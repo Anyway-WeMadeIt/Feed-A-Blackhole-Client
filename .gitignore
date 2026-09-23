@@ -112,3 +112,31 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# OS-generated files
+.DS_Store
+._*
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE-local caches and workspace state
+.idea/
+*.sln.iml
+*.code-workspace
+*.swp
+*.swo
+*~
+
+# Keep only the team's shared VS Code configuration
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/launch.json
+!/.vscode/settings.json
+!/.vscode/tasks.json
+
+# Local environment configuration (commit examples without credentials)
+.env
+.env.*
+!.env.example
