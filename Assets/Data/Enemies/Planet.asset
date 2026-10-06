@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemyKind
   id: planet
   moveSpeed: 0.8
-  radius: 0.5
+  radius: 1.173
+  radiusStep: 0.09
   upgradesTo: {fileID: 11400000, guid: 0d5945d74a2a4975ab65cf7d32bbd8e8, type: 2}
   pickupPeriod: 0
   tiers:

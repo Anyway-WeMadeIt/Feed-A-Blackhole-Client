@@ -30,6 +30,7 @@ namespace BlackHole.Unity
         [SerializeField] private ExplosionLook _explosionLook;
         [SerializeField] private LightningLook _lightningLook;
         [SerializeField] private CometLook _cometLook;
+        [SerializeField] private GameObject _blackHole;
 
         [Header("UI Layers")]
         [SerializeField] private RectTransform _rootLayer;
@@ -77,6 +78,7 @@ namespace BlackHole.Unity
         private ScreenFlow _screens;
         private GameHost _host;
         private CameraShake _cameraShake;
+        private BattleCameraFit _cameraFit;
 
         private void Awake()
         {
@@ -105,19 +107,19 @@ namespace BlackHole.Unity
             _enemyView = new EnemyView(transform, _enemyLooks, _breakerLook, _cometLook);
             _breakerView = new BreakerView(transform, _breakerLook);
             _deathEffectView = new DeathEffectView(transform, _lightningLook, _explosionLook);
-            _hqView = new HqView(transform);
+            _hqView = new HqView(transform, _blackHole);
 
-            // 전투 카메라를 화면비에 맞춘다(좁은 화면에서도 16:9의 가로 폭을 보여 준다). 씬에 없으면 여기서 붙인다.
+            // 전투 카메라를 화면비와 판의 전장 배율에 맞춘다(좁은 화면에서도 16:9의 가로 폭을 보여 준다). 씬에 없으면 여기서 붙인다.
             Camera battleCamera = Camera.main;
-            if (battleCamera != null && !battleCamera.TryGetComponent(out BattleCameraFit _))
-                battleCamera.gameObject.AddComponent<BattleCameraFit>();
+            if (battleCamera != null && !battleCamera.TryGetComponent(out _cameraFit))
+                _cameraFit = battleCamera.gameObject.AddComponent<BattleCameraFit>();
         }
 
         private void BootstrapBattle()
         {
             // 화면이 보는 진행 상태: 방장의 것. 전투 사이에 이어진다(저장은 없다).
             _viewer = new PlayerState(Host);
-            _battle = new BattleSystem(_loaded.Content, _viewer, _enemyView, _breakerView, _deathEffectView, _hqView);
+            _battle = new BattleSystem(_loaded.Content, _viewer, _enemyView, _breakerView, _deathEffectView, _hqView, _cameraFit);
             // 마우스가 조준하는 참가자: 방장.
             _aim = new AimInput(_battle, _viewer.Id);
         }

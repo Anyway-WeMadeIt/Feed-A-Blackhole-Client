@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemyKind
   id: asteroid
   moveSpeed: 1.5
-  radius: 0.22
+  radius: 0.312
+  radiusStep: 0.35
   upgradesTo: {fileID: 11400000, guid: 3875f6a9833f4cf2893d251eb303b445, type: 2}
   pickupPeriod: 0
   tiers:

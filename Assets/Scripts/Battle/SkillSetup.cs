@@ -6,7 +6,7 @@ namespace BlackHole.Unity
     // 현재 아래 값은 모두 [임시].
     // 스킬 설정 에셋: 스킬 종류마다 기본 수치 칸을 따로 둔다(한 칸에 모든 종류의 수치를 섞지 않는다).
     // 칸의 값은 Core의 저작 형식(BreakerData)으로 옮겨져 ContentLoader가 검증한다.
-    // 값의 원본은 데이터 시트(Skills 탭)이고, 이 에셋은 가져오기가 채운다.
+    // 값은 이 에셋을 Inspector에서 직접 고친다.
     [CreateAssetMenu(fileName = "SkillSetup", menuName = "BlackHole/Skill Setup")]
     public sealed class SkillSetup : ScriptableObject
     {
@@ -35,21 +35,6 @@ namespace BlackHole.Unity
         [SerializeField] private float breakerCometDuration = 5;
         [Tooltip("혜성 중첩 하나의 치명타 피해 보너스 증가(0 이상). 0.5면 +50%. 중첩끼리 더한 뒤 치명타 피해 보너스에 곱한다.")]
         [SerializeField] private float breakerCometCritDamageBonus = 0.5f;
-
-        // WriteTo의 반대. 데이터 시트 가져오기(메뉴 BlackHole > Data Sheets)만 부른다.
-        internal void Replace(BreakerData breaker)
-        {
-            breakerDamage = breaker.Damage;
-            breakerInterval = breaker.Interval;
-            breakerRadius = breaker.Radius;
-            breakerCritChance = breaker.CritChance;
-            breakerCritDamage = breaker.CritDamage;
-            breakerMoonDuration = breaker.MoonDuration;
-            breakerMoonSpeedBonus = breaker.MoonSpeedBonus;
-            breakerMoonRadiusBonus = breaker.MoonRadiusBonus;
-            breakerCometDuration = breaker.CometDuration;
-            breakerCometCritDamageBonus = breaker.CometCritDamageBonus;
-        }
 
         public void WriteTo(ContentData data)
         {

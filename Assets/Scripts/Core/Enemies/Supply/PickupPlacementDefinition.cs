@@ -6,6 +6,7 @@ namespace BlackHole.Core
     // 띠 = [일반 바깥 반지름 + InnerOffset, 일반 바깥 반지름 + OuterOffset]. 음수는 안쪽이다.
     // 일반 띠를 기준으로 하므로 일반 띠가 바뀌어도(예: 성장도에 따라) 혜성 띠가 따라간다. 띠는 소환 때마다 그때의 일반 띠로 푼다(Resolve).
     // 혜성 띠가 일반 띠보다 바깥에 있는지, 겹치는지는 강제하지 않는다 — 오프셋을 고르는 저작자의 몫이다.
+    // 오프셋의 저작 값도 성장도 0(전장 배율 1)의 것이다. 판은 일반 띠와 같은 배율로 넓힌 오프셋을 쓴다(Scaled).
     public sealed class PickupPlacementDefinition
     {
         public float InnerOffset { get; }
@@ -24,6 +25,13 @@ namespace BlackHole.Core
 
             InnerOffset = innerOffset;
             OuterOffset = outerOffset;
+        }
+
+        // 두 오프셋에 scale(양수)을 곱한 정의.
+        public PickupPlacementDefinition Scaled(float scale)
+        {
+            DefinitionGuard.Positive(scale, nameof(scale));
+            return new PickupPlacementDefinition(InnerOffset * scale, OuterOffset * scale);
         }
 
         // 일반 출현 띠 normal에서 푼 혜성 출현 띠. 안쪽 반지름은 0 아래로 내려가지 않는다.

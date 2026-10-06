@@ -4,7 +4,7 @@ using System.Text;
 namespace BlackHole.Core
 {
     // 스프레드시트가 주고받는 CSV(RFC 4180): 쉼표로 칸을 나누고, 쉼표·큰따옴표·줄바꿈이 든 칸은 큰따옴표로 감싼다.
-    // 에디터의 데이터 시트 도구와 실행 중의 노드 콘텐츠 읽기(NodeContentCsv)가 함께 쓴다.
+    // 실행 중의 노드 콘텐츠 읽기(NodeContentCsv)가 쓴다(노드 데이터는 시트에서 내려받은 CSV가 원본이다).
     public static class Csv
     {
         public static List<string[]> Parse(string text)

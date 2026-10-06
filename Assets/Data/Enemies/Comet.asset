@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemyKind
   id: comet
   moveSpeed: -5
-  radius: 0.2
+  radius: 0.54
+  radiusStep: 0
   upgradesTo: {fileID: 0}
   pickupPeriod: 1
   tiers:

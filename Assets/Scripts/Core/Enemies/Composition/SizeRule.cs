@@ -4,8 +4,9 @@ namespace BlackHole.Core
 {
     // 크기 규칙: 한 종류의 크기 s(1부터)는 크기 1부터 s까지의 적이 같은 몫으로 섞여 나오게 한다. 종류와 색은 바꾸지 않는다.
     // 크기 k인 적은 색의 베이스 수치에 선형 배율을 받는다:
-    // - HP·Gold·EXP: 1 + (k − 1) × 1.0   (크기 2면 2배, 3이면 3배)
-    // - 반지름:       1 + (k − 1) × 0.5   (크기 2면 1.5배, 3이면 2배)
+    // - HP·Gold·EXP: 1 + (k − 1) × 1.0    (크기 2면 2배, 3이면 3배)
+    // - 반지름:       1 + (k − 1) × 증가분 (증가분은 종류의 것, EnemyDefinition.RadiusStep)
+    //   원작 실측(C0 화면 지름): 소행성 34·45·57px → 0.35, 행성 127·138·149·161px → 0.09, 별 286·383·475px → 0.33.
     public static class SizeRule
     {
         // 노드를 사지 않은 크기.
@@ -15,11 +16,11 @@ namespace BlackHole.Core
         public const int Max = 20;
 
         private const float StatStep = 1.0f;
-        private const float RadiusStep = 0.5f;
 
         public static float StatMultiplier(int size) => 1 + (Require(size) - Base) * StatStep;
 
-        public static float RadiusMultiplier(int size) => 1 + (Require(size) - Base) * RadiusStep;
+        // radiusStep: 크기 1당 반지름 증가분(크기 1의 반지름 대비, 0 이상). 종류마다 다르다.
+        public static float RadiusMultiplier(int size, float radiusStep) => 1 + (Require(size) - Base) * radiusStep;
 
         private static int Require(int size)
         {

@@ -16,7 +16,10 @@ MonoBehaviour:
   milestones:
   - level: 10
     targetGold: 690000
+    fieldScale: 1.68
   - level: 20
     targetGold: 5600000
+    fieldScale: 2.27
   - level: 30
     targetGold: 420000000
+    fieldScale: 2.83

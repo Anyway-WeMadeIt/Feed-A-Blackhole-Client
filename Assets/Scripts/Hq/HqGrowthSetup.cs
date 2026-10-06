@@ -6,7 +6,7 @@ using UnityEngine;
 namespace BlackHole.Unity
 {
     // 아래 값은 모두 [임시]
-    // 블랙홀 성장 설정 에셋. 값의 원본은 데이터 시트(Growth·Milestones 탭)이고, 이 에셋은 가져오기가 채운다.
+    // 블랙홀 성장 설정 에셋. 값은 이 에셋을 Inspector에서 직접 고친다.
     [CreateAssetMenu(fileName = "HqGrowthSetup", menuName = "BlackHole/Hq Growth Setup")]
     public sealed class HqGrowthSetup : ScriptableObject
     {
@@ -17,6 +17,8 @@ namespace BlackHole.Unity
             public int level;
             [Tooltip("결산이 잔액을 이 값까지 채운다(차액 지급, 그 판에서 번 Gold는 버린다). 앞 이정표보다 커야 한다.")]
             public long targetGold;
+            [Tooltip("이 이정표에 닿은 뒤의 전장 배율(1 이상, 앞 이정표 이상). 카메라 크기와 적 출현 띠가 이 배율로 넓어진다. 원작 실측: 1.68, 2.27, 2.83.")]
+            public float fieldScale;
         }
 
         [Header("Level 사다리 (줄 번호 + 1 = Level, 누적 EXP)")]
@@ -34,19 +36,9 @@ namespace BlackHole.Unity
             };
 
             foreach (Milestone milestone in milestones)
-                data.Milestones.Add(new HqMilestoneData { Level = milestone.level, TargetGold = milestone.targetGold });
+                data.Milestones.Add(new HqMilestoneData { Level = milestone.level, TargetGold = milestone.targetGold, FieldScale = milestone.fieldScale });
 
             return data;
-        }
-
-        // ToData의 반대. 데이터 시트 가져오기(메뉴 BlackHole > Data Sheets)만 부른다.
-        internal void Replace(HqGrowthData data)
-        {
-            levelExp = new List<long>(data.LevelExp);
-            milestones = new List<Milestone>();
-
-            foreach (HqMilestoneData milestone in data.Milestones)
-                milestones.Add(new Milestone { level = milestone.Level, targetGold = milestone.TargetGold });
         }
     }
 }

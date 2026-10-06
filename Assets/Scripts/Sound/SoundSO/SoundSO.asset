@@ -27,14 +27,24 @@ MonoBehaviour:
   _clickSound: {fileID: 8300000, guid: cafb17dce055b8348bb04e4a53a33827, type: 3}
   _hoverSound: {fileID: 8300000, guid: 603d711d366e42c4e82b50b5c7ba0e43, type: 3}
   _hitSound: {fileID: 8300000, guid: 1b1978e1712a4a54ba5d755a12ceda42, type: 3}
-  _whiffSound: {fileID: 8300000, guid: 2fb90a4bf5816734ba284886ff0ab989, type: 3}
+  _whiffSound: {fileID: 8300000, guid: dfd46c1a16874174ab13b58afc4e3aa5, type: 3}
   _destroySound: {fileID: 8300000, guid: 2467596ad48dbaa4d831884f6ce8c001, type: 3}
   _levelUpSound: {fileID: 8300000, guid: fa024954b46b69240af50cc8dfbd34d7, type: 3}
   _lightningSound: {fileID: 8300000, guid: f878dcf1e1ea83a4b81a7730e8d3b7d8, type: 3}
   _razerSound: {fileID: 8300000, guid: fc36704f0e2e48e4eb16ec9f2c2318f3, type: 3}
   _moonCometSound: {fileID: 8300000, guid: e8b23b59cddcd544fa242981853d1bc9, type: 3}
-  _sliderSound: {fileID: 8300000, guid: 06d11171f295b4640a5b2a69a7c5f238, type: 3}
+  _sliderSound: {fileID: 8300000, guid: ca831d761abfe7f4b8b2e6de25790cdc, type: 3}
   _closingSound: {fileID: 8300000, guid: 1b0bc1ca217f97e4a8c7608c80c84e28, type: 3}
-  _NodeUpgradeSound: {fileID: 8300000, guid: c3737831f731f414083d3c83366176f8, type: 3}
+  _NodeUpgradeSound:
+  - {fileID: 8300000, guid: 182b05dd2bdca594e8da5010837179a8, type: 3}
+  - {fileID: 8300000, guid: 8e7610c9a9abc47449f2944461260115, type: 3}
+  - {fileID: 8300000, guid: cf1ab9c84587f854b8a3eda628ba2b90, type: 3}
+  - {fileID: 8300000, guid: 44e8850f9829805438737dbba5f890ad, type: 3}
+  - {fileID: 8300000, guid: 731da509ef6a6d042a32d530e85ce1c3, type: 3}
+  - {fileID: 8300000, guid: dd0dbf9171c732d4b91cf8c841f2baa0, type: 3}
+  - {fileID: 8300000, guid: 10e4b112cea689146acd353397d5c54d, type: 3}
+  - {fileID: 8300000, guid: fe5afc032062c0f44bd1f4236ed3a029, type: 3}
+  - {fileID: 8300000, guid: 2d4aac591b5c6544c896cb607483b868, type: 3}
+  - {fileID: 8300000, guid: 4727de7a4af27814b84b6c5483dd3179, type: 3}
   _switchingScreensSound: {fileID: 8300000, guid: 2c585b7af19c7bf4aa1b65aecd5f2a2c, type: 3}
   _superNovaSound: {fileID: 8300000, guid: 595c4aad3bd64e547af70a6faffa81ad, type: 3}

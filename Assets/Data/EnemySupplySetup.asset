@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemySupplySetup
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemySupplySetup
   minDistance: 2
-  maxDistance: 4
+  maxDistance: 9.6
   pickupInnerOffset: -1
   pickupOuterOffset: 0.5
   maxAliveEnemies: 200

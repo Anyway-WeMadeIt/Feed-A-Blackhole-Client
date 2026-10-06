@@ -48,13 +48,18 @@ namespace BlackHole.Unity
 
         private void HandleModeSelectBackClicked() => _ui.PopPanel(Unbind);
 
-        // 화면이 다 덮인 뒤 패널을 모두 닫고(바인딩 해제) 업그레이드 화면으로 바꾼다. 루트를 바꿔도 패널은 남기 때문이다.
-        private void EnterMode() => _transition.Play(ShowUpgradeFromModeSelect);
+        // 화면이 다 덮인 뒤 패널을 모두 닫고(바인딩 해제) 곧바로 판을 시작한다(전투 화면). 루트를 바꿔도 패널은 남기 때문이다.
+        // 업그레이드 화면은 첫 판의 결산 뒤에 처음 연다.
+        private void EnterMode() => _transition.Play(StartBattleFromModeSelect);
 
-        private void ShowUpgradeFromModeSelect()
+        private void StartBattleFromModeSelect()
         {
             _ui.PopAllPanels(Unbind);
-            ShowUpgrade();
+            StartBattle();
+
+            // 판을 시작하지 못했으면(판 조립 오류 등, 로그는 StartBattle이 남긴다) 타이틀에 갇히지 않게 업그레이드 화면으로 간다.
+            if (!_battle.IsRunning)
+                ShowUpgrade();
         }
     }
 }

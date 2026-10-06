@@ -90,7 +90,8 @@ namespace BlackHole.Unity
         // Stage바 증가
         private float _stageFillTarget;
         private float _stageFillTimer;
-        private const float StageFillDuration = 1.0f;
+        private const float DefaultDuration = 1.0f;
+        private float _stageFillDuration = DefaultDuration;
         private bool _isShowingStage;
 
         // 행성 파괴
@@ -105,7 +106,7 @@ namespace BlackHole.Unity
 
         // 타이머
         private float _matterTimer;
-        private const float MatterDuration = 1.0f;
+        private float _matterDuration = DefaultDuration;
         private bool _isShowMatter;
 
         // 확대 효과 (강조 표시를 위해 짠 하고 나타나는 효과
@@ -114,6 +115,7 @@ namespace BlackHole.Unity
         private TMP_Text _scaleTarget;
         private float _scaleTimer;
 
+        private const float MatterStepCount = 5; // Matter 개수
         private const float ScaleDuration = 0.15f;
         private const float HighlightScale = 1.2f;
         private bool _isScaleEffect;
@@ -261,7 +263,13 @@ namespace BlackHole.Unity
                 _stageFillTimer = 0f;
                 _isShowingStage = true;
 
-                _stageFill.anchorMax = new Vector2(0f, _stageFill.anchorMax.y);
+                // SoundManager인스턴스가 존재하면 Slider SFX 재생 길이를 반환
+                // Slider SFX 길이만큼 슬라이더가 올라가는 속도를 맞추기 위함
+                float length = SoundManager.Instance != null ? SoundManager.Instance.SliderLength : 0f;
+                _stageFillDuration = length > 0f ? length : DefaultDuration;
+                _matterDuration = _stageFillDuration / MatterStepCount;
+                SoundManager.Instance?.PlaySlider();
+                //_stageFill.anchorMax = new Vector2(0f, _stageFill.anchorMax.y);
             }
 
             if (_stageText == null)
@@ -390,7 +398,7 @@ namespace BlackHole.Unity
         {
             _stageFillTimer += Time.deltaTime;
 
-            float t = Mathf.Clamp01(_stageFillTimer / StageFillDuration);
+            float t = Mathf.Clamp01(_stageFillTimer / _stageFillDuration);
 
             // 부드럽게 증가
             t = Mathf.SmoothStep(0f, 1f, t);
@@ -414,7 +422,7 @@ namespace BlackHole.Unity
         {
             _matterTimer += Time.deltaTime;
 
-            float t = Mathf.Clamp01(_matterTimer / MatterDuration);
+            float t = Mathf.Clamp01(_matterTimer / _matterDuration);
 
             // 부드럽게 증가
             t = Mathf.SmoothStep(0f, 1f, t);
@@ -445,7 +453,7 @@ namespace BlackHole.Unity
         {
             // 값이 있을때만 증가 연출
             // (그렇지 않으면 0도 증가하는 연출이 발생해서 기다리는데 지장이 있다)
-            if (_target == 0) t = 1f;
+            //if (_target == 0) t = 1f;
 
             int value = IncreaseLerp(_target, t);
             if (_text != null)
@@ -480,7 +488,7 @@ namespace BlackHole.Unity
         {
             // 값이 있을때만 증가 연출
             // (그렇지 않으면 0도 증가하는 연출이 발생해서 기다리는데 지장이 있다)
-            if (_target == 0) t = 1f;
+            //if (_target == 0) t = 1f;
 
             // Total은 이번판에 얻은 Gold를 더해서 결산
             long value = _matterType.Equals(MatterType.Total) ?
@@ -508,7 +516,8 @@ namespace BlackHole.Unity
                         _matterType = MatterType.Total; break;
                     case MatterType.Total:
                         _matterType = MatterType.Done;
-                        _isShowMatter = false; break;
+                        _isShowMatter = false;
+                        SoundManager.Instance?.PlayClosing(); break;
                 }
             }
         }

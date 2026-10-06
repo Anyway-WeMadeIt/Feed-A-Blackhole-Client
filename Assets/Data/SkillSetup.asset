@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.SkillSetup
   breakerDamage: 2
   breakerInterval: 1
-  breakerRadius: 1.5
+  breakerRadius: 0.26
   breakerCritChance: 0
   breakerCritDamage: 1
   breakerMoonDuration: 5

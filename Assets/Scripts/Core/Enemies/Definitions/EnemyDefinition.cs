@@ -5,7 +5,7 @@ namespace BlackHole.Core
 {
     // 적 한 종류의 정의:
     // - 이동 속도(부호는 공전 방향),
-    // - 반지름(크기 1의 반지름),
+    // - 반지름(크기 1의 반지름)과 크기 1당 반지름 증가분,
     // - 색 등급 표(색마다의 베이스 HP·Gold·EXP),
     // - 붙을 수 있는 특수 성질(황금·전기·달·레이저·슈퍼노바 …),
     // - 변환 대상, 픽업이면 등장 주기.
@@ -18,8 +18,11 @@ namespace BlackHole.Core
         // 공전 속도(초당 이동 거리). 0이 아닌 값이고, 부호가 공전 방향이다: 양수는 반시계, 음수는 시계방향.
         public float MoveSpeed { get; }
 
-        // 크기 1의 반지름. 모든 색이 같다. 크기 k의 반지름은 여기에 SizeRule.RadiusMultiplier(k)를 곱한다.
+        // 크기 1의 반지름. 모든 색이 같다. 크기 k의 반지름은 여기에 SizeRule.RadiusMultiplier(k, RadiusStep)를 곱한다.
         public float Radius { get; }
+
+        // 크기가 1 오를 때 늘어나는 반지름(크기 1의 반지름 대비, 0 이상). 0.35면 크기 2가 1.35배, 크기 3이 1.7배다.
+        public float RadiusStep { get; }
 
         // 색 등급 표. 번호가 적의 색 등급(Enemy.Tier)이다. 공급되는 종류는 7색(EnemyContentInvariants), 픽업은 한 줄.
         public IReadOnlyList<EnemyTier> Tiers { get; }
@@ -42,6 +45,7 @@ namespace BlackHole.Core
             string id,
             float moveSpeed,
             float radius,
+            float radiusStep,
             IReadOnlyList<EnemyTier> tiers,
             IReadOnlyList<EnemyTraitDefinition> traits = null,
             string upgradesTo = null,
@@ -55,6 +59,9 @@ namespace BlackHole.Core
 
             if (float.IsNaN(pickupPeriod) || float.IsInfinity(pickupPeriod) || pickupPeriod < 0)
                 throw new ArgumentOutOfRangeException(nameof(pickupPeriod), "0 이상의 유한한 값이 필요하다(0 = 픽업이 아님).");
+
+            if (float.IsNaN(radiusStep) || float.IsInfinity(radiusStep) || radiusStep < 0)
+                throw new ArgumentOutOfRangeException(nameof(radiusStep), "0 이상의 유한한 값이 필요하다(0 = 크기가 반지름을 바꾸지 않음).");
 
             if (tiers == null || tiers.Count == 0)
                 throw new ArgumentException("색 등급이 하나 이상 필요하다.", nameof(tiers));
@@ -82,6 +89,7 @@ namespace BlackHole.Core
             Id = id;
             MoveSpeed = DefinitionGuard.NonZeroFinite(moveSpeed, nameof(moveSpeed));
             Radius = DefinitionGuard.Positive(radius, nameof(radius));
+            RadiusStep = radiusStep;
             Tiers = Array.AsReadOnly(Copy(tiers));
             Traits = traits == null ? Array.AsReadOnly(Array.Empty<EnemyTraitDefinition>()) : Array.AsReadOnly(Copy(traits));
             UpgradesTo = string.IsNullOrEmpty(upgradesTo) ? null : upgradesTo;
@@ -92,7 +100,7 @@ namespace BlackHole.Core
         // HP   = 색의 HP × 크기 배율,
         // Gold = 색의 Gold × 크기 배율(반올림),
         // EXP  = 색의 EXP × 크기 배율(반올림),
-        // 반지름 = 종류의 반지름 × 크기의 반지름 배율, 속도 = 종류의 속도.
+        // 반지름 = 종류의 반지름 × 크기의 반지름 배율(종류의 증가분), 속도 = 종류의 속도.
         // 성질이 황금이면 Gold에 판 구성의 황금 배율을 한 번 더 곱한다(반올림). 다른 성질은 수치를 바꾸지 않는다.
         // trait는 판 구성의 성질(composition.Traits)이어야 한다 — 노드가 반영된 배율이 거기 있다.
         public EnemyStats StatsAt(EnemyComposition composition, int tier, EnemyTraitDefinition trait = null, int size = SizeRule.Base)
@@ -118,7 +126,7 @@ namespace BlackHole.Core
             return new EnemyStats(
                 row.MaxHealth * scale,
                 MoveSpeed,
-                Radius * SizeRule.RadiusMultiplier(size),
+                Radius * SizeRule.RadiusMultiplier(size, RadiusStep),
                 gold,
                 Multiply(row.Exp, scale));
         }

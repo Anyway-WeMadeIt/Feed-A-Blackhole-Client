@@ -37,11 +37,15 @@ namespace BlackHole.Unity
 
         // 화면 버튼과 시간 종료가 같은 전환 경로를 사용한다. 판은 화면이 다 덮인 뒤에 바꾼다.
         // 시작: 덮인 뒤 판을 조립·시작하고 전투 화면으로 바꾼다. 덮이는 동안 판이 흐르지 않는다.
-        private void RequestStart() => _transition.Play(StartBattle);
+        private void RequestStart()
+        {
+            SoundManager.Instance.PlaySwitchingScreens();
+            _transition.Play(StartBattle);
+        }
 
         // 끝: 덮인 뒤 판을 정리·결산하고 결산 화면으로 바꾼다. 적이 치워지는 모습이 보이지 않는다.
         private void RequestEnd() => _transition.Play(EndBattleAsync);
-
+ 
         private void StartBattle()
         {
             try

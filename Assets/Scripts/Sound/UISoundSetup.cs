@@ -18,7 +18,7 @@ public class UISoundSetup : ScriptableObject
     [Header("달과 혜성 능력 얻을 때"), SerializeField] private AudioClip _moonCometSound;
     [Header("결산 때 나오는 사이즈 슬라이더 사운드"), SerializeField] private AudioClip _sliderSound;
     [Header("결산"), SerializeField] private AudioClip _closingSound;
-    [Header("NodeUpgrade"), SerializeField] private AudioClip _NodeUpgradeSound;
+    [Header("NodeUpgrade"), SerializeField] private List<AudioClip> _NodeUpgradeSound;
     [Header("화면 전환"), SerializeField] private AudioClip _switchingScreensSound;
     [Header("SuperNova"), SerializeField] private AudioClip _superNovaSound;
 
@@ -34,7 +34,7 @@ public class UISoundSetup : ScriptableObject
     public AudioClip MoonComet { get { return _moonCometSound; } }
     public AudioClip Slider { get { return _sliderSound; } }
     public AudioClip Closing { get { return _closingSound; } }
-    public AudioClip NodeUpgrade { get { return _NodeUpgradeSound; } }
+    public List<AudioClip> NodeUpgrade { get { return _NodeUpgradeSound; } }
     public AudioClip SwitchingScreens { get { return _switchingScreensSound; } }
     public AudioClip SuperNova { get { return _superNovaSound; } }
 }

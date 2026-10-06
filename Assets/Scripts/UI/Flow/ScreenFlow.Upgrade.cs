@@ -11,6 +11,7 @@ namespace BlackHole.Unity
 
         private void ShowUpgrade()
         {
+            SoundManager.Instance?.ResetNodeUpgradeIndex(); // 업그레이드 SFX 인덱스 초기화
             _ui.SwitchRoot<UpgradeScreen>(
                 _upgradePresentation,
                 afterPresented: root =>

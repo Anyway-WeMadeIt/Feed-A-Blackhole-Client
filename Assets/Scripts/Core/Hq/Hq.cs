@@ -17,6 +17,9 @@ namespace BlackHole.Core
 
         public int GoalLevel { get; } // 이 판의 목표 Level(다음 이정표의 Level). 0이면 목표가 없다(마지막 이정표 뒤).
 
+        // 이 판의 전장 배율(성장도가 정하고 판 동안 같다). 출현 띠와 화면(카메라·화면 크기가 고정인 표시)이 이 배율로 넓어진다.
+        public float FieldScale { get; }
+
         public long Exp { get; private set; } // 누적 EXP(시작 Level에 닿는 EXP부터 센다).
 
         public int Level { get; private set; }
@@ -52,6 +55,7 @@ namespace BlackHole.Core
             Stage = stage;
             StartLevel = growth.StartLevelAt(stage);
             GoalLevel = growth.GoalLevelAt(stage);
+            FieldScale = growth.FieldScaleAt(stage);
             Level = StartLevel;
             Exp = growth.ExpToReach(StartLevel) ?? 0;
         }

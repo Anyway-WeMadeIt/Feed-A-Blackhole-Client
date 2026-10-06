@@ -15,7 +15,9 @@ namespace BlackHole.Unity
     //   헛친 Tick(맞은 적 없음)은 약하게 튄다. 치명타 Tick은 금색으로 번쩍인다. 빈 Tick(조준점 없음)은 튀지 않는다.
     // - 버프 구체: 달·혜성 중첩 하나마다 구체 하나가 링 바깥 궤도를 시계방향으로 돈다. 두 버프가 한 궤도를 나눠 쓰고,
     //   궤도를 중첩 수만큼 균등하게 나눈 자리에 받은 순서(BreakerBuff.Number)대로 놓인다. 중첩이 바뀌면 곧바로 새 자리로 옮긴다.
-    //   구체 크기는 월드 단위로 고정이고, 궤도는 화면의 링(튐 포함) 바로 바깥을 따라간다. 표시는 64개까지다.
+    //   구체 크기는 화면에서 고정이다(저작 값 × 판의 전장 배율, 원작 달은 카메라와 무관하게 같은 크기). 궤도는 화면의 링(튐 포함) 바로 바깥을 따라간다.
+    //   표시는 64개까지다.
+    // - 링 굵기는 반지름에 비례한다(BreakerLook.ThicknessRatio). 링 자체는 판정 반지름 그대로라 카메라가 넓어지면 적과 함께 작아 보인다.
     // - 혜성 배경 원: 혜성 중첩이 하나라도 있으면 링을 덮는 반투명 무지개 원을 적 위, 링 아래에 그린다. 곧바로 켜고 끈다.
     // - 일시정지 중에는 회전과 튀김을 멈추고, 재개하면 이어간다.
     // 정지 중에는 판이 기록을 비우지 않으므로, 이미 본 Tick은 번호로 걸러 두 번 튀지 않는다.
@@ -78,6 +80,8 @@ namespace BlackHole.Unity
             public float PunchElapsed = float.MaxValue;
             public float PunchStrength;
             public bool PunchCritical;
+            // 마지막으로 획득음을 낸 버프 번호
+            public int SoundedBuff;
         }
 
         public BreakerView(Transform parent, BreakerLook look)
@@ -91,6 +95,7 @@ namespace BlackHole.Unity
         public void Synchronize(World world, bool paused, float delta)
         {
             IReadOnlyList<BattlePlayer> players = world.Players;
+            float fieldScale = world.Hq.FieldScale;
 
             // 매 프레임 경로: IReadOnlyList를 인덱스로 돈다(인터페이스 foreach는 열거자를 할당한다).
             for (int i = 0; i < players.Count; i++)
@@ -98,7 +103,7 @@ namespace BlackHole.Unity
                 BattlePlayer player = players[i];
 
                 if (player.Breaker != null)
-                    Show(player, player.Breaker, paused, delta);
+                    Show(player, player.Breaker, paused, delta, fieldScale);
             }
         }
 
@@ -121,7 +126,8 @@ namespace BlackHole.Unity
             Object.Destroy(_quad);
         }
 
-        private void Show(BattlePlayer player, BreakerSkill breaker, bool paused, float delta)
+        // fieldScale: 판의 전장 배율. 화면 크기가 고정인 구체에만 곱한다.
+        private void Show(BattlePlayer player, BreakerSkill breaker, bool paused, float delta, float fieldScale)
         {
             if (!_rings.TryGetValue(player.Id, out Ring ring))
             {
@@ -137,6 +143,7 @@ namespace BlackHole.Unity
             }
 
             ReadTicks(ring, breaker);
+            ReadBuffs(ring, breaker);
 
             // 링·구체·혜성 배경 원의 표시 여부는 여기서만 정한다. 구체와 배경 원은 링이 보일 때만 보인다.
             bool visible = !paused && player.AimPoint.HasValue;
@@ -156,7 +163,7 @@ namespace BlackHole.Unity
             float ringEdge = shownRadius + shownThickness * 0.5f;
 
             if (orbCount > 0)
-                ApplyOrbs(ring, orbCount, ringEdge);
+                ApplyOrbs(ring, orbCount, ringEdge, fieldScale);
 
             if (aura)
                 ApplyAura(ring, ringEdge);
@@ -180,7 +187,11 @@ namespace BlackHole.Unity
                 if (!tick.Center.HasValue)
                     continue;
 
-                float strength = tick.HitCount > 0 ? 1 : _look.MissStrength;
+                // 맞췄으면 타격음, 못 맞췄으면 헛침 소리
+                if (tick.HitCount > 0) SoundManager.Instance?.RequestHitSound();
+                else SoundManager.Instance.PlayWhiff();
+
+                    float strength = tick.HitCount > 0 ? 1 : _look.MissStrength;
 
                 if (!punched)
                 {
@@ -205,7 +216,7 @@ namespace BlackHole.Unity
                 ? _look.Punch(ring.PunchElapsed / _look.PunchDuration) * ring.PunchStrength
                 : 0;
             shownRadius = radius * (1 + _look.PunchRadiusScale * punch);
-            shownThickness = _look.Thickness * (1 + _look.PunchThicknessScale * punch);
+            shownThickness = radius * _look.ThicknessRatio * (1 + _look.PunchThicknessScale * punch);
 
             // 셰이더는 링 중심에서의 월드 거리로 그리므로, 사각형 크기는 링의 크기가 아니라 셰이더가 도는 픽셀 범위만 정한다.
             // 그릴 링이 딱 들어가게 맞춘다. 대부분의 프레임은 크기가 그대로라 쓰지 않는다.
@@ -254,10 +265,12 @@ namespace BlackHole.Unity
         }
 
         // count: FillOrbKinds가 채운 칸 수(1 이상). ringEdge: 화면의 링 바깥 가장자리(링 반지름 + 굵기/2).
-        private void ApplyOrbs(Ring ring, int count, float ringEdge)
+        // fieldScale: 판의 전장 배율. 구체 크기·간격·테두리에 곱해 화면에서 같은 크기로 보이게 한다.
+        private void ApplyOrbs(Ring ring, int count, float ringEdge, float fieldScale)
         {
-            float orbitRadius = ringEdge + _look.OrbitOffset + _look.OrbRadius;
-            float size = 2 * (orbitRadius + _look.OrbRadius) * MeshMargin;
+            float orbRadius = _look.OrbRadius * fieldScale;
+            float orbitRadius = ringEdge + _look.OrbitOffset * fieldScale + orbRadius;
+            float size = 2 * (orbitRadius + orbRadius) * MeshMargin;
 
             if (size != ring.OrbSize)
             {
@@ -267,12 +280,12 @@ namespace BlackHole.Unity
 
             ring.Orbs.GetPropertyBlock(_properties);
             _properties.SetFloat(_orbitRadiusId, orbitRadius);
-            _properties.SetFloat(_orbRadiusId, _look.OrbRadius);
+            _properties.SetFloat(_orbRadiusId, orbRadius);
             _properties.SetFloat(_orbCountId, count);
             _properties.SetFloat(_phaseId, ring.OrbPhase);
             _properties.SetColor(_moonFillId, _look.MoonFill);
             _properties.SetColor(_moonOutlineId, _look.MoonOutline);
-            _properties.SetFloat(_outlineWidthId, _look.MoonOutlineWidth);
+            _properties.SetFloat(_outlineWidthId, _look.MoonOutlineWidth * fieldScale);
             _properties.SetFloatArray(_orbKindsId, _orbKinds);
             ring.Orbs.SetPropertyBlock(_properties);
         }
@@ -307,6 +320,29 @@ namespace BlackHole.Unity
                 Orbs = CreateQuadRenderer("Buff Orbs", root, _look.OrbMaterial, OrbSortingOrder),
                 Aura = CreateQuadRenderer("Comet Aura", root, _look.CometAuraMaterial, AuraSortingOrder),
             };
+        }
+
+        private void ReadBuffs(Ring ring, BreakerSkill breaker)
+        {
+            int latest = ring.SoundedBuff;
+
+            IReadOnlyList<BreakerBuff> moon = breaker.MoonBuffs;
+            for (int i = 0; i < moon.Count; i++)
+            {
+                if (moon[i].Number > latest) latest = moon[i].Number;
+            }
+
+            IReadOnlyList<BreakerBuff> comet = breaker.CometBuffs;
+            for (int i = 0; i <comet.Count; i++)
+            {
+                if (comet[i].Number > latest) latest = comet[i].Number;
+            }
+
+            if (latest > ring.SoundedBuff)
+            {
+                SoundManager.Instance?.PlayMoonComet();
+                ring.SoundedBuff = latest;
+            }
         }
 
         private MeshRenderer CreateQuadRenderer(string name, Transform parent, Material material, int sortingOrder) =>

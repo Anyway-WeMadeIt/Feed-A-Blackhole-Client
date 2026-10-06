@@ -31,13 +31,17 @@ namespace BlackHole.Unity
 
         // 달 성질 ID. 달을 가진 적에는 달 하나가 공전한다(EnemyKind의 성질 ID와 같다).
         private const string MoonTrait = "moon";
-        // 달 구체의 반지름(월드 단위). 모든 행성이 같은 크기의 달을 가진다. Breaker 달(BreakerLook.OrbRadius)보다 작다 [임시].
-        private const float MoonRadius = 0.2f;
+        // 달 구체의 반지름(전장 배율 1에서의 월드 단위). 모든 행성이 같은 크기의 달을 가진다. Breaker 달(BreakerLook.OrbRadius)보다 작다.
+        // 원작 달은 카메라와 무관하게 화면에서 약 25px이라(C0 지름 25px ÷ 54px/unit ÷ 2) 판의 전장 배율을 곱한다.
+        private const float MoonRadius = 0.236f;
         // 공전 속도 배율의 범위. 기본 속도(BreakerLook.OrbitSpeed)에 곱해 적마다 다르게 돈다.
         private const float MoonSpeedMin = 0.8f;
         private const float MoonSpeedMax = 1.2f;
         // 달은 적 스프라이트(0)와 성질 속 채움(1) 위, Breaker 링 계열(5 ~ 11) 아래에 그린다.
         private const int MoonSortingOrder = 2;
+
+        // 이 판의 전장 배율(Hq.FieldScale). 화면 크기가 고정인 달과 떠오르는 숫자에 곱한다. Synchronize가 매번 읽는다.
+        private float _fieldScale = HqGrowthDefinition.StartFieldScale;
         private const float MeshMargin = 1.1f;
         // 셰이더(BlackHole/Breaker Orbs)의 MAX_ORBS와 같다. 달만 그리므로 칸 종류는 모두 0(달)이다.
         private const int MaxOrbs = 64;
@@ -65,6 +69,8 @@ namespace BlackHole.Unity
         private readonly HashSet<EnemyId> _seen = new HashSet<EnemyId>();
         private readonly List<EnemyId> _gone = new List<EnemyId>();
 
+        private long _lastDeathSequence; // 마지막으로 소리를 낸 사망 기록의 번호.
+
         // breakerLook: 달의 외형(머티리얼·색·간격·기본 공전 속도)을 Breaker 달과 같게 맞추려고 받는다.
         // cometLook: 혜성(픽업)의 외형. 혜성의 화면은 CometView가 맡는다.
         public EnemyView(Transform parent, EnemyLooks looks, BreakerLook breakerLook, CometLook cometLook)
@@ -86,6 +92,9 @@ namespace BlackHole.Unity
         {
             _seen.Clear();
             IReadOnlyList<Enemy> enemies = world.Enemies;
+            _fieldScale = world.Hq.FieldScale;
+            _goldText.Scale = _fieldScale;
+            _damageText.Scale = _fieldScale;
 
             // 매 프레임 경로: IReadOnlyList를 인덱스로 돈다(인터페이스 foreach는 열거자를 할당한다).
             for (int i = 0; i < enemies.Count; i++)
@@ -136,6 +145,35 @@ namespace BlackHole.Unity
             }
 
             _comets.Retain(_seen);
+            ReadDeaths(world); // 이번 프레임에 새로 확정된 사망이 있으면 파괴음을 낸다.
+        }
+
+        // world.Deaths에서 아직 처리하지 않은 새 사망 기록(Sequence가 더 큰 것)이 있는지 확인하고 소리를 낸다.
+        // 일시정지 중에는 판이 기록을 비우지 않아 같은 기록이 매 프레임 남아 있으므로, 번호로 걸러 한 번만 소리를 낸다.
+        private void ReadDeaths(World world)
+        {
+            IReadOnlyList<DeathRecord> deaths = world.Deaths;
+
+            // 이번 프레임에서 확인한 가장 큰 번호. 루프가 끝난 뒤 _lastDeathSequence에 반영한다.
+            long latest = _lastDeathSequence;
+            bool anynew = false;
+
+            // 매 프레임 경로: IReadOnlyList를 인덱스로 돈다
+            for (int i = 0; i < deaths.Count; i++)
+            {
+                long sequence = deaths[i].Sequence;
+
+                if (sequence <= _lastDeathSequence) continue; // 이미 소리를 낸 기록이면 건너뛴다.
+
+                if (sequence > latest) latest = sequence;
+
+                anynew = true;
+
+                // 한 프레임에 여러 마리가 죽어도 소리는 한 번만 낸다(소리가 겹쳐 커지는 것을 막는다).
+                if (anynew) SoundManager.Instance?.RequestDestroyed();
+
+                _lastDeathSequence = latest; // 다음 프레임에는 여기까지 처리한 기록을 건너뛴다.
+            }
         }
 
         // 관리하는 적 스프라이트가 없고, 지운 객체도 장면에서 모두 사라졌는가.
@@ -154,6 +192,9 @@ namespace BlackHole.Unity
             _hitParticles.Clear();
             _goldText.Reset();
             _damageText.Reset();
+
+            // 새 판의 사망 번호는 1부터 다시 시작하므로 함께 되돌린다. 빠뜨리면 다음 판에서 소리가 나지 않는다.
+            _lastDeathSequence = 0;
         }
 
         public void Dispose()
@@ -222,17 +263,19 @@ namespace BlackHole.Unity
         private void CreateMoon(EnemyVisual visual, Enemy enemy)
         {
             var moon = QuadRenderers.Create($"Moon #{enemy.Id.Value}", _root, _quad, _breakerLook.OrbMaterial, MoonSortingOrder);
-            float orbitRadius = enemy.Stats.Radius + _breakerLook.OrbitOffset + MoonRadius;
-            float size = 2 * (orbitRadius + MoonRadius) * MeshMargin;
+            // 적(월드)에 붙어 돌지만 달 자체와 간격은 화면 크기가 고정이다: 전장 배율을 곱한다.
+            float moonRadius = MoonRadius * _fieldScale;
+            float orbitRadius = enemy.Stats.Radius + _breakerLook.OrbitOffset * _fieldScale + moonRadius;
+            float size = 2 * (orbitRadius + moonRadius) * MeshMargin;
             moon.transform.localScale = new Vector3(size, size, 1);
 
             moon.GetPropertyBlock(_properties);
             _properties.SetFloat(_orbitRadiusId, orbitRadius);
-            _properties.SetFloat(_orbRadiusId, MoonRadius);
+            _properties.SetFloat(_orbRadiusId, moonRadius);
             _properties.SetFloat(_orbCountId, 1);
             _properties.SetColor(_moonFillId, _breakerLook.MoonFill);
             _properties.SetColor(_moonOutlineId, _breakerLook.MoonOutline);
-            _properties.SetFloat(_outlineWidthId, _breakerLook.MoonOutlineWidth);
+            _properties.SetFloat(_outlineWidthId, _breakerLook.MoonOutlineWidth * _fieldScale);
             _properties.SetFloatArray(_orbKindsId, _moonKinds);
             moon.SetPropertyBlock(_properties);
 

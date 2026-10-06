@@ -31,7 +31,7 @@ namespace BlackHole.Core
 
                 try
                 {
-                    milestones.Add(new HqMilestone(mark.Level, mark.TargetGold));
+                    milestones.Add(new HqMilestone(mark.Level, mark.TargetGold, mark.FieldScale));
                 }
                 catch (ArgumentException error)
                 {

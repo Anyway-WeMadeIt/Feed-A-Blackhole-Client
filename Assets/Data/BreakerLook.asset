@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BreakerLook
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.BreakerLook
   _material: {fileID: 2100000, guid: 68919185f544bac4980bc5f5b15f3de5, type: 2}
-  _thickness: 0.14
+  _thicknessRatio: 0.15
   _dashCount: 8
   _dashRatio: 0.6
   _color: {r: 0.33962262, g: 0.33962262, b: 0.33962262, a: 0.9}
@@ -58,7 +58,7 @@ MonoBehaviour:
   _hitFlashColor: {r: 0.106265545, g: 0.108193874, b: 0.11320752, a: 1}
   _criticalFlashColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   _orbMaterial: {fileID: 2100000, guid: 89089763f29d1ad439f6b3238e56e555, type: 2}
-  _orbRadius: 0.3
+  _orbRadius: 0.343
   _orbitOffset: 0.1
   _orbitSpeed: 0.15
   _moonFill: {r: 1, g: 1, b: 1, a: 1}

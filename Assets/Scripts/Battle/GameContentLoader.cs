@@ -50,8 +50,8 @@ namespace BlackHole.Unity
             return fits.Count == 0 ? new LoadedContent(content.Content, tree.Tree, layout) : null;
         }
 
-        // 콘텐츠 에셋으로 Core 저작 형식을 채운다. 시트 가져오기(DataSheetImport)도 이 형식으로 게임과 같은 검사를 한다.
-        internal static ContentData ContentDataFrom(SkillSetup skills, EnemyCatalog enemies, EnemySupplySetup supply, HqGrowthSetup growth)
+        // 콘텐츠 에셋으로 Core 저작 형식을 채운다.
+        private static ContentData ContentDataFrom(SkillSetup skills, EnemyCatalog enemies, EnemySupplySetup supply, HqGrowthSetup growth)
         {
             ContentData data = SampleContent.Create();
             skills.WriteTo(data);

@@ -39,11 +39,12 @@ namespace BlackHole.Core
                 enemies.Enemies,
                 CompositionsOf(enemies, table));
 
+            // 출현 띠(혜성 띠 포함)는 이 판의 전장 배율만큼 넓힌다: 이정표마다 카메라와 함께 넓어진다.
             var world = new World(
                 seed,
                 stats,
-                enemies.EnemyPlacement,
-                enemies.PickupPlacement,
+                enemies.EnemyPlacement?.Scaled(hq.FieldScale),
+                enemies.PickupPlacement?.Scaled(hq.FieldScale),
                 enemies.MaxAliveEnemies,
                 hq,
                 battlePlayers);

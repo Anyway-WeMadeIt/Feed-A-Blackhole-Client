@@ -40,6 +40,10 @@ namespace BlackHole.Unity
             _fontSize = fontSize;
         }
 
+        // 화면 크기를 고정하려고 곱하는 배율(판의 전장 배율, EnemyView가 정한다). 글자 크기와 떠오르는 거리에 곱한다.
+        // 원작의 피해·골드 숫자는 카메라가 넓어져도 화면에서 같은 크기다.
+        public float Scale { get; set; } = 1;
+
         // 떠 있는 라벨이 없고, 지운 객체도 장면에서 모두 사라졌는가.
         // 지운 객체는 프레임 끝에 사라지므로, Reset 뒤 한 프레임이 지나야 true가 된다.
         public bool IsClear => _labels.Count == 0 && _root.childCount == 0;
@@ -54,6 +58,7 @@ namespace BlackHole.Unity
             label.Text.text = text;
             label.Text.color = color;
             label.Text.transform.position = position;
+            label.Text.transform.localScale = Vector3.one * Scale;
             label.Text.gameObject.SetActive(true);
         }
 
@@ -77,7 +82,7 @@ namespace BlackHole.Unity
                 }
 
                 float progress = label.Elapsed / _duration;
-                label.Text.transform.position = label.Start + Vector3.up * (_riseDistance * progress);
+                label.Text.transform.position = label.Start + Vector3.up * (_riseDistance * Scale * progress);
 
                 Color color = label.Text.color;
                 color.a = 1f - progress;

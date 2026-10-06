@@ -11,8 +11,9 @@ namespace BlackHole.Unity
         [Header("외형")]
         [Tooltip("BlackHole/Breaker Ring 셰이더의 머티리얼.")]
         [SerializeField] private Material _material;
-        [Tooltip("선 굵기(월드 단위). 반지름이 바뀌어도 그대로다.")]
-        [SerializeField] private float _thickness = 0.12f;
+        [Tooltip("선 굵기(반지름 대비). 링 굵기 = 반지름 × 이 값이라 범위가 커지면 같이 굵어진다. 원작 점선은 링 지름의 약 7%(반지름의 0.15배).")]
+        [Min(0.001f)]
+        [SerializeField] private float _thicknessRatio = 0.15f;
         [Tooltip("점선 개수. 반지름이 바뀌어도 그대로다.")]
         [Min(1)]
         [SerializeField] private int _dashCount = 8;
@@ -48,10 +49,10 @@ namespace BlackHole.Unity
         [Header("버프 구체: 중첩 하나마다 구체 하나가 링 바깥 궤도를 시계방향으로 돈다(달·혜성이 한 궤도를 나눠 쓴다)")]
         [Tooltip("BlackHole/Breaker Orbs 셰이더의 머티리얼. 혜성의 무지개(흐름 속도·채도)는 이 머티리얼의 속성이다.")]
         [SerializeField] private Material _orbMaterial;
-        [Tooltip("구체의 반지름(월드 단위). 링 크기·카메라와 관계없이 그대로다.")]
+        [Tooltip("구체의 반지름(전장 배율 1에서의 월드 단위). 화면 크기가 고정이라 판의 전장 배율을 곱한다(원작 달은 카메라와 무관하게 약 37px). 링 크기와는 관계없다.")]
         [Min(0.001f)]
         [SerializeField] private float _orbRadius = 0.3f;
-        [Tooltip("링 바깥 가장자리와 구체 사이의 간격(월드 단위). 궤도 반지름 = 링 반지름 + 링 굵기/2 + 구체 반지름 + 이 값.")]
+        [Tooltip("링 바깥 가장자리와 구체 사이의 간격(전장 배율 1에서의 월드 단위, 전장 배율을 곱한다). 궤도 반지름 = 링 반지름 + 링 굵기/2 + 구체 반지름 + 이 값.")]
         [Min(0)]
         [SerializeField] private float _orbitOffset = 0.1f;
         [Tooltip("공전 속도(바퀴/초, 시계방향).")]
@@ -60,7 +61,7 @@ namespace BlackHole.Unity
         [SerializeField] private Color _moonFill = Color.white;
         [Tooltip("달 구체의 테두리 색.")]
         [SerializeField] private Color _moonOutline = new(0.25f, 0.27f, 0.32f, 1f);
-        [Tooltip("달 구체의 테두리 두께(월드 단위).")]
+        [Tooltip("달 구체의 테두리 두께(전장 배율 1에서의 월드 단위, 전장 배율을 곱한다).")]
         [Min(0)]
         [SerializeField] private float _moonOutlineWidth = 0.01f;
 
@@ -72,7 +73,7 @@ namespace BlackHole.Unity
         [SerializeField] private float _cometAuraOffset = 0.15f;
 
         public Material Material => _material;
-        public float Thickness => _thickness;
+        public float ThicknessRatio => _thicknessRatio;
         public int DashCount => _dashCount;
         public float DashRatio => _dashRatio;
         public Color Color => _color;

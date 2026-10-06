@@ -54,6 +54,9 @@ namespace BlackHole.Unity
         private int _shownGoal = -1;
         private bool? _shownPaused;
 
+        private const float FillSharpness = 5f;
+        private float _fillValue = float.NaN;
+
         protected override void OnInitialize()
         {
             ScreenRefs.WarnMissing<Refs>(this);
@@ -90,6 +93,7 @@ namespace BlackHole.Unity
             {
                 _shownLevel = int.MinValue;
                 _level.text = string.Empty;
+                _fillValue = float.NaN;
                 SetLevelFill(0);
             }
 
@@ -129,8 +133,10 @@ namespace BlackHole.Unity
                     + (goalLevel > 0 ? " / " + goalLevel.ToString(CultureInfo.InvariantCulture) : string.Empty)
                     + "  " + percent.ToString(CultureInfo.InvariantCulture) + "%";
                 // 막대도 글자와 같은 %로 맞춘다. 1% 단위로만 바뀌므로 매 프레임 레이아웃을 다시 잡지 않는다.
-                SetLevelFill(percent / 100f);
+                //SetLevelFill(percent / 100f);
             }
+
+            UpdateLevelFill(level, progress);
 
             if (paused != _shownPaused && _pauseLabel != null)
             {
@@ -141,8 +147,37 @@ namespace BlackHole.Unity
 
         private void SetLevelFill(float amount)
         {
-            if (_levelFill != null)
-                _levelFill.anchorMax = new Vector2(Mathf.Clamp01(amount), _levelFill.anchorMax.y);
+            // if (_levelFill != null)
+            //     _levelFill.anchorMax = new Vector2(Mathf.Clamp01(amount), _levelFill.anchorMax.y);
+            if (_levelFill == null)
+                return;
+            
+            float x = Mathf.Clamp01(amount);
+
+            if (Mathf.Approximately(_levelFill.anchorMax.x, x))
+                return;
+            
+            _levelFill.anchorMax = new Vector2(x, _levelFill.anchorMax.y);
         }
+
+        private void UpdateLevelFill(int level, float progress)
+        {
+            float target = level + Mathf.Min(Mathf.Clamp01(progress), 0.9999f);
+
+            if (float.IsNaN(_fillValue) || target < _fillValue)
+            {
+                _fillValue = target;
+            }
+            else
+            {
+                float t = 1f - Mathf.Exp(-FillSharpness * Time.unscaledDeltaTime);
+                _fillValue = Mathf.Lerp(_fillValue, target, t);
+
+                if (target - _fillValue < 0.001f)
+                    _fillValue = target;
+            }
+
+            SetLevelFill(_fillValue - Mathf.Floor(_fillValue));
+        }   
     }
 }

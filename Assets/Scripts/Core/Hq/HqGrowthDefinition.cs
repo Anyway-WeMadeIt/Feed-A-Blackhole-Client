@@ -7,14 +7,16 @@ namespace BlackHole.Core
     // 1. 모든 판이 함께 쓰는 Level 사다리 하나(누적 EXP)
     // 2. 이정표(Level이 커지는 순서). 판이 다음 이정표의 Level에 닿으면 그 Step에서 판이 끝나고 성장도가 1 오른다.
     //
-    // 성장도 = 도달한 이정표의 수(0 ~ 이정표 수). 성장도가 정하는 것은 판의 시작 Level과 목표 Level뿐이다:
+    // 성장도 = 도달한 이정표의 수(0 ~ 이정표 수). 성장도가 정하는 것은 판의 시작 Level·목표 Level과 전장 배율이다:
     // - 시작 Level: 성장도 0이면 0, 아니면 마지막으로 도달한 이정표의 Level.
     // - 목표 Level: 다음 이정표의 Level. 마지막 이정표 뒤에는 목표가 없다(판은 시간으로만 끝난다).
+    // - 전장 배율: 성장도 0이면 1, 아니면 마지막으로 도달한 이정표의 배율(HqMilestone.FieldScale).
     public sealed class HqGrowthDefinition
     {
         public const int StartStage = 0;
         public const int StartLevel = 0;
         public const int NoGoal = 0;
+        public const float StartFieldScale = 1f;
 
         public static readonly HqGrowthDefinition None = new(Array.Empty<long>());
 
@@ -76,6 +78,11 @@ namespace BlackHole.Core
                     throw new ArgumentOutOfRangeException(
                         nameof(milestones), $"이정표 {i}의 목표 잔액 {mark.TargetGold}는 앞 이정표의 {marks[i - 1].TargetGold}보다 커야 한다.");
 
+                // 카메라는 이정표마다 넓어지기만 한다(원작). 같은 배율은 허용한다(그 이정표에서는 넓어지지 않음).
+                if (i > 0 && mark.FieldScale < marks[i - 1].FieldScale)
+                    throw new ArgumentOutOfRangeException(
+                        nameof(milestones), $"이정표 {i}의 전장 배율 {mark.FieldScale}는 앞 이정표의 {marks[i - 1].FieldScale}보다 작을 수 없다.");
+
                 marks[i] = mark;
             }
 
@@ -98,6 +105,13 @@ namespace BlackHole.Core
 
         // 성장도 stage의 판의 목표 Level(다음 이정표의 Level). 없으면 NoGoal.
         public int GoalLevelAt(int stage) => NextMilestoneAt(stage)?.Level ?? NoGoal;
+
+        // 성장도 stage의 판의 전장 배율: 성장도 0이면 StartFieldScale, 아니면 마지막으로 도달한 이정표의 배율.
+        public float FieldScaleAt(int stage)
+        {
+            RequireStage(stage);
+            return stage == StartStage ? StartFieldScale : Milestones[stage - StartStage - 1].FieldScale;
+        }
 
         // 이 Level에 닿는 누적 EXP. Level 0은 0이다. 사다리 밖이면 null이다.
         public long? ExpToReach(int level)

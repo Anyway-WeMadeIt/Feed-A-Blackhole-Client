@@ -58,6 +58,7 @@ namespace BlackHole.Unity
             if (result.Raised > 0)
             {
                 _cameraShake.Play();
+                SoundManager.Instance.PlayLevelUp();
             }
 
             RefreshBattleHud();
