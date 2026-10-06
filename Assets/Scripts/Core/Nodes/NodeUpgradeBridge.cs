@@ -45,8 +45,8 @@ namespace BlackHole.Core
             new Route("laserStar.spawnChance", EnemyUpgradeStats.TraitChance("star", "laser"), UpgradeOperation.Add, 1),
             new Route("supernovaStar.spawnChance", EnemyUpgradeStats.TraitChance("star", "supernova"), UpgradeOperation.Add, 1),
 
-            new Route("breaker.planetDamageBonus", BreakerUpgradeStats.PlanetDamageBonus, UpgradeOperation.Add, 1),
-            new Route("breaker.starDamageBonus", BreakerUpgradeStats.StarDamageBonus, UpgradeOperation.Add, 1),
+            new Route("breaker.planetBonus", BreakerUpgradeStats.PlanetBonus, UpgradeOperation.Add, 1),
+            new Route("breaker.starBonus", BreakerUpgradeStats.StarBonus, UpgradeOperation.Add, 1),
         };
 
         private static readonly HashSet<string> _routed = RoutedStats();

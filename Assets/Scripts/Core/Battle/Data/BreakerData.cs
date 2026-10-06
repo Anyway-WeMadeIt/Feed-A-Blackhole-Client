@@ -23,7 +23,7 @@ namespace BlackHole.Core
         public float CometCritDamageBonus;
 
         // 행성, 별 데미지 보너스
-        public float PlanetDamageBonus;
-        public float StarDamageBonus;
+        public float PlanetBonus;
+        public float StarBonus;
     }
 }

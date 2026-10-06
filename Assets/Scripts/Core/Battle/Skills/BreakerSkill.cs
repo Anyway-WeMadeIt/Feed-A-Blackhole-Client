@@ -70,10 +70,10 @@ namespace BlackHole.Core
 
 
         // 현재 행성 치명타 보너스
-        public float CurrentPlanetBonus => Definition.PlanetDamageBonus * _planet.Count;
+        public float CurrentPlanetBonus => Definition.PlanetBonus * _planet.Count;
 
         // 현재 별 치명타 보너스
-        public float CurrentStarBonus => Definition.StarDamageBunos * _star.Count;
+        public float CurrentStarBonus => Definition.StarBonus * _star.Count;
 
         // critical은 이 Breaker의 치명타만 쓰는 난수다.
         internal BreakerSkill(BreakerDefinition definition, BattleRandom critical)
@@ -118,9 +118,9 @@ namespace BlackHole.Core
 
         internal void GrantComet() => _comet.Add(new BreakerBuff(++_buffCount, Definition.CometDuration));
 
-        internal void GrantPlanet() => _planet.Add(new BreakerBuff(++_buffCount, Definition.PlanetDamageBonus));
+        internal void GrantPlanet() => _planet.Add(new BreakerBuff(++_buffCount, Definition.PlanetBonus));
 
-        internal void GrantStar() => _star.Add(new BreakerBuff(++_buffCount, Definition.StarDamageBunos));
+        internal void GrantStar() => _star.Add(new BreakerBuff(++_buffCount, Definition.StarBonus));
 
         private void AgeBuffs(float delta)
         {

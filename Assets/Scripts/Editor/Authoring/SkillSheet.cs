@@ -45,10 +45,10 @@ namespace BlackHole.Authoring
             new Key { Name = "breaker.comet-crit-damage-bonus", Parameter = "cometCritDamageBonus", Note = "혜성 중첩 하나의 치명타 피해 보너스 증가(0 이상). 0.5면 +50%.",
                 Get = b => b.CometCritDamageBonus, Set = (b, v) => b.CometCritDamageBonus = v },
 
-            new Key { Name = "breaker.planet-damage-bonus", Parameter = "planetDamageBonus", Note = "행성 공격시 수치값으로 피해 보너스 증가 (0 이상)",
-                Get = b => b.PlanetDamageBonus, Set = (b, v) => b.PlanetDamageBonus = v },
-            new Key { Name = "breaker.star-damage-bonus", Parameter = "starDamageBonus", Note = "별 공격시 수치값으로 피해 보너스 증가 (0 이상)",
-                Get = b => b.StarDamageBonus, Set = (b, v) => b.StarDamageBonus = v }
+            new Key { Name = "breaker.planet-bonus", Parameter = "planetBonus", Note = "행성 공격시 수치값으로 피해 보너스 증가 (0 이상)",
+                Get = b => b.PlanetBonus, Set = (b, v) => b.PlanetBonus = v },
+            new Key { Name = "breaker.star-bonus", Parameter = "starBonus", Note = "별 공격시 수치값으로 피해 보너스 증가 (0 이상)",
+                Get = b => b.StarBonus, Set = (b, v) => b.StarBonus = v }
         };
 
         public static string SkillsCsv(BreakerData breaker)
@@ -89,7 +89,7 @@ namespace BlackHole.Authoring
 
             try { new BreakerDefinition(breaker.Damage, breaker.Interval, breaker.Radius, breaker.CritChance, breaker.CritDamage,
                 breaker.MoonDuration, breaker.MoonSpeedBonus, breaker.MoonRadiusBonus, breaker.CometDuration, breaker.CometCritDamageBonus,
-                breaker.PlanetDamageBonus, breaker.StarDamageBonus); }
+                breaker.PlanetBonus, breaker.StarBonus); }
             catch (ArgumentException error) { diagnostics.Add(RuleAt("breaker.", error, keyRows)); }
 
             if (diagnostics.Count == 0)

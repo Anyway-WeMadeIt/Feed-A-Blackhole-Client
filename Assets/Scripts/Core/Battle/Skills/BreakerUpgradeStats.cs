@@ -26,8 +26,8 @@ namespace BlackHole.Core
         public const string CometCritDamageBonus = "breaker.comet-crit-damage-bonus";
 
         // 행성에 대한 브레이커 보너스 피해 : 0을 시작으로 기본 피해 및 치명타와의 계산 순서확인 필요
-        public const string PlanetDamageBonus = "breaker.planet-damage-bonus";
+        public const string PlanetBonus = "breaker.planet-damage-bonus";
         // 별에 대한 브레이커의 보너스 대미지 : 0을 시작으로 기본 피해 및 치명타와의 계산 순서확인 필요
-        public const string StarDamageBonus = "breaker.star-damage-bonus";
+        public const string StarBonus = "breaker.star-damage-bonus";
     }
 }

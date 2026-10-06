@@ -53,7 +53,7 @@ namespace BlackHole.Core
             return Guard("Breaker", into, () =>
                 new BreakerDefinition(item.Damage, item.Interval, item.Radius, item.CritChance, item.CritDamage,
                     item.MoonDuration, item.MoonSpeedBonus, item.MoonRadiusBonus, item.CometDuration, item.CometCritDamageBonus,
-                    item.PlanetDamageBonus, item.StarDamageBonus));
+                    item.PlanetBonus, item.StarBonus));
         }
 
         // ── 공통 ────────────────────────────────────────────────────────────
