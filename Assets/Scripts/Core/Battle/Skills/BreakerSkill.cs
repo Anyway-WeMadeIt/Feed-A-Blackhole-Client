@@ -118,6 +118,10 @@ namespace BlackHole.Core
 
         internal void GrantComet() => _comet.Add(new BreakerBuff(++_buffCount, Definition.CometDuration));
 
+        internal void GrantPlanet() => _planet.Add(new BreakerBuff(++_buffCount, Definition.PlanetDamageBonus));
+
+        internal void GrantStar() => _star.Add(new BreakerBuff(++_buffCount, Definition.StarDamageBunos));
+
         private void AgeBuffs(float delta)
         {
             Age(_moon, delta);
