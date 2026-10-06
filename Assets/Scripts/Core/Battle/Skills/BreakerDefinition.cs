@@ -26,8 +26,13 @@ namespace BlackHole.Core
         public float CometDuration { get; }
         public float CometCritDamageBonus { get; }
 
+        // 행성, 별 보너스 피해
+        public float PlanetDamageBonus { get; }
+        public float StarDamageBunos { get; }
+
         public BreakerDefinition(float damage, float interval, float radius, float critChance, float critDamage,
-            float moonDuration, float moonSpeedBonus, float moonRadiusBonus, float cometDuration, float cometCritDamageBonus)
+            float moonDuration, float moonSpeedBonus, float moonRadiusBonus, float cometDuration, float cometCritDamageBonus,
+            float planetBonus, float starBonus)
         {
             Damage = DefinitionGuard.Positive(damage, nameof(damage));
             Interval = DefinitionGuard.Positive(interval, nameof(interval));
@@ -43,6 +48,9 @@ namespace BlackHole.Core
             MoonRadiusBonus = NotNegative(moonRadiusBonus, nameof(moonRadiusBonus));
             CometDuration = DefinitionGuard.Positive(cometDuration, nameof(cometDuration));
             CometCritDamageBonus = NotNegative(cometCritDamageBonus, nameof(cometCritDamageBonus));
+
+            PlanetDamageBonus = NotNegative(planetBonus, nameof(planetBonus));
+            StarDamageBunos = NotNegative(starBonus, nameof(starBonus));
         }
 
         private static float NotNegative(float value, string name)
@@ -78,7 +86,9 @@ namespace BlackHole.Core
                 upgrades.Apply(BreakerUpgradeStats.MoonSpeedBonus, MoonSpeedBonus),
                 upgrades.Apply(BreakerUpgradeStats.MoonRadiusBonus, MoonRadiusBonus),
                 upgrades.Apply(BreakerUpgradeStats.CometDuration, CometDuration),
-                upgrades.Apply(BreakerUpgradeStats.CometCritDamageBonus, CometCritDamageBonus));
+                upgrades.Apply(BreakerUpgradeStats.CometCritDamageBonus, CometCritDamageBonus),
+                upgrades.Apply(BreakerUpgradeStats.PlanetDamageBonus, PlanetDamageBonus),
+                upgrades.Apply(BreakerUpgradeStats.StarDamageBonus, StarDamageBunos));
         }
     }
 }

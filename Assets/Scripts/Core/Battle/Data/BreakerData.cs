@@ -21,5 +21,9 @@ namespace BlackHole.Core
         // 혜성 버프 중첩 하나의 지속 시간(초)과 치명타 피해 보너스 증가(0 이상).
         public float CometDuration;
         public float CometCritDamageBonus;
+
+        // 행성, 별 데미지 보너스
+        public float PlanetDamageBonus;
+        public float StarDamageBonus;
     }
 }

@@ -83,7 +83,8 @@ namespace BlackHole.Authoring
                 return diagnostics;
 
             try { new BreakerDefinition(breaker.Damage, breaker.Interval, breaker.Radius, breaker.CritChance, breaker.CritDamage,
-                breaker.MoonDuration, breaker.MoonSpeedBonus, breaker.MoonRadiusBonus, breaker.CometDuration, breaker.CometCritDamageBonus); }
+                breaker.MoonDuration, breaker.MoonSpeedBonus, breaker.MoonRadiusBonus, breaker.CometDuration, breaker.CometCritDamageBonus,
+                breaker.PlanetDamageBonus, breaker.StarDamageBonus); }
             catch (ArgumentException error) { diagnostics.Add(RuleAt("breaker.", error, keyRows)); }
 
             if (diagnostics.Count == 0)

@@ -22,6 +22,9 @@ namespace BlackHole.Core
         private readonly List<BreakerBuff> _moon = new();
         private readonly List<BreakerBuff> _comet = new();
 
+        private readonly List<BreakerBuff> _planet = new();
+        private readonly List<BreakerBuff> _star = new();
+
         // 다음 Tick까지 남은 주기(기본 주기 기준).
         private float _untilNextTick;
         // 마지막으로 받은 버프의 번호(BreakerBuff.Number).
@@ -64,6 +67,13 @@ namespace BlackHole.Core
 
         // 지금 치명타 Tick에 적용되는 치명타 피해 보너스(혜성 버프 포함). 치명타 피해 = 피해 × (1 + 이 값).
         public float CurrentCritDamage => Definition.CritDamage * (1 + CometCritDamageBonus);
+
+
+        // 현재 행성 치명타 보너스
+        public float CurrentPlanetBonus => Definition.PlanetDamageBonus * _planet.Count;
+
+        // 현재 별 치명타 보너스
+        public float CurrentStarBonus => Definition.StarDamageBunos * _star.Count;
 
         // critical은 이 Breaker의 치명타만 쓰는 난수다.
         internal BreakerSkill(BreakerDefinition definition, BattleRandom critical)
@@ -148,10 +158,21 @@ namespace BlackHole.Core
             }
 
             bool critical = _targets.Count > 0 && RollCritical();
-            var damage = new Damage(critical ? Definition.Damage * (1 + CurrentCritDamage) : Definition.Damage, owner.Id, critical);
+
+            // 기본 데미지
+            float damage = Definition.Damage;
+
+            // 행성 + 별 데미지 보너스
+            float planetDamage = Definition.Damage * CurrentPlanetBonus;
+            float starDamage = Definition.Damage * CurrentStarBonus;
+
+            damage += planetDamage + starDamage;
+
+            if (critical) damage *= 1 + CurrentCritDamage;
+            var damageData = new Damage(damage, owner.Id, critical);
 
             foreach (Enemy target in _targets)
-                world.DealDamage(target, damage);
+                world.DealDamage(target, damageData);
 
             LastTickHitCount = _targets.Count;
             _ticks.Add(new BreakerTick(TickCount, center, radius, _targets.Count, critical));
