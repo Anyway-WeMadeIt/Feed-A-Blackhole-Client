@@ -1097,6 +1097,7 @@ namespace BlackHole.EditorTools
                 Profile = _playtest.AppliedProfile != null ? _playtest.AppliedProfile.name : string.Empty,
                 Fingerprint = _playtest.Fingerprint,
                 BaseFingerprint = _playtest.BaseFingerprint,
+                Stats = _report.Stats,
             };
 
             foreach (NodeDefinition node in NodeTree.Nodes)
@@ -1107,6 +1108,7 @@ namespace BlackHole.EditorTools
                     note.Nodes.Add((node.Id, rank));
             }
 
+            note.DescribeNodes(NodeTree);
             return note;
         }
 

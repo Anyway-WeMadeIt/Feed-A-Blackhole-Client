@@ -5,12 +5,14 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using BlackHole.Analytics;
+using BlackHole.Core;
 
 namespace BlackHole.Unity
 {
     // 느낌 메모 한 줄(schema 1, M3). 적는 순간의 세팅·수치 지문·판 상태와 느낌을 함께 담는다.
     // 메모 하나 = 파일 하나(PlaytestNotes: notes/<저장 이름>.json). 필드 설명은 Docs/Archive/BalanceLoop/M3-feel-notes.md.
-    // - setup: 그 판(또는 창의 세팅)이 시작한 상태. 노드는 실제로 적용된 Rank다(콘텐츠에 없는 노드는 빠진다).
+    // - setup: 그 판(또는 창의 세팅)이 시작한 상태. 노드는 실제로 적용된 Rank다(콘텐츠에 없는 노드는 빠진다). 노드마다 그 Rank까지의 효과도 적는다(effect: "breaker.radius +75%").
+    // - stats: 그 판에 실제로 쓰인 계산된 수치(NoteStats). 노드 ID를 시트와 맞춰 보지 않아도 읽힌다.
     // - battle: 플레이 중에 적었을 때만. 에디터에서 세팅만 보고 적으면 없다(null).
     internal sealed class FeelNote
     {
@@ -36,10 +38,15 @@ namespace BlackHole.Unity
         public List<(string NodeId, int Rank)> Nodes = new List<(string NodeId, int Rank)>();
         // 게임 순서로 만들 수 있는 세팅인가. 모르면 null.
         public bool? ReachableInGame;
+        // 노드마다 산 Rank까지 더한 효과(예: "breaker.radius +75%"). 노드 ID만으로는 시트를 봐야 읽히므로 함께 적는다(DescribeNodes).
+        public readonly Dictionary<string, string> NodeEffects = new Dictionary<string, string>();
 
         public string Profile;
         public string Fingerprint;
         public string BaseFingerprint;
+
+        // 계산된 수치(NoteStats): 나(블랙홀·Breaker)와 적(종류별 수·HP·Gold·EXP·성질), 바뀐 업그레이드 수치.
+        public JsonObject Stats;
 
         public HudSnapshot Battle;
         public string BattleId;
@@ -54,6 +61,45 @@ namespace BlackHole.Unity
 
         public string SetupKey => FeelNotes.SetupKeyOf(GrowthStage, StartLevel, Nodes);
 
+        // NodeEffects를 채운다: 노드마다 1 ~ 산 Rank의 효과를 수치(StatId)별로 더한다. 트리에 없는 노드는 건너뛴다.
+        public void DescribeNodes(NodeTree tree)
+        {
+            NodeEffects.Clear();
+
+            if (tree == null)
+                return;
+
+            foreach ((string nodeId, int rank) in Nodes)
+            {
+                if (!tree.TryGet(nodeId, out NodeDefinition node))
+                    continue;
+
+                var sums = new List<(UpgradeStat Stat, float Value)>();
+                for (int r = 1; r <= rank && r <= node.MaxRank; r++)
+                {
+                    foreach (NodeEffect effect in node.RankAt(r).Effects)
+                    {
+                        int index = sums.FindIndex(sum => sum.Stat == effect.Stat);
+                        if (index < 0)
+                            sums.Add((effect.Stat, effect.Value));
+                        else
+                            sums[index] = (effect.Stat, sums[index].Value + effect.Value);
+                    }
+                }
+
+                var parts = new List<string>(sums.Count);
+                foreach ((UpgradeStat stat, float value) in sums)
+                {
+                    UpgradeStatDefinition definition = tree.Content.StatOf(stat);
+                    string unit = definition.Unit == UpgradeStatUnit.Percent ? "%" : string.Empty;
+                    string sign = value >= 0 ? "+" : string.Empty;
+                    parts.Add($"{definition.StatId} {sign}{value.ToString("0.###", CultureInfo.InvariantCulture)}{unit}");
+                }
+
+                NodeEffects[nodeId] = string.Join(", ", parts);
+            }
+        }
+
         public static string NewId(DateTime atUtc, Random random) =>
             $"n-{atUtc.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture)}-{random.Next(0x10000):x4}";
 
@@ -61,7 +107,12 @@ namespace BlackHole.Unity
         {
             var nodes = new List<object>(Nodes.Count);
             foreach ((string nodeId, int rank) in Nodes)
-                nodes.Add(new JsonObject { { "nodeId", nodeId }, { "rank", rank } });
+            {
+                var node = new JsonObject { { "nodeId", nodeId }, { "rank", rank } };
+                if (NodeEffects.TryGetValue(nodeId, out string effect))
+                    node.Add("effect", effect);
+                nodes.Add(node);
+            }
 
             var tags = new List<object>(Tags);
 
@@ -94,6 +145,7 @@ namespace BlackHole.Unity
                         { "baseFingerprint", BaseFingerprint },
                     }
                 },
+                { "stats", Stats },
                 { "battle", Battle != null ? BattleJson() : null },
                 { "difficulty", Difficulty },
                 { "fun", Fun },

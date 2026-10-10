@@ -35,6 +35,8 @@ namespace BlackHole.Unity
         private BattleSystem _battle;
         private ScreenFlow _screens;
         private GameContent _content;
+        // 노드 정의(메모에 노드마다 효과를 적을 때 쓴다).
+        private NodeTree _nodeTree;
         private BattleAnalytics _analytics;
         private readonly PlaytestHud _hud = new();
         private string[] _kindNames;
@@ -112,6 +114,8 @@ namespace BlackHole.Unity
             public int Seed;
             public long Gold;
             public readonly List<(string NodeId, int Rank)> Nodes = new();
+            // 판이 시작할 때 읽은 계산된 수치(NoteStats). 판 밖에서 적는 메모가 쓴다.
+            public JsonObject Stats;
         }
 
         private bool _stylesReady;
@@ -128,6 +132,7 @@ namespace BlackHole.Unity
             BattleSystem battle,
             ScreenFlow screens,
             GameContent content,
+            NodeTree nodeTree,
             ProgressState progress,
             BattleAnalytics analytics)
         {
@@ -135,6 +140,7 @@ namespace BlackHole.Unity
             _battle = battle;
             _screens = screens;
             _content = content;
+            _nodeTree = nodeTree;
             _progress = progress;
             _analytics = analytics;
 #if UNITY_EDITOR
@@ -1135,6 +1141,9 @@ namespace BlackHole.Unity
                 foreach (string nodeId in _progress.OwnedNodes)
                     _battleSetup.Nodes.Add((nodeId, _progress.RankOf(nodeId)));
             }
+
+            // 판이 끝나면 판 객체가 사라지므로, 판 밖(결산·업그레이드 화면)에서 적는 메모를 위해 시작할 때 읽어 둔다.
+            _battleSetup.Stats = NoteStats.Capture(session, _content, _battle.Upgrades, NoteStats.AtBattleStart);
         }
 
         // 게임 시작(Initialize) 뒤인가. 플레이 메모 창이 플레이 직후 아직 준비 안 된 패널을 건드리지 않게 본다.
@@ -1181,8 +1190,14 @@ namespace BlackHole.Unity
             {
                 note.Battle = _hud.Capture(session);
                 note.BattleId = _analytics.CurrentBattleId;
+                note.Stats = NoteStats.Capture(session, _content, _battle.Upgrades, NoteStats.AtNow);
+            }
+            else if (_battleSetup != null)
+            {
+                note.Stats = _battleSetup.Stats;
             }
 
+            note.DescribeNodes(_nodeTree);
             return note;
         }
 

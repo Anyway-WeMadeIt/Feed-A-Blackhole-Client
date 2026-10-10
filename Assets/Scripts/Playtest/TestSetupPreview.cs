@@ -54,6 +54,7 @@ namespace BlackHole.Unity
             AddBreaker(report, session.World.Breaker);
             AddEnemies(report, session.World, content);
             AddStats(report, upgrades);
+            report.Stats = NoteStats.Capture(session, content, upgrades, NoteStats.AtPreview);
             return report;
         }
 
@@ -292,6 +293,8 @@ namespace BlackHole.Unity
         public int OwnedNodes { get; set; }
         public int OwnedRanks { get; set; }
         public long TotalCost { get; set; }
+        // 메모에 남기는 계산된 수치(NoteStats). 세팅을 넣지 못했으면 null.
+        public JsonObject Stats { get; set; }
 
         public bool Succeeded => Progress != null;
 

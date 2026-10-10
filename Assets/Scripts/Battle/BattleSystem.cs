@@ -36,6 +36,9 @@ namespace BlackHole.Unity
         // 마지막으로 시작한 판의 시드. 테스트 도구가 같은 판을 다시 할 때 쓴다.
         public int LastSeed { get; private set; }
 
+        // 마지막으로 시작한 판의 업그레이드 수치(노드로 정해진 값). 테스트 도구가 메모에 계산된 수치를 남길 때 읽는다.
+        public UpgradeStatValues Upgrades { get; private set; }
+
         // 판이 있는가(진행 또는 정지). 종료·포기는 이때만 한다.
         private bool HasBattle => _state == State.Running || _state == State.Paused;
 
@@ -64,6 +67,7 @@ namespace BlackHole.Unity
 
             LastSeed = _nextSeed ?? Environment.TickCount;
             _nextSeed = null;
+            Upgrades = upgrades;
             Session = GameSessionFactory.Create(_content, _progress, LastSeed, upgrades);
 
             _cameraFit.SetFieldScale(Session.World.Hq.FieldScale);
