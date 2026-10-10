@@ -22,8 +22,6 @@ namespace BlackHole.EditorTools
     // - 저장: Assets/Playtest/Scenarios의 시나리오 JSON(정확한 노드 목록). 개발 패널의 시나리오 탭에서도 같은 파일을 쓴다.
     // - ▶ 플레이: 세팅을 맡기고 플레이 모드에 들어가면 판이 바로 그 세팅으로 시작한다. 플레이 중에는 "지금 판에 적용"으로 다시 시작한다.
     // - 밸런스 프로필: 고른 프로필을 적용한 값으로 미리보고 플레이한다(바꾸면 다음 플레이부터).
-    // - AI 조정(M4): AI 초안(ai-draft.json)을 켜고 끄며 원본과 비교하고, 원본에 반영(승격)하거나 되돌린다. AI 묶음을 만든다.
-    //   자동 루프(M6): 이 PC의 Claude Code에게 초안을 맡긴다(버튼, 또는 메모 저장 때 자동). 상태·결과·비용을 보인다.
     // 창의 세팅은 Undo(Ctrl+Z)로 되돌린다.
     internal sealed class TestSetupWindow : EditorWindow, INodeCanvasHost
     {
@@ -54,7 +52,12 @@ namespace BlackHole.EditorTools
         [SerializeField] private int _stage;
         [SerializeField] private int _level;
         [SerializeField] private long _gold;
-        [SerializeField] private int _seed;
+        [SerializeField] private int _seed = 1;
+        [SerializeField] private string _category = "기본";
+        [SerializeField] private string _expected = "";
+        [SerializeField] private string _savedFingerprint = "";
+        [SerializeField] private string _categoryFilter = "전체";
+        [SerializeField] private string _nodeGroup = "전체";
         [SerializeField] private bool _freezeTime;
         [SerializeField] private List<RankEntry> _ranks = new List<RankEntry>();
         // 마지막으로 저장하거나 불러온 내용. 지금 세팅과 다르면 제목에 *를 붙인다.
@@ -81,11 +84,6 @@ namespace BlackHole.EditorTools
         private Label _title;
         private VisualElement _fileBox;
         private VisualElement _profileBox;
-        private VisualElement _aiBox;
-        private Label _aiRunStatus;
-        private bool _aiRunBusy;
-        private DateTime _draftWrite;
-        private (DateTime Write, long Length) _changesStamp;
         private VisualElement _playBox;
         private VisualElement _fieldsBox;
         private VisualElement _nodesBox;
@@ -119,9 +117,6 @@ namespace BlackHole.EditorTools
             Undo.undoRedoPerformed += OnUndoRedo;
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
             LiveDataSignal.Changed += OnLiveDataChanged;
-            AiContextService.Written += OnContextWritten;
-            AiRunner.Changed += OnContextWritten;
-            AiRunner.Finished += OnAiRunFinished;
 
             // 플레이에 들어가지 못해(컴파일 오류 등) 남은 세팅이 다음 보통 플레이에서 실행되지 않게 지운다.
             if (!EditorApplication.isPlayingOrWillChangePlaymode)
@@ -133,24 +128,6 @@ namespace BlackHole.EditorTools
             Undo.undoRedoPerformed -= OnUndoRedo;
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
             LiveDataSignal.Changed -= OnLiveDataChanged;
-            AiContextService.Written -= OnContextWritten;
-            AiRunner.Changed -= OnContextWritten;
-            AiRunner.Finished -= OnAiRunFinished;
-        }
-
-        // AI 실행이 끝났다(M6). 초안이 도착했으면 창에 알린다.
-        private void OnAiRunFinished(AiRunRecord record)
-        {
-            if (record.Status == AiRun.Ok)
-                ShowNotification(new GUIContent("AI 초안 도착"));
-            else if (record.Status == AiRun.InvalidDraft || record.Status == AiRun.Error)
-                ShowNotification(new GUIContent("AI 실행: " + AiRun.StatusText(record.Status)));
-        }
-
-        private void OnContextWritten()
-        {
-            if (_aiBox != null)
-                BuildAi();
         }
 
         // 수치 파일이 바뀌었다(LiveDataWatcher가 게임 로더로 검사한 뒤). 창에 다시 들어오지 않아도 바로 다시 계산한다.
@@ -217,7 +194,6 @@ namespace BlackHole.EditorTools
             {
                 BuildProfile();
                 BuildPlay();
-                BuildAi();
             }
         }
 
@@ -256,7 +232,6 @@ namespace BlackHole.EditorTools
             side.style.paddingRight = 8;
             _fileBox = Box(side);
             _profileBox = Box(side);
-            _aiBox = Box(side);
             _playBox = Box(side);
             _messagesBox = Box(side);
             side.Add(Header("세팅"));
@@ -321,7 +296,6 @@ namespace BlackHole.EditorTools
             {
                 BuildProfile();
                 BuildPlay();
-                BuildAi();
             }
         }
 
@@ -367,6 +341,9 @@ namespace BlackHole.EditorTools
             {
                 name = _setupName,
                 note = _note,
+                category = _category,
+                expected = _expected,
+                contentFingerprint = _savedFingerprint,
                 growthStage = _stage,
                 gold = _gold,
                 startLevel = _level,
@@ -403,6 +380,9 @@ namespace BlackHole.EditorTools
             _filePath = path ?? string.Empty;
             _setupName = scenario.name;
             _note = scenario.note ?? string.Empty;
+            _category = string.IsNullOrEmpty(scenario.category) ? "기본" : scenario.category;
+            _expected = scenario.expected ?? "";
+            _savedFingerprint = scenario.contentFingerprint ?? "";
             _stage = scenario.growthStage;
             _gold = scenario.gold;
             _seed = scenario.seed;
@@ -470,6 +450,8 @@ namespace BlackHole.EditorTools
                 return;
 
             _report = _loaded != null ? TestSetupPreview.Build(ToScenario(), _loaded.Content, NodeTree) : null;
+            if (_report != null && !string.IsNullOrEmpty(_savedFingerprint) && _savedFingerprint != _playtest?.Fingerprint)
+                _report.Warnings.Add("저장 당시와 콘텐츠 수치가 다릅니다. 같은 노드 조합도 전력이 달라질 수 있습니다.");
             _canvas.Refresh();
             UpdateTitle();
             BuildNodes();
@@ -478,7 +460,6 @@ namespace BlackHole.EditorTools
             BuildMessages();
             BuildReport();
             BuildNotesList();
-            BuildAi();
         }
 
         // 메모 파일이 바뀌면(개발 패널에서 적었거나 바깥에서 고쳤으면) 목록을 다시 그린다. 1초에 10번 불린다.
@@ -487,11 +468,6 @@ namespace BlackHole.EditorTools
             if (_notesList != null && PlaytestNotes.Stamp() != _notesStamp)
                 BuildNotesList();
 
-            // AI가 초안을 쓰거나 지웠다, 변경 기록이 늘었다, AI 실행이 시작되거나 끝났다.
-            if (_aiBox != null && (DraftWrite() != _draftWrite || PlaytestChanges.Stamp() != _changesStamp || AiRunner.Busy != _aiRunBusy))
-                BuildAi();
-            else if (_aiRunStatus != null && AiRunner.Busy)
-                _aiRunStatus.text = AiRunningText();
         }
 
         private void UpdateTitle()
@@ -595,6 +571,21 @@ namespace BlackHole.EditorTools
             row.Add(new Button(NewSetup) { text = "새로" });
 
             List<string> files = ScenarioFiles();
+            var categories = new List<string> { "전체" };
+            foreach (string path in files)
+            {
+                var item = PlaytestScenario.Parse(File.ReadAllText(path), out _);
+                string group = string.IsNullOrEmpty(item?.category) ? "기본" : item.category;
+                if (!categories.Contains(group)) categories.Add(group);
+            }
+            if (!categories.Contains(_categoryFilter)) _categoryFilter = "전체";
+            var filter = new DropdownField("분류", categories, categories.IndexOf(_categoryFilter));
+            filter.RegisterValueChangedCallback(evt => { _categoryFilter = evt.newValue; BuildFile(); });
+            _fileBox.Add(filter);
+            if (_categoryFilter != "전체") files.RemoveAll(path => {
+                var item = PlaytestScenario.Parse(File.ReadAllText(path), out _);
+                return (string.IsNullOrEmpty(item?.category) ? "기본" : item.category) != _categoryFilter;
+            });
             var choices = new List<string> { "불러오기…" };
             foreach (string path in files)
                 choices.Add(Path.GetFileNameWithoutExtension(path));
@@ -650,6 +641,19 @@ namespace BlackHole.EditorTools
                 return;
             }
 
+            if (_loaded == null || NodeTree == null)
+            {
+                _message = "콘텐츠를 먼저 불러와야 세팅을 검사할 수 있습니다.";
+                BuildMessages();
+                return;
+            }
+            TestSetupReport check = TestSetupPreview.Build(scenario, _loaded.Content, NodeTree);
+            if (!check.Succeeded)
+            {
+                _message = "세팅을 바꾸지 않았습니다: " + string.Join(" / ", check.Errors);
+                BuildMessages();
+                return;
+            }
             Undo.RecordObject(this, "세팅 불러오기");
             FromScenario(scenario, path);
             BuildFile();
@@ -699,6 +703,15 @@ namespace BlackHole.EditorTools
                 return;
             }
 
+            if (_report == null || !_report.Succeeded)
+            {
+                _message = "유효한 세팅만 저장할 수 있습니다. 콘텐츠·노드 오류를 먼저 확인하세요.";
+                BuildMessages();
+                return;
+            }
+            if (scenario.seed == 0 && !EditorUtility.DisplayDialog("무작위 시드", "시드가 0이면 매번 배치가 달라집니다. 재현용은 고정 시드를 사용하세요.", "그대로 저장", "취소")) return;
+            _savedFingerprint = _playtest?.Fingerprint ?? "";
+            scenario.contentFingerprint = _savedFingerprint;
             File.WriteAllText(path, JsonUtility.ToJson(scenario, true) + "\n");
             AssetDatabase.ImportAsset(path);
             Undo.RecordObject(this, "세팅 저장");
@@ -822,6 +835,7 @@ namespace BlackHole.EditorTools
                 _stage = progress.GrowthStage;
                 _gold = progress.Gold;
                 _level = panel.BattleLevel ?? StartLevel(_stage);
+                _seed = panel.BattleSeed;
                 _message = "지금 게임의 진행을 가져왔다.";
             }, rebuildFields: true);
         }
@@ -844,6 +858,13 @@ namespace BlackHole.EditorTools
             note.isDelayed = true;
             note.RegisterValueChangedCallback(evt => Change("세팅 메모", () => _note = evt.newValue));
             _fieldsBox.Add(note);
+            var category = new TextField("분류") { value = _category, isDelayed = true };
+            category.RegisterValueChangedCallback(evt => Change("분류", () => _category = evt.newValue));
+            _fieldsBox.Add(category);
+            var expected = new TextField("확인할 결과") { value = _expected, multiline = true, isDelayed = true };
+            expected.RegisterValueChangedCallback(evt => Change("확인할 결과", () => _expected = evt.newValue));
+            _fieldsBox.Add(expected);
+            _fieldsBox.Add(Note("저장은 확정된 노드 목록을 남깁니다. 예산 구매는 현재 가격으로 목록을 만드는 도구입니다."));
 
             if (Growth == null)
             {
@@ -912,6 +933,17 @@ namespace BlackHole.EditorTools
             row.Add(Grow(new Button(() => Change("모두 0", () => _ranks.Clear())) { text = "모두 0" }));
             row.Add(Grow(new Button(SetAllMax) { text = "모두 마지막 Rank" }));
             _nodesBox.Add(row);
+            var groups = new List<string> { "전체" };
+            if (NodeTree != null) foreach (NodeDefinition node in NodeTree.Nodes)
+            {
+                string group = NodeFamily(node.Id);
+                if (!groups.Contains(group)) groups.Add(group);
+            }
+            groups.Sort(StringComparer.Ordinal);
+            if (!groups.Contains(_nodeGroup)) _nodeGroup = "전체";
+            var groupField = new DropdownField("노드 계열 (ID 기준)", groups, groups.IndexOf(_nodeGroup));
+            groupField.RegisterValueChangedCallback(evt => { _nodeGroup = evt.newValue; BuildSearch(); });
+            _nodesBox.Add(groupField);
 
             var buyRow = Row();
             var budget = new LongField("예산") { value = _budget };
@@ -960,18 +992,20 @@ namespace BlackHole.EditorTools
             });
         }
 
+        private static string NodeFamily(string id) => id.Contains("-") ? id.Substring(0, id.LastIndexOf('-')) : id;
+
         private void BuildSearch()
         {
             _searchResults.Clear();
 
-            if (NodeTree == null || string.IsNullOrWhiteSpace(_search))
+            if (NodeTree == null || (string.IsNullOrWhiteSpace(_search) && _nodeGroup == "전체"))
                 return;
 
             int shown = 0;
 
             foreach (NodeDefinition node in NodeTree.Nodes)
             {
-                if (node.Id.IndexOf(_search.Trim(), StringComparison.OrdinalIgnoreCase) < 0)
+                if ((_nodeGroup != "전체" && NodeFamily(node.Id) != _nodeGroup) || node.Id.IndexOf(_search.Trim(), StringComparison.OrdinalIgnoreCase) < 0)
                     continue;
 
                 if (++shown > MaxSearchResults)
@@ -1050,474 +1084,6 @@ namespace BlackHole.EditorTools
             if (_report != null && _report.Unreachable.Contains(_focusedId))
                 _focusBox.Add(Note("게임에서는 이 노드를 이 순서로 살 수 없다(시작 노드에서 산 노드로 이어지지 않는다). 테스트에는 그대로 쓴다."));
         }
-
-        #endregion
-
-        #region AI 조정
-
-        private const int MaxChangesShown = 5;
-
-        private static DateTime DraftWrite() =>
-            File.Exists(AiContextService.DraftPath) ? File.GetLastWriteTimeUtc(AiContextService.DraftPath) : default;
-
-        // AI 초안(켜기·끄기·반영·버리기), 이 세팅의 AI 묶음, 최근 변경 기록(되돌리기).
-        private void BuildAi()
-        {
-            if (_aiBox == null)
-                return;
-
-            _aiBox.Clear();
-            _draftWrite = DraftWrite();
-            _changesStamp = PlaytestChanges.Stamp();
-            _aiBox.Add(Header("AI 조정"));
-
-            BuildDraft();
-            BuildAutoRun();
-            BuildContextLine();
-            BuildChanges();
-        }
-
-        private void BuildDraft()
-        {
-            if (!ProfilePromoter.HasDraft)
-            {
-                _aiBox.Add(Note($"AI 초안이 없다. AI가 {AiContextService.DraftPath}를 쓰면 여기에 보인다. 지침: Docs/BalanceLoop/AI-GUIDE.md"));
-                return;
-            }
-
-            BalanceProfile draft = ProfilePromoter.ReadDraft(out string error);
-
-            if (draft == null)
-            {
-                _aiBox.Add(new HelpBox($"AI 초안을 읽지 못했다: {error}", HelpBoxMessageType.Error));
-                _aiBox.Add(Grow(new Button(DiscardDraft) { text = "초안 버리기" }));
-                return;
-            }
-
-            bool on = _playtest != null && _playtest.AppliedProfile != null && _playtest.AppliedProfile.name == BalanceProfile.DraftName;
-            var box = new VisualElement();
-            box.style.paddingLeft = 6;
-            box.style.paddingTop = 4;
-            box.style.paddingBottom = 4;
-            box.style.marginBottom = 4;
-            box.style.borderLeftWidth = 3;
-            box.style.borderLeftColor = on ? new Color(0.35f, 0.75f, 0.45f) : new Color(0.9f, 0.7f, 0.3f);
-
-            var title = new Label($"AI 초안 · 값 {draft.patches.Count}개{(on ? " · 켜짐(지금 미리보기·플레이가 초안 값)" : " · 꺼짐")}");
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.whiteSpace = WhiteSpace.Normal;
-            box.Add(title);
-
-            if (!string.IsNullOrEmpty(draft.note))
-                box.Add(Wrapped(draft.note));
-
-            foreach (BalanceProfile.Patch patch in draft.patches)
-            {
-                if (patch == null)
-                    continue;
-
-                string before = ProfilePromoter.TryReadCurrent(patch.path, out double current, out string readError)
-                    ? Number(current)
-                    : "?";
-                string ratio = before != "?" && current != 0 ? $" (×{Number(patch.value / current)})" : string.Empty;
-                var line = new Label($"{patch.path}: {before} → {Number(patch.value)}{ratio}");
-                line.style.whiteSpace = WhiteSpace.Normal;
-                line.selection.isSelectable = true;
-                box.Add(line);
-
-                if (!string.IsNullOrEmpty(patch.reason))
-                {
-                    Label reason = Note("  " + patch.reason);
-                    reason.style.marginBottom = 2;
-                    box.Add(reason);
-                }
-
-                if (readError != null)
-                    box.Add(new HelpBox($"{patch.path}: {readError}", HelpBoxMessageType.Warning));
-            }
-
-            var row = Row();
-            row.Add(Grow(new Button(() => UseDraft(!on)) { text = on ? "원본으로" : "초안 켜기" }));
-            var promote = new Button(PromoteDraft) { text = "초안을 원본에 반영" };
-            row.Add(Grow(promote));
-            row.Add(Grow(new Button(DiscardDraft) { text = "초안 버리기" }));
-            box.Add(row);
-            box.Add(Note(EditorApplication.isPlaying
-                ? "켜기·원본으로는 같은 세팅·같은 시드로 판을 다시 시작한다. 반영은 노드 CSV·에셋을 고치고 변경 기록에 남긴다."
-                : "켜면 확정 정보가 초안 값이 된다. 플레이하면 초안 값으로 시작한다. 반영은 노드 CSV·에셋을 고치고 변경 기록에 남긴다."));
-            _aiBox.Add(box);
-        }
-
-        // 자동 루프(M6): Claude Code 실행 상태·마지막 결과·버튼·자동 토글.
-        private void BuildAutoRun()
-        {
-            AiRunRequest active = AiRunner.Active;
-            _aiRunBusy = active != null;
-            var box = new VisualElement();
-            box.style.paddingLeft = 6;
-            box.style.paddingTop = 4;
-            box.style.paddingBottom = 4;
-            box.style.marginBottom = 4;
-            box.style.borderLeftWidth = 3;
-            box.style.borderLeftColor = active != null ? new Color(0.4f, 0.65f, 0.95f) : new Color(0.5f, 0.5f, 0.5f);
-
-            var title = new Label("AI 자동 실행 · 이 PC의 Claude Code");
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            box.Add(title);
-
-            if (active != null)
-            {
-                _aiRunStatus = Wrapped(AiRunningText());
-                box.Add(_aiRunStatus);
-            }
-            else
-            {
-                _aiRunStatus = null;
-            }
-
-            List<AiRunRecord> records = AiRunner.ReadRecords();
-            AiRunRecord last = records.Count > 0 ? records[records.Count - 1] : null;
-
-            if (last != null)
-            {
-                string cost = last.CostUsd.HasValue ? $" · ${last.CostUsd.Value.ToString("0.00", CultureInfo.InvariantCulture)}" : string.Empty;
-                string turns = last.Turns.HasValue ? $" · {last.Turns}턴" : string.Empty;
-                box.Add(Wrapped($"마지막: {AiRun.StatusText(last.Status)} · {last.FinishedAtUtc.ToLocalTime().ToString("MM-dd HH:mm", CultureInfo.InvariantCulture)}"
-                                + $" · {last.Seconds.ToString("0", CultureInfo.InvariantCulture)}초{cost}{turns} · {AiRun.TriggerText(last.Trigger)}"
-                                + (last.NoteId != null ? $" · 메모 {last.NoteId}" : string.Empty)));
-
-                if (last.Summary != null)
-                {
-                    Label summary = Wrapped(last.Summary);
-                    summary.selection.isSelectable = true;
-                    summary.style.marginLeft = 8;
-                    box.Add(summary);
-                }
-
-                if (last.Errors.Count > 0)
-                {
-                    var shown = new List<string>();
-                    for (int i = 0; i < last.Errors.Count && i < 6; i++)
-                        shown.Add(last.Errors[i]);
-
-                    box.Add(new HelpBox(string.Join("\n", shown), last.Status == AiRun.Ok ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning));
-                }
-
-                if (last.Warnings.Count > 0)
-                    box.Add(new HelpBox("확인할 것:\n" + string.Join("\n", last.Warnings), HelpBoxMessageType.Info));
-            }
-            else if (active == null)
-            {
-                box.Add(Note("아직 실행이 없다. 버튼을 누르거나, 아래 토글을 켜고 메모를 저장하면 Claude Code가 이 PC에서 초안을 쓴다."));
-            }
-
-            if (AiRunner.PendingNoteId != null)
-                box.Add(Note($"다음 차례: 메모 {AiRunner.PendingNoteId}(지금 실행이 끝나면 맡긴다)"));
-
-            var row = Row();
-
-            if (active != null)
-                row.Add(Grow(new Button(AiRunner.Stop) { text = "멈추기" }));
-            else
-                row.Add(Grow(new Button(RunAi) { text = "AI에게 초안 맡기기" }));
-
-            var check = new Button(AiRunner.CheckClaude) { text = AiRunner.Checking ? "확인 중…" : "Claude Code 확인" };
-            check.SetEnabled(!AiRunner.Checking);
-            row.Add(Grow(check));
-            row.Add(Grow(new Button(RevealAiRuns) { text = "실행 기록" }));
-            box.Add(row);
-
-            AiRunSettings settings = AiRunner.LoadSettings(out string settingsError);
-            var auto = new Toggle("메모 저장 때 자동으로 맡기기") { value = settings.AutoOnNote };
-            auto.RegisterValueChangedCallback(evt =>
-            {
-                if (AiRunner.SetAutoOnNote(evt.newValue, out string error))
-                    return;
-
-                _message = $"자동 실행 설정을 저장하지 못했다: {error}";
-                BuildMessages();
-                auto.SetValueWithoutNotify(evt.previousValue);
-            });
-            box.Add(auto);
-
-            if (settingsError != null)
-                box.Add(new HelpBox(settingsError, HelpBoxMessageType.Warning));
-
-            if (AiRunner.CheckText != null)
-            {
-                Label checkText = Note(AiRunner.CheckText);
-                checkText.selection.isSelectable = true;
-                box.Add(checkText);
-            }
-
-            box.Add(Note($"실행마다 Claude 사용량이 든다(한 번에 최대 {settings.MaxTurns}턴·${settings.MaxBudgetUsd.ToString("0.##", CultureInfo.InvariantCulture)}, "
-                         + $"{settings.TimeoutSeconds}초). AI는 초안 파일만 쓸 수 있다. 설정: PlaytestData/{AiRunSettings.FileName}"));
-            _aiBox.Add(box);
-        }
-
-        private static string AiRunningText()
-        {
-            AiRunRequest active = AiRunner.Active;
-
-            if (active == null)
-                return string.Empty;
-
-            return $"실행 중 · {AiRunner.ActiveSeconds.ToString("0", CultureInfo.InvariantCulture)}초 · {AiRun.TriggerText(active.Trigger)}"
-                   + $" · 메모 {active.NoteId ?? "없음"}" + (active.Attempt > 1 ? $" · {active.Attempt}번째 시도" : string.Empty)
-                   + " · 끝나면 여기에 결과가 보인다.";
-        }
-
-        // 지금 세팅의 묶음으로 AI에게 맡긴다. 묶음이 없으면 먼저 만든다. 이 세팅의 가장 최근 메모를 먼저 보게 한다.
-        private void RunAi()
-        {
-            string key = CurrentSetupKey();
-
-            if (key == null)
-            {
-                _message = "세팅을 넣지 못해 AI에게 맡길 수 없다. 위의 오류를 먼저 본다.";
-                BuildMessages();
-                return;
-            }
-
-            if (!File.Exists(AiContextService.PathOf(key)))
-                MakeContext();
-
-            string noteId = null;
-            List<JsonObject> notes = PlaytestNotes.ReadRaw();
-
-            for (int i = notes.Count - 1; i >= 0 && noteId == null; i--)
-            {
-                if (notes[i].Text("setupKey") == key)
-                    noteId = notes[i].Text("id");
-            }
-
-            _message = AiRunner.Start(AiRun.ByButton, key, noteId, out string error)
-                ? $"AI에게 맡겼다(메모 {noteId ?? "없음"}). 끝나면 AI 조정 칸에 결과가 보이고, 초안을 쓰면 초안 칸이 생긴다."
-                : $"AI에게 맡기지 못했다: {error}";
-            BuildMessages();
-            BuildAi();
-        }
-
-        private static void RevealAiRuns()
-        {
-            string path = Directory.Exists(AiRunner.RunsFolder) ? AiRunner.RunsFolder : PlaytestNotes.DataFolder;
-            List<AiRunRecord> records = AiRunner.ReadRecords();
-
-            if (records.Count > 0)
-            {
-                string done = Path.Combine(AiRun.RunDir(AiRunner.RepoRoot, records[records.Count - 1].Id), AiRun.DoneFile);
-
-                if (File.Exists(done))
-                    path = done;
-            }
-
-            EditorUtility.RevealInFinder(path);
-        }
-
-        private void BuildContextLine()
-        {
-            string key = CurrentSetupKey();
-
-            if (key == null)
-                return;
-
-            string path = AiContextService.PathOf(key);
-            string text = File.Exists(path)
-                ? $"이 세팅의 AI 묶음: PlaytestData/context/{key}.json · {File.GetLastWriteTime(path).ToString("MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}"
-                : "이 세팅의 AI 묶음이 아직 없다. 메모를 저장하면 생긴다(지금 만들 수도 있다).";
-            _aiBox.Add(Note(text));
-
-            var row = Row();
-            row.Add(Grow(new Button(MakeContext) { text = "AI 묶음 만들기" }));
-            row.Add(Grow(new Button(() => EditorUtility.RevealInFinder(File.Exists(path) ? path : AiContextService.Folder)) { text = "폴더 열기" }));
-            _aiBox.Add(row);
-        }
-
-        private void BuildChanges()
-        {
-            List<ChangeRecord> records = PlaytestChanges.ReadAll();
-
-            if (records.Count == 0)
-                return;
-
-            HashSet<string> reverted = ChangeRecord.RevertedIds(records);
-            _aiBox.Add(Note($"변경 기록 {records.Count}개 · PlaytestData/changes.ndjson"));
-
-            for (int i = records.Count - 1; i >= 0 && i >= records.Count - MaxChangesShown; i--)
-            {
-                ChangeRecord record = records[i];
-                bool undone = reverted.Contains(record.Id);
-                string kind = record.Kind switch
-                {
-                    ChangeRecord.Promote => "반영",
-                    ChangeRecord.Revert => "되돌리기",
-                    ChangeRecord.Pull => "시트에서 끌어옴",
-                    ChangeRecord.Sheet => "시트에 반영",
-                    _ => record.Kind,
-                };
-                var box = new VisualElement();
-                box.style.marginBottom = 4;
-                box.style.paddingLeft = 4;
-                box.style.borderLeftWidth = 2;
-                box.style.borderLeftColor = new Color(0.5f, 0.5f, 0.55f);
-
-                var head = new Label($"{LocalTime(record.AtUtc.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture))} · {kind} · {record.Profile ?? record.Author} · " +
-                                     $"값 {record.Patches.Count}개 · 지문 {record.FingerprintBefore} → {record.FingerprintAfter}{(undone ? " · 되돌림" : string.Empty)}");
-                head.style.whiteSpace = WhiteSpace.Normal;
-                head.style.unityFontStyleAndWeight = FontStyle.Bold;
-                box.Add(head);
-
-                foreach (ChangePatch patch in record.Patches)
-                    box.Add(Wrapped($"{patch.Path}: {Number(patch.Before)} → {Number(patch.After)}"));
-
-                if (!string.IsNullOrEmpty(record.Summary))
-                    box.Add(Note(record.Summary));
-
-                if (record.Kind == ChangeRecord.Promote && !undone)
-                {
-                    ChangeRecord target = record;
-                    box.Add(new Button(() => RevertChange(target)) { text = "되돌리기" });
-                }
-
-                if (undone)
-                    box.style.opacity = 0.5f;
-
-                _aiBox.Add(box);
-            }
-
-            int pending = SheetSyncPlan.Pending(records).Count;
-            if (pending > 0)
-            {
-                _aiBox.Add(new HelpBox($"기획 시트에 아직 옮기지 않은 노드 변경 기록이 {pending}개 있다. Sheet Sync 창의 \"시트에 반영\"으로 옮긴다.", HelpBoxMessageType.Info));
-                _aiBox.Add(new Button(SheetSyncWindow.Open) { text = "Sheet Sync 열기" });
-            }
-        }
-
-        private void UseDraft(bool on)
-        {
-            string profile = on ? BalanceProfile.DraftName : string.Empty;
-
-            if (EditorApplication.isPlaying)
-            {
-                PlaytestPanel panel = FindAnyObjectByType<PlaytestPanel>();
-
-                if (panel == null)
-                {
-                    _message = "개발 패널을 찾지 못했다(게임이 아직 시작하지 않았다).";
-                    BuildMessages();
-                    return;
-                }
-
-                panel.RestartWithProfile(profile);
-                _message = on ? "AI 초안 값으로 같은 세팅·같은 시드로 다시 시작했다." : "원본 값으로 같은 세팅·같은 시드로 다시 시작했다.";
-            }
-            else
-            {
-                PlaytestSession.SelectProfile(profile);
-                _message = on ? "AI 초안을 켰다. 확정 정보와 플레이가 초안 값이다." : "원본으로 돌렸다.";
-            }
-
-            LoadContent();
-            Recompute();
-            BuildMessages();
-        }
-
-        private void PromoteDraft()
-        {
-            BalanceProfile draft = ProfilePromoter.ReadDraft(out _);
-            int count = draft != null ? draft.patches.Count : 0;
-
-            if (!EditorUtility.DisplayDialog(
-                    "초안을 원본에 반영",
-                    $"AI 초안의 값 {count}개를 원본(노드 CSV·에셋)에 씁니다.\n변경 기록에 남고, 이 창의 \"되돌리기\"로 돌릴 수 있습니다.",
-                    "반영",
-                    "취소"))
-                return;
-
-            if (ProfilePromoter.Promote(out ChangeRecord record, out List<string> errors))
-            {
-                bool node = record.Patches.Exists(patch => patch.Path.StartsWith("node/", StringComparison.Ordinal));
-                _message = $"반영했다({record.Id}): 값 {record.Patches.Count}개 · 지문 {record.FingerprintBefore} → {record.FingerprintAfter}. " +
-                           $"초안은 {record.Archive}로 옮겼다." + (node ? " 노드 CSV를 바꿨다 — 기획 시트에도 옮긴다." : string.Empty);
-
-                if (errors.Count > 0)
-                    _message += "\n" + string.Join("\n", errors);
-            }
-            else
-            {
-                _message = "반영하지 못했다(아무것도 바꾸지 않았다):\n" + string.Join("\n", errors);
-            }
-
-            LoadContent();
-            Recompute();
-            BuildMessages();
-        }
-
-        private void RevertChange(ChangeRecord change)
-        {
-            if (!EditorUtility.DisplayDialog(
-                    "반영 되돌리기",
-                    $"{change.Id}의 값 {change.Patches.Count}개를 이전 값으로 돌립니다. 변경 기록에 남습니다.",
-                    "되돌리기",
-                    "취소"))
-                return;
-
-            _message = ProfilePromoter.Revert(change, out ChangeRecord record, out List<string> errors)
-                ? $"되돌렸다({record.Id}): 값 {record.Patches.Count}개 · 지문 {record.FingerprintBefore} → {record.FingerprintAfter}."
-                  + (errors.Count > 0 ? "\n" + string.Join("\n", errors) : string.Empty)
-                : "되돌리지 못했다(아무것도 바꾸지 않았다):\n" + string.Join("\n", errors);
-
-            LoadContent();
-            Recompute();
-            BuildMessages();
-        }
-
-        private void DiscardDraft()
-        {
-            if (!EditorUtility.DisplayDialog("초안 버리기", "AI 초안을 원본에 반영하지 않고 PlaytestData/drafts/로 옮깁니다.", "버리기", "취소"))
-                return;
-
-            _message = ProfilePromoter.Discard(out string archive, out string error)
-                ? $"초안을 {archive}로 옮겼다."
-                : $"초안을 치우지 못했다: {error}";
-
-            LoadContent();
-            Recompute();
-            BuildMessages();
-        }
-
-        // 지금 세팅의 AI 묶음을 쓴다(메모 없이도). 세팅은 메모와 같은 모양(실제로 적용된 Rank)이다.
-        private void MakeContext()
-        {
-            FeelNote note = NoteFromWindow();
-
-            if (note == null)
-            {
-                _message = "세팅을 넣지 못해 AI 묶음을 만들 수 없다. 위의 오류를 먼저 본다.";
-                BuildMessages();
-                return;
-            }
-
-            var setup = new PlaytestScenario
-            {
-                name = note.SetupName,
-                growthStage = note.GrowthStage,
-                startLevel = note.StartLevel,
-                seed = note.Seed,
-                gold = note.Gold,
-            };
-
-            foreach ((string nodeId, int rank) in note.Nodes)
-                setup.nodes.Add(new PlaytestScenario.Node { nodeId = nodeId, rank = rank });
-
-            _message = AiContextService.WriteFor(setup, note.SetupKey, out string path, out string error)
-                ? $"AI 묶음을 썼다: {path}"
-                : $"AI 묶음을 쓰지 못했다: {error}";
-            BuildMessages();
-            BuildAi();
-        }
-
-        private static string Number(double value) => value.ToString("0.####", CultureInfo.InvariantCulture);
 
         #endregion
 

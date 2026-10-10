@@ -475,6 +475,7 @@ namespace BlackHole.Unity
                 }
 
                 PlaytestScenario scenario = option.Scenario;
+                GUILayout.Label($"[{scenario.category ?? "기본"}] {scenario.expected}", _small);
                 GUILayout.Label($"{scenario.name}  ({option.File.Source})", _label);
 
                 if (!string.IsNullOrEmpty(scenario.note))
@@ -540,6 +541,8 @@ namespace BlackHole.Unity
 
         // 지금 진행 상태(성장도·Gold·산 노드)와 진행 중인 판의 Level. 테스트 세팅 창이 "지금 게임에서 가져오기"로 읽는다.
         internal ProgressState Progress => _progress;
+        internal int BattleSeed => _battle.LastSeed;
+
         internal int? BattleLevel => _battle.Session?.World.Hq.Level;
 
         private bool RunScenario(PlaytestScenario scenario, bool startBattle, int? seed)
@@ -555,6 +558,8 @@ namespace BlackHole.Unity
                 return false;
             }
 
+            if (!string.IsNullOrEmpty(scenario.contentFingerprint) && scenario.contentFingerprint != _session.Fingerprint)
+                _scenarioWarnings.Add("저장 당시와 콘텐츠 수치가 다릅니다.");
             _session.Tag.MarkTestSession();
             _lastScenario = scenario;
             _scenarioForNextBattle = startBattle ? scenario : null;

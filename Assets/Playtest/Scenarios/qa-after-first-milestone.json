@@ -1,0 +1,13 @@
+{
+  "name": "qa-after-first-milestone",
+  "category": "QA/이정표",
+  "note": "공유용 대표 시점. 예산이 있으면 현재 가격으로 생성하는 레시피.",
+  "expected": "다음 단계의 시작 Level·전장·적 구성 확인",
+  "growthStage": 1,
+  "gold": 0,
+  "nodes": [],
+  "autoBuyBudget": 700000,
+  "startLevel": 0,
+  "seed": 1,
+  "freezeTime": false
+}

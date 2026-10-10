@@ -7,5 +7,7 @@
   "autoBuyBudget": 3000000,
   "startLevel": 0,
   "seed": 42,
-  "freezeTime": true
+  "freezeTime": true,
+  "category": "기존 비교",
+  "expected": "기존 시나리오 목적에 맞는 전투·UI를 확인한다."
 }

@@ -9,7 +9,7 @@ namespace BlackHole.Unity
 {
     // 밸런스 프로필의 경로로 콘텐츠 저작 데이터(ContentData)와 노드 시트 데이터(NodeContentData)의 값을 읽고 쓴다.
     // 로더(ContentLoader·NodeContentLoader)에 넘기기 전에 부르므로, 패치한 값도 원래 검증을 그대로 거친다.
-    // 같은 경로를 AI 묶음(지금 값)·변경 기록(이전 값)·승격(ProfileTargets가 원본 칸으로 옮긴다)도 쓴다.
+    // 로컬 테스트 프로필에서 경로별 값을 덧씌운다.
     //
     // 경로는 슬래시로 나눈다. 종류·성질은 계약 ID처럼 열거형 이름의 첫 글자만 소문자다(asteroid, golden).
     //   battle/<timeLimit|killTimeBonus>

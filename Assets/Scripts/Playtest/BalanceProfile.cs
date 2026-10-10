@@ -9,15 +9,13 @@ namespace BlackHole.Unity
     // 밸런스 프로필: 콘텐츠 값을 덮어쓰는 패치 묶음(JSON). 원본 에셋은 건드리지 않는다.
     // 경로 문법과 적용은 BalanceProfilePatcher가 맡는다. 이름은 그대로 전투 요약의 contentVersion이 된다(ContentTag).
     // 예: { "name": "golden-x5", "note": "황금 기본 배율 x50 -> x5", "patches": [ { "path": "enemy/asteroid/trait/golden/multiplier", "value": 5 } ] }
-    // AI 초안(M4)은 이름이 ai-draft인 프로필이고, 패치마다 reason(왜)과 noteIds(근거 메모)를 더 적는다. 다른 프로필에서는 생략한다.
+    // 패치마다 이유와 근거 메모를 선택적으로 남길 수 있다.
     [Serializable]
     internal sealed class BalanceProfile
     {
         // contentVersion은 64자까지다. 테스트 표시(+test)가 붙을 자리를 남긴다.
         public const int MaxNameLength = 58;
 
-        // AI 초안 프로필의 이름(파일은 Assets/Playtest/Profiles/ai-draft.json). 창이 "초안"으로 따로 보이고 승격한다.
-        public const string DraftName = "ai-draft";
         private static readonly Regex NamePattern = new("^[A-Za-z0-9._-]+$");
 
         // 필드 이름이 곧 JSON 키다.

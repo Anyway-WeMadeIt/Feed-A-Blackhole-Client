@@ -1,6 +1,8 @@
 {
     "name": "m4-trial",
     "note": "",
+    "category": "기존 비교",
+    "expected": "기존 노드 조합의 전투·UI 확인",
     "growthStage": 0,
     "gold": 0,
     "nodes": [

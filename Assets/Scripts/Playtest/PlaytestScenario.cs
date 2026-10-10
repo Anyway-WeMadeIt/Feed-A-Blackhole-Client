@@ -17,6 +17,10 @@ namespace BlackHole.Unity
 
         public string name;
         public string note;
+        public string category = "기본";
+        public string expected;
+        public string contentFingerprint;
+
         public int growthStage;
         public long gold;
         public List<Node> nodes = new();
@@ -25,7 +29,7 @@ namespace BlackHole.Unity
         // 0보다 크면: 판을 이 Level에서 시작한다(판 시작 직후 EXP를 채운다).
         public int startLevel;
         // 0이 아니면: 판을 이 시드로 시작한다(같은 시드면 같은 출현).
-        public int seed;
+        public int seed = 1;
         // 판을 시간 고정으로 시작한다.
         public bool freezeTime;
 
@@ -69,6 +73,13 @@ namespace BlackHole.Unity
             }
 
             scenario.nodes ??= new List<Node>();
+            if (scenario.growthStage < 0) { error = "growthStage는 0 이상이다."; return null; }
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (Node node in scenario.nodes)
+            {
+                if (node == null || string.IsNullOrWhiteSpace(node.nodeId) || node.rank <= 0 || !seen.Add(node.nodeId))
+                { error = "노드 ID는 중복 없이 지정하고 Rank는 1 이상이어야 한다."; return null; }
+            }
             error = null;
             return scenario;
         }
@@ -86,6 +97,22 @@ namespace BlackHole.Unity
             List<string> errors,
             List<string> warnings)
         {
+            if (scenario == null || scenario.growthStage < 0 || scenario.growthStage > growth.MaxStage
+                || scenario.gold < 0 || scenario.autoBuyBudget < 0 || scenario.startLevel < 0 || scenario.startLevel > growth.MaxLevel)
+            { errors.Add("세팅의 단계·Level·Gold·예산이 허용 범위를 벗어났다."); return false; }
+            int goal = growth.GoalLevelAt(scenario.growthStage);
+            if (scenario.startLevel > 0 && (scenario.startLevel < growth.StartLevelAt(scenario.growthStage)
+                || (goal != HqGrowthDefinition.NoGoal && scenario.startLevel >= goal)))
+            { errors.Add("시작 Level은 해당 이정표 단계의 시작 이상, 다음 목표 미만이어야 한다."); return false; }
+            if (scenario.nodes == null) { errors.Add("nodes 목록이 없다."); return false; }
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var node in scenario.nodes)
+            {
+                if (node == null || string.IsNullOrEmpty(node.nodeId) || !seen.Add(node.nodeId)
+                    || !tree.TryGet(node.nodeId, out NodeDefinition definition) || node.rank <= 0 || node.rank > definition.MaxRank)
+                    errors.Add("재현할 수 없는 노드 또는 Rank: " + node?.nodeId);
+            }
+            if (errors.Count > 0) return false;
             var data = new ProgressSaveData
             {
                 FormatVersion = ProgressSaveData.CurrentFormatVersion,
@@ -126,7 +153,7 @@ namespace BlackHole.Unity
                     if (NodePurchase.Check(progress, tree, node.Id) != PurchaseResult.Purchased)
                         continue;
 
-                    if (NodePurchase.TryGetNextCost(progress, tree, node.Id, out long cost) && cost < cheapestCost)
+                    if (NodePurchase.TryGetNextCost(progress, tree, node.Id, out long cost) && (cost < cheapestCost || (cost == cheapestCost && (cheapest == null || string.CompareOrdinal(node.Id, cheapest) < 0))))
                     {
                         cheapest = node.Id;
                         cheapestCost = cost;

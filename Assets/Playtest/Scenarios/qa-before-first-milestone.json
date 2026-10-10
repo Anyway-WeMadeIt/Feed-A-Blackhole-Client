@@ -1,0 +1,13 @@
+{
+  "name": "qa-before-first-milestone",
+  "category": "QA/이정표",
+  "note": "공유용 대표 시점. 예산이 있으면 현재 가격으로 생성하는 레시피.",
+  "expected": "첫 이정표 도달과 전환을 확인",
+  "growthStage": 0,
+  "gold": 0,
+  "nodes": [],
+  "autoBuyBudget": 600000,
+  "startLevel": 9,
+  "seed": 1,
+  "freezeTime": false
+}
