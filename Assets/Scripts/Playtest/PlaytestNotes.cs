@@ -7,18 +7,19 @@ using UnityEngine;
 
 namespace BlackHole.Unity
 {
-    // 느낌 메모 파일(한 줄에 JSON 하나, schema 1). 덧붙이기만 하고 고치거나 지우지 않는다.
-    // - 에디터: <레포>/PlaytestData/notes.ndjson (git 무시). AI가 레포에서 바로 읽는다.
-    // - 개발 빌드(폰): persistentDataPath/playtest/notes.ndjson. 꺼내는 길은 adb pull이다.
-    // 플레이 메모 창과 개발 패널이 같은 함수로 쓰고 읽는다.
+    // 느낌 메모 파일(schema 1). 메모 하나 = 파일 하나: <DataFolder>/notes/<저장 이름>.json (예: qa-nodes-3_golden-x5_004.json).
+    // 저장 이름은 시나리오_프로필_번호이고, 같은 시나리오·프로필로 저장할 때마다 번호가 하나씩 오른다.
+    // - 에디터: <레포>/PlaytestData/notes/ (git 무시).
+    // - 개발 빌드(폰): persistentDataPath/playtest/notes/. 꺼내는 길은 adb pull이다.
+    // 플레이 메모 창과 개발 패널이 같은 함수로 쓰고 읽는다. 쓴 파일은 고치거나 지우지 않는다(사람이 지워도 된다).
     internal static class PlaytestNotes
     {
         public const string DataFolderName = "PlaytestData";
-        private const string FileName = "notes.ndjson";
+        private const string NotesFolderName = "notes";
 
         private static readonly System.Random Ids = new System.Random();
-        private static DateTime _cachedWrite;
-        private static long _cachedLength = -1;
+        private static (DateTime Write, long Length) _cachedStamp;
+        private static bool _cacheValid;
         private static List<FeelNoteView> _cached = new List<FeelNoteView>();
         private static int _cachedSkipped;
 
@@ -29,15 +30,30 @@ namespace BlackHole.Unity
         public static string DataFolder => PlaytestFiles.Root;
 #endif
 
-        public static string FilePath => Path.Combine(DataFolder, FileName);
+        // 메모 파일이 쌓이는 폴더.
+        public static string NotesFolder => Path.Combine(DataFolder, NotesFolderName);
 
-        // 파일이 바뀌었는지 볼 때 쓰는 값(마지막 쓰기 시각과 크기). 파일이 없으면 default.
+        public static string PathOf(string name) => Path.Combine(NotesFolder, name + ".json");
+
+        // 폴더가 바뀌었는지 볼 때 쓰는 값(가장 최근 쓰기 시각, 파일 크기 합 + 파일 수). 폴더가 없으면 default.
         public static (DateTime Write, long Length) Stamp()
         {
             try
             {
-                var file = new FileInfo(FilePath);
-                return file.Exists ? (file.LastWriteTimeUtc, file.Length) : default;
+                var folder = new DirectoryInfo(NotesFolder);
+                if (!folder.Exists)
+                    return default;
+
+                DateTime latest = default;
+                long total = 0;
+                foreach (FileInfo file in folder.EnumerateFiles("*.json"))
+                {
+                    if (file.LastWriteTimeUtc > latest)
+                        latest = file.LastWriteTimeUtc;
+                    total += file.Length + 1;
+                }
+
+                return (latest, total);
             }
             catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
             {
@@ -46,7 +62,7 @@ namespace BlackHole.Unity
         }
 
         // 이 시나리오·프로필로 다음에 저장할 메모 이름(앞부분_번호). 번호는 같은 시나리오·프로필 메모 수 + 1이다
-        // (이름에 적힌 가장 큰 번호보다 작아지지 않게 한다 — 파일에서 줄을 지웠어도 이름이 겹치지 않게).
+        // (이름에 적힌 가장 큰 번호보다 작아지지 않고, 이미 있는 파일 이름과 겹치지 않게 한다).
         public static string NextName(string setupName, string profile)
         {
             string prefix = FeelNotes.NamePrefix(setupName, profile);
@@ -65,22 +81,28 @@ namespace BlackHole.Unity
                     largest = Math.Max(largest, number);
             }
 
-            return $"{prefix}_{(Math.Max(count, largest) + 1).ToString("000", CultureInfo.InvariantCulture)}";
+            int next = Math.Max(count, largest) + 1;
+            while (File.Exists(PathOf(NameOf(prefix, next))))
+                next++;
+
+            return NameOf(prefix, next);
         }
 
-        // 메모에 ID·저장 이름·시각·빌드를 채워 한 줄로 붙인다. 성공하면 ID를 돌려준다(저장 이름은 note.Name).
-        public static bool TryAppend(FeelNote note, out string id, out string error)
+        private static string NameOf(string prefix, int number) =>
+            $"{prefix}_{number.ToString("000", CultureInfo.InvariantCulture)}";
+
+        // 메모에 ID·저장 이름·시각·빌드를 채워 <저장 이름>.json으로 쓴다. 저장 이름은 note.Name.
+        public static bool TrySave(FeelNote note, out string error)
         {
             note.AtUtc = DateTime.UtcNow;
             note.Id = FeelNote.NewId(note.AtUtc, Ids);
-            note.Name = NextName(note.SetupName, note.Profile);
             note.BuildVersion = Application.version;
-            id = note.Id;
 
             try
             {
-                Directory.CreateDirectory(DataFolder);
-                File.AppendAllText(FilePath, PlaytestJson.Write(note.ToJson()) + "\n");
+                Directory.CreateDirectory(NotesFolder);
+                note.Name = NextName(note.SetupName, note.Profile);
+                File.WriteAllText(PathOf(note.Name), PlaytestJson.Write(note.ToJson(), true) + "\n");
                 error = null;
                 return true;
             }
@@ -91,54 +113,57 @@ namespace BlackHole.Unity
             }
         }
 
-        // 모든 메모의 원문 JSON(파일 순서). AI 묶음이 화면용 FeelNoteView가 아니라 원문을 담는다.
-        public static List<JsonObject> ReadRaw()
-        {
-            try
-            {
-                return File.Exists(FilePath)
-                    ? PlaytestJson.ParseLines(File.ReadAllLines(FilePath), FeelNote.Schema, out _)
-                    : new List<JsonObject>();
-            }
-            catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
-            {
-                Debug.LogWarning($"[메모] {FilePath}를 읽지 못했다: {exception.Message}");
-                return new List<JsonObject>();
-            }
-        }
-
-        // 모든 메모(파일 순서 = 적은 순서). 파일이 바뀌지 않았으면 다시 읽지 않는다. skipped는 읽지 못한 줄 수.
+        // 모든 메모(적은 시각 순). 폴더가 바뀌지 않았으면 다시 읽지 않는다. skipped는 읽지 못한 파일 수.
         public static IReadOnlyList<FeelNoteView> ReadAll(out int skipped)
         {
-            skipped = _cachedSkipped;
+            (DateTime Write, long Length) stamp = Stamp();
 
-            try
+            if (_cacheValid && stamp == _cachedStamp)
             {
-                var file = new FileInfo(FilePath);
-
-                if (!file.Exists)
-                {
-                    _cached = new List<FeelNoteView>();
-                    _cachedLength = -1;
-                    _cachedSkipped = 0;
-                    skipped = 0;
-                    return _cached;
-                }
-
-                if (file.LastWriteTimeUtc == _cachedWrite && file.Length == _cachedLength)
-                    return _cached;
-
-                _cached = FeelNotes.Parse(File.ReadAllLines(FilePath), out _cachedSkipped);
-                _cachedWrite = file.LastWriteTimeUtc;
-                _cachedLength = file.Length;
                 skipped = _cachedSkipped;
                 return _cached;
             }
+
+            var notes = new List<FeelNoteView>();
+            skipped = 0;
+
+            try
+            {
+                if (Directory.Exists(NotesFolder))
+                {
+                    foreach (string path in Directory.GetFiles(NotesFolder, "*.json"))
+                    {
+                        FeelNoteView view = FeelNotes.ParseFile(File.ReadAllText(path));
+                        if (view == null)
+                        {
+                            skipped++;
+                            continue;
+                        }
+
+                        // 이름은 파일 이름이 기준이다(사람이 파일 이름을 바꿨으면 그 이름).
+                        view.Name = Path.GetFileNameWithoutExtension(path);
+                        notes.Add(view);
+                    }
+                }
+            }
             catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
             {
-                Debug.LogWarning($"[메모] {FilePath}를 읽지 못했다: {exception.Message}");
+                Debug.LogWarning($"[메모] {NotesFolder}를 읽지 못했다: {exception.Message}");
+                skipped = _cachedSkipped;
                 return _cached;
             }
+
+            notes.Sort((a, b) =>
+            {
+                int byTime = string.CompareOrdinal(a.AtUtc, b.AtUtc);
+                return byTime != 0 ? byTime : string.CompareOrdinal(a.Name, b.Name);
+            });
+
+            _cached = notes;
+            _cachedSkipped = skipped;
+            _cachedStamp = stamp;
+            _cacheValid = true;
+            return _cached;
         }
     }
 }

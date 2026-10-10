@@ -11,7 +11,7 @@ namespace BlackHole.EditorTools
     // 플레이 메모(메뉴 BlackHole > Playtest Notes). 플레이해 보고 마음에 안 드는 점(느낌)과 어떻게 고칠지(고칠 방향)를 적는다.
     // 세팅을 만드는 일은 테스트 세팅 창, 느낌을 적고 읽는 일은 이 창이 맡는다.
     // - 대상: 플레이 중이면 지금 판(개발 패널이 실제로 플레이한 세팅·판 상태), 아니면 테스트 세팅 창에 열린 세팅.
-    // - 저장: 대상의 세팅·수치 지문(·판 상태)과 함께 PlaytestData/notes.ndjson에 한 줄(PlaytestNotes). '고칠 방향'은 JSON 키 intent다.
+    // - 저장: 대상의 세팅·수치 지문(·판 상태)과 함께 PlaytestData/notes/<저장 이름>.json 파일 하나(PlaytestNotes). '고칠 방향'은 JSON 키 intent다.
     // - 저장 이름: 시나리오_프로필_번호. 같은 시나리오·프로필로 저장할 때마다 번호가 하나씩 오른다(PlaytestNotes.NextName).
     // - 목록: 대상과 같은 시나리오·프로필의 최근 메모. 지금과 다른 수치(지문)로 적은 메모는 흐리게 "이전 수치"로 보인다.
     internal sealed class PlaytestNotesWindow : EditorWindow
@@ -88,7 +88,7 @@ namespace BlackHole.EditorTools
             root.Add(_target);
 
             root.Add(Header("메모 쓰기"));
-            root.Add(Note("마음에 안 드는 점과 어떻게 고치면 좋을지 적는다. 대상의 세팅·수치 지문(플레이 중이면 판 상태도)과 함께 PlaytestData/notes.ndjson에 한 줄로 쌓인다."));
+            root.Add(Note("마음에 안 드는 점과 어떻게 고치면 좋을지 적는다. 저장하면 대상의 세팅·수치 지문(플레이 중이면 판 상태도)과 함께 PlaytestData/notes/<저장 이름>.json 파일 하나로 쌓인다."));
             _choices = new VisualElement();
             root.Add(_choices);
             BuildChoices();
@@ -286,7 +286,7 @@ namespace BlackHole.EditorTools
             note.Text = _text.Trim();
             note.Intent = _fix.Trim();
 
-            if (!PlaytestNotes.TryAppend(note, out _, out string error))
+            if (!PlaytestNotes.TrySave(note, out string error))
             {
                 _status.text = $"메모를 저장하지 못했다: {error}";
                 return;

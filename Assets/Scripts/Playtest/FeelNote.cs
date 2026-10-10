@@ -9,7 +9,7 @@ using BlackHole.Analytics;
 namespace BlackHole.Unity
 {
     // 느낌 메모 한 줄(schema 1, M3). 적는 순간의 세팅·수치 지문·판 상태와 느낌을 함께 담는다.
-    // 파일은 PlaytestNotes(줄 단위). 형식은 Docs/Archive/BalanceLoop/M3-feel-notes.md.
+    // 메모 하나 = 파일 하나(PlaytestNotes: notes/<저장 이름>.json). 필드 설명은 Docs/Archive/BalanceLoop/M3-feel-notes.md.
     // - setup: 그 판(또는 창의 세팅)이 시작한 상태. 노드는 실제로 적용된 Rank다(콘텐츠에 없는 노드는 빠진다).
     // - battle: 플레이 중에 적었을 때만. 에디터에서 세팅만 보고 적으면 없다(null).
     internal sealed class FeelNote
@@ -21,7 +21,7 @@ namespace BlackHole.Unity
         public const int FunMax = 5;
 
         public string Id;
-        // 저장 이름: 시나리오_프로필_번호(예: qa-nodes-3_golden-x5_004). 같은 시나리오·프로필에 쌓일 때마다 번호가 오른다(PlaytestNotes가 채운다).
+        // 저장 이름 = 파일 이름: 시나리오_프로필_번호(예: qa-nodes-3_golden-x5_004). 같은 시나리오·프로필에 쌓일 때마다 번호가 오른다(PlaytestNotes가 채운다).
         public string Name;
         public DateTime AtUtc;
         // 어디서 적었나: "notes"(플레이 메모 창) | "panel"(개발 패널) | "window"(예전: 테스트 세팅 창)
@@ -145,7 +145,7 @@ namespace BlackHole.Unity
     internal sealed class FeelNoteView
     {
         public string Id;
-        // 저장 이름. 이름이 생기기 전에 적은 메모는 null.
+        // 저장 이름(파일 이름).
         public string Name;
         public string AtUtc;
         public string SetupKey;
@@ -167,9 +167,20 @@ namespace BlackHole.Unity
         // 프로필 없이(원본 수치로) 적은 메모의 프로필 표시.
         public const string BaseProfileLabel = "원본";
 
-        // 저장 이름 앞부분: 시나리오(세팅 이름)_프로필.
+        // 저장 이름 앞부분: 시나리오(세팅 이름)_프로필. 파일 이름이 되므로 쓸 수 없는 글자는 -로 바꾼다.
         public static string NamePrefix(string setupName, string profile) =>
-            $"{(string.IsNullOrEmpty(setupName) ? "이름 없음" : setupName)}_{(string.IsNullOrEmpty(profile) ? BaseProfileLabel : profile)}";
+            $"{FileSafe(string.IsNullOrEmpty(setupName) ? "이름 없음" : setupName)}_{FileSafe(string.IsNullOrEmpty(profile) ? BaseProfileLabel : profile)}";
+
+        // Windows·Android 어디서나 파일 이름에 쓸 수 있게(<>:"/\|?* 와 제어 문자 → -, 끝의 점·공백 제거).
+        private static string FileSafe(string text)
+        {
+            var safe = new StringBuilder(text.Length);
+            foreach (char c in text)
+                safe.Append(c < 32 || "<>:\"/\\|?*".IndexOf(c) >= 0 ? '-' : c);
+
+            string result = safe.ToString().TrimEnd('.', ' ');
+            return result.Length > 0 ? result : "-";
+        }
 
         // 같은 시나리오·프로필로 적은 메모인가(이름이 없는 예전 메모도 세팅 이름·프로필로 본다).
         public static bool SameGroup(FeelNoteView note, string setupName, string profile) =>
@@ -240,31 +251,17 @@ namespace BlackHole.Unity
             return id;
         }
 
-        // 줄마다 JSON 하나. 읽지 못한 줄은 건너뛰고 수를 센다(사람이 고치다 깨뜨려도 나머지는 읽는다).
-        public static List<FeelNoteView> Parse(IEnumerable<string> lines, out int skipped)
+        // 메모 파일 하나(JSON 객체 하나)를 읽는다. 형식이 틀리면 null(사람이 고치다 깨뜨려도 나머지는 읽는다).
+        public static FeelNoteView ParseFile(string json)
         {
-            var notes = new List<FeelNoteView>();
-            skipped = 0;
-
-            foreach (string line in lines)
+            try
             {
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
-
-                try
-                {
-                    if (PlaytestJson.Parse(line) is JsonObject obj && obj.Int("schema") == FeelNote.Schema)
-                        notes.Add(ViewOf(obj));
-                    else
-                        skipped++;
-                }
-                catch (FormatException)
-                {
-                    skipped++;
-                }
+                return PlaytestJson.Parse(json) is JsonObject obj && obj.Int("schema") == FeelNote.Schema ? ViewOf(obj) : null;
             }
-
-            return notes;
+            catch (FormatException)
+            {
+                return null;
+            }
         }
 
         private static FeelNoteView ViewOf(JsonObject obj)

@@ -960,7 +960,7 @@ namespace BlackHole.Unity
             foreach (string line in _noteGroupRecent)
                 GUILayout.Label(line, _small);
 
-            GUILayout.Label("느낌과 고칠 방향을 적는다. 이 판의 세팅·수치 지문·판 상태가 함께 한 줄로 쌓인다(에디터의 플레이 메모 창과 같은 파일).", _small);
+            GUILayout.Label("느낌과 고칠 방향을 적는다. 저장하면 이 판의 세팅·수치 지문·판 상태와 함께 '저장 이름.json' 파일 하나로 쌓인다(에디터의 플레이 메모 창과 같은 폴더).", _small);
 
             GUILayout.Label("난이도", _small);
             GUILayout.BeginHorizontal();
@@ -1021,10 +1021,10 @@ namespace BlackHole.Unity
                 SaveNote();
             GUI.enabled = true;
 
-            GUILayout.Label($"이번 실행에 {_savedNotes}개 저장 · {PlaytestNotes.FilePath}", _small);
+            GUILayout.Label($"이번 실행에 {_savedNotes}개 저장 · {PlaytestNotes.NotesFolder}", _small);
 #if UNITY_EDITOR
             if (GUILayout.Button("폴더 열기"))
-                UnityEditor.EditorUtility.RevealInFinder(PlaytestNotes.FilePath);
+                UnityEditor.EditorUtility.RevealInFinder(PlaytestNotes.NotesFolder);
 #endif
         }
 
@@ -1087,7 +1087,7 @@ namespace BlackHole.Unity
             note.Text = _noteText.Trim();
             note.Intent = _noteIntent.Trim();
 
-            if (!PlaytestNotes.TryAppend(note, out _, out string error))
+            if (!PlaytestNotes.TrySave(note, out string error))
             {
                 _status = $"메모를 저장하지 못했다: {error}";
                 return;
