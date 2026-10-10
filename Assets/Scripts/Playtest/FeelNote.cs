@@ -9,7 +9,7 @@ using BlackHole.Analytics;
 namespace BlackHole.Unity
 {
     // 느낌 메모 한 줄(schema 1, M3). 적는 순간의 세팅·수치 지문·판 상태와 느낌을 함께 담는다.
-    // 사람과 AI가 같은 파일(PlaytestNotes)을 줄 단위로 읽는다. 형식은 Docs/BalanceLoop/M3-feel-notes.md.
+    // 파일은 PlaytestNotes(줄 단위). 형식은 Docs/Archive/BalanceLoop/M3-feel-notes.md.
     // - setup: 그 판(또는 창의 세팅)이 시작한 상태. 노드는 실제로 적용된 Rank다(콘텐츠에 없는 노드는 빠진다).
     // - battle: 플레이 중에 적었을 때만. 에디터에서 세팅만 보고 적으면 없다(null).
     internal sealed class FeelNote
@@ -21,8 +21,10 @@ namespace BlackHole.Unity
         public const int FunMax = 5;
 
         public string Id;
+        // 저장 이름: 시나리오_프로필_번호(예: qa-nodes-3_golden-x5_004). 같은 시나리오·프로필에 쌓일 때마다 번호가 오른다(PlaytestNotes가 채운다).
+        public string Name;
         public DateTime AtUtc;
-        // 어디서 적었나: "window"(테스트 세팅 창) | "panel"(개발 패널)
+        // 어디서 적었나: "notes"(플레이 메모 창) | "panel"(개발 패널) | "window"(예전: 테스트 세팅 창)
         public string Source;
         public string BuildVersion;
 
@@ -46,6 +48,7 @@ namespace BlackHole.Unity
         public int? Difficulty;
         public int? Fun;
         public List<string> Tags = new List<string>();
+        // 느낌(무엇이 마음에 안 드나)과 고칠 방향(어떻게 고치면 좋겠나, JSON 키 intent).
         public string Text;
         public string Intent;
 
@@ -66,6 +69,7 @@ namespace BlackHole.Unity
             {
                 { "schema", Schema },
                 { "id", Id },
+                { "name", Name },
                 { "atUtc", AtUtc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) },
                 { "source", Source },
                 { "build", BuildVersion },
@@ -141,6 +145,8 @@ namespace BlackHole.Unity
     internal sealed class FeelNoteView
     {
         public string Id;
+        // 저장 이름. 이름이 생기기 전에 적은 메모는 null.
+        public string Name;
         public string AtUtc;
         public string SetupKey;
         public string SetupName;
@@ -158,6 +164,17 @@ namespace BlackHole.Unity
 
     internal static class FeelNotes
     {
+        // 프로필 없이(원본 수치로) 적은 메모의 프로필 표시.
+        public const string BaseProfileLabel = "원본";
+
+        // 저장 이름 앞부분: 시나리오(세팅 이름)_프로필.
+        public static string NamePrefix(string setupName, string profile) =>
+            $"{(string.IsNullOrEmpty(setupName) ? "이름 없음" : setupName)}_{(string.IsNullOrEmpty(profile) ? BaseProfileLabel : profile)}";
+
+        // 같은 시나리오·프로필로 적은 메모인가(이름이 없는 예전 메모도 세팅 이름·프로필로 본다).
+        public static bool SameGroup(FeelNoteView note, string setupName, string profile) =>
+            (note.SetupName ?? string.Empty) == (setupName ?? string.Empty) && (note.Profile ?? string.Empty) == (profile ?? string.Empty);
+
         // 세팅 키: 이정표 단계·시작 Level·노드(id:rank, 이름 순)의 SHA-1 앞 8자리. 이름이 달라도 같은 상태면 같은 키다.
         public static string SetupKeyOf(int growthStage, int startLevel, IEnumerable<(string NodeId, int Rank)> nodes)
         {
@@ -258,6 +275,7 @@ namespace BlackHole.Unity
             var view = new FeelNoteView
             {
                 Id = obj.Text("id"),
+                Name = obj.Text("name"),
                 AtUtc = obj.Text("atUtc"),
                 SetupKey = obj.Text("setupKey"),
                 SetupName = setup?.Text("name"),

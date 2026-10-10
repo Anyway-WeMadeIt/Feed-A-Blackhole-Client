@@ -88,6 +88,14 @@ namespace BlackHole.Unity
         private string _noteText = "";
         private string _noteIntent = "";
         private int _savedNotes;
+        // 메모 탭 머리: 다음 저장 이름과 같은 시나리오·프로필로 쌓인 메모(최근 것부터). 0.5초마다 다시 읽는다.
+        private const float NoteGroupRefreshSeconds = 0.5f;
+        private const int MaxRecentNotes = 3;
+        private string _noteGroupFor;
+        private float _noteGroupAt;
+        private string _nextNoteName;
+        private int _noteGroupCount;
+        private readonly List<string> _noteGroupRecent = new();
 
         // 지금(또는 마지막) 판이 시작한 세팅. 판이 바뀌는 순간 뜬다. 메모의 setup은 이것이다
         // (판이 끝나 결산이 진행 상태를 바꾼 뒤에 적어도 그 판의 세팅이 남는다).
@@ -936,7 +944,23 @@ namespace BlackHole.Unity
 
         private void DrawNote()
         {
-            GUILayout.Label("느낌을 적는다. 이 판의 세팅·수치 지문·판 상태가 함께 한 줄로 쌓이고, 사람과 AI가 같은 파일을 읽는다.", _small);
+            // 이 메모가 붙는 시나리오·프로필(지금 판 기준, 잠김). 바꾸려면 시나리오·프로필 탭에서 판을 다시 시작한다.
+            string setup = NoteSetupName();
+            string profile = _session.AppliedProfile != null ? _session.AppliedProfile.name : string.Empty;
+            RefreshNoteGroup(setup, profile);
+
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = false;
+            LockedField("시나리오", setup);
+            LockedField("프로필", profile.Length > 0 ? profile : FeelNotes.BaseProfileLabel);
+            LockedField("저장 이름", _nextNoteName);
+            GUI.enabled = wasEnabled;
+
+            GUILayout.Label($"이 시나리오·프로필 메모 {_noteGroupCount}개", _small);
+            foreach (string line in _noteGroupRecent)
+                GUILayout.Label(line, _small);
+
+            GUILayout.Label("느낌과 고칠 방향을 적는다. 이 판의 세팅·수치 지문·판 상태가 함께 한 줄로 쌓인다(에디터의 플레이 메모 창과 같은 파일).", _small);
 
             GUILayout.Label("난이도", _small);
             GUILayout.BeginHorizontal();
@@ -989,7 +1013,7 @@ namespace BlackHole.Unity
 
             GUILayout.Label("느낌", _small);
             _noteText = GUILayout.TextArea(_noteText, GUILayout.MinHeight(56));
-            GUILayout.Label("의도 (어떻게 되면 좋겠나)", _small);
+            GUILayout.Label("고칠 방향 (어떻게 고치면 좋겠나)", _small);
             _noteIntent = GUILayout.TextArea(_noteIntent, GUILayout.MinHeight(36));
 
             GUI.enabled = HasNoteInput;
@@ -1002,6 +1026,52 @@ namespace BlackHole.Unity
             if (GUILayout.Button("폴더 열기"))
                 UnityEditor.EditorUtility.RevealInFinder(PlaytestNotes.FilePath);
 #endif
+        }
+
+        private void LockedField(string label, string value)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, _small, GUILayout.Width(64));
+            GUILayout.TextField(value ?? string.Empty);
+            GUILayout.EndHorizontal();
+        }
+
+        // 메모가 붙는 세팅 이름(NewNote와 같은 규칙): 지금 판이 시작한 세팅, 판이 없으면 마지막 시나리오(없으면 "지금 진행").
+        private string NoteSetupName() =>
+            _battleSetup != null ? _battleSetup.Name
+            : _progress != null ? (_lastScenario != null ? _lastScenario.name : "지금 진행")
+            : null;
+
+        private void RefreshNoteGroup(string setup, string profile)
+        {
+            string key = setup + "\n" + profile;
+            if (_nextNoteName != null && key == _noteGroupFor && Time.unscaledTime < _noteGroupAt)
+                return;
+
+            _noteGroupFor = key;
+            _noteGroupAt = Time.unscaledTime + NoteGroupRefreshSeconds;
+            _nextNoteName = PlaytestNotes.NextName(setup, profile);
+            _noteGroupCount = 0;
+            _noteGroupRecent.Clear();
+
+            IReadOnlyList<FeelNoteView> all = PlaytestNotes.ReadAll(out _);
+            for (int i = all.Count - 1; i >= 0; i--)
+            {
+                if (!FeelNotes.SameGroup(all[i], setup, profile))
+                    continue;
+
+                _noteGroupCount++;
+                if (_noteGroupRecent.Count < MaxRecentNotes)
+                    _noteGroupRecent.Add(RecentLine(all[i]));
+            }
+        }
+
+        private static string RecentLine(FeelNoteView note)
+        {
+            string text = note.Text.Length > 0 ? note.Text : note.Intent;
+            if (text.Length > 40)
+                text = text.Substring(0, 40) + "…";
+            return $"{note.Name ?? "(이름 없음)"} · {text}";
         }
 
         private bool HasNoteInput =>
@@ -1017,19 +1087,20 @@ namespace BlackHole.Unity
             note.Text = _noteText.Trim();
             note.Intent = _noteIntent.Trim();
 
-            if (!PlaytestNotes.TryAppend(note, out string id, out string error))
+            if (!PlaytestNotes.TryAppend(note, out _, out string error))
             {
                 _status = $"메모를 저장하지 못했다: {error}";
                 return;
             }
 
             _savedNotes++;
+            _nextNoteName = null;
             _noteDifficulty = null;
             _noteFun = null;
             _noteTags.Clear();
             _noteText = "";
             _noteIntent = "";
-            _status = $"메모 {id}를 저장했다(세팅 키 {note.SetupKey}).";
+            _status = $"메모 {note.Name}를 저장했다.";
         }
 
         // 판이 바뀌는 순간 그 판이 시작한 세팅을 떠 둔다.
@@ -1066,8 +1137,11 @@ namespace BlackHole.Unity
             }
         }
 
+        // 게임 시작(Initialize) 뒤인가. 플레이 메모 창이 플레이 직후 아직 준비 안 된 패널을 건드리지 않게 본다.
+        internal bool Ready => _session != null;
+
         // 지금 판(없으면 지금 진행)의 세팅·수치·판 상태를 담은 메모. 느낌 칸은 부르는 쪽이 채운다.
-        // 테스트 세팅 창도 플레이 중에는 이것으로 메모를 만든다(창의 세팅이 아니라 실제로 플레이한 상태가 남는다).
+        // 플레이 메모 창도 플레이 중에는 이것으로 메모를 만든다(실제로 플레이한 상태가 남는다).
         internal FeelNote NewNote(string source)
         {
             TrackBattleSetup();

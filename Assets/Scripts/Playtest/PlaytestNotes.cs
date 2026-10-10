@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace BlackHole.Unity
     // 느낌 메모 파일(한 줄에 JSON 하나, schema 1). 덧붙이기만 하고 고치거나 지우지 않는다.
     // - 에디터: <레포>/PlaytestData/notes.ndjson (git 무시). AI가 레포에서 바로 읽는다.
     // - 개발 빌드(폰): persistentDataPath/playtest/notes.ndjson. 꺼내는 길은 adb pull이다.
-    // 테스트 세팅 창과 개발 패널이 같은 함수로 쓰고 읽는다.
+    // 플레이 메모 창과 개발 패널이 같은 함수로 쓰고 읽는다.
     internal static class PlaytestNotes
     {
         public const string DataFolderName = "PlaytestData";
@@ -44,11 +45,35 @@ namespace BlackHole.Unity
             }
         }
 
-        // 메모에 ID·시각·빌드를 채워 한 줄로 붙인다. 성공하면 ID를 돌려준다.
+        // 이 시나리오·프로필로 다음에 저장할 메모 이름(앞부분_번호). 번호는 같은 시나리오·프로필 메모 수 + 1이다
+        // (이름에 적힌 가장 큰 번호보다 작아지지 않게 한다 — 파일에서 줄을 지웠어도 이름이 겹치지 않게).
+        public static string NextName(string setupName, string profile)
+        {
+            string prefix = FeelNotes.NamePrefix(setupName, profile);
+            int count = 0;
+            int largest = 0;
+
+            foreach (FeelNoteView note in ReadAll(out _))
+            {
+                if (!FeelNotes.SameGroup(note, setupName, profile))
+                    continue;
+
+                count++;
+
+                if (note.Name != null && note.Name.Length > prefix.Length + 1 && note.Name.StartsWith(prefix + "_", StringComparison.Ordinal)
+                    && int.TryParse(note.Name.Substring(prefix.Length + 1), NumberStyles.None, CultureInfo.InvariantCulture, out int number))
+                    largest = Math.Max(largest, number);
+            }
+
+            return $"{prefix}_{(Math.Max(count, largest) + 1).ToString("000", CultureInfo.InvariantCulture)}";
+        }
+
+        // 메모에 ID·저장 이름·시각·빌드를 채워 한 줄로 붙인다. 성공하면 ID를 돌려준다(저장 이름은 note.Name).
         public static bool TryAppend(FeelNote note, out string id, out string error)
         {
             note.AtUtc = DateTime.UtcNow;
             note.Id = FeelNote.NewId(note.AtUtc, Ids);
+            note.Name = NextName(note.SetupName, note.Profile);
             note.BuildVersion = Application.version;
             id = note.Id;
 

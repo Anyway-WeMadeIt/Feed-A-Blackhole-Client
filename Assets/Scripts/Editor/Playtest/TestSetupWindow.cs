@@ -22,6 +22,7 @@ namespace BlackHole.EditorTools
     // - 저장: Assets/Playtest/Scenarios의 시나리오 JSON(정확한 노드 목록). 개발 패널의 시나리오 탭에서도 같은 파일을 쓴다.
     // - ▶ 플레이: 세팅을 맡기고 플레이 모드에 들어가면 판이 바로 그 세팅으로 시작한다. 플레이 중에는 "지금 판에 적용"으로 다시 시작한다.
     // - 밸런스 프로필: 고른 프로필을 적용한 값으로 미리보고 플레이한다(바꾸면 다음 플레이부터).
+    // - 메모: 느낌·고칠 방향은 따로 "플레이 메모" 창(PlaytestNotesWindow)에 적는다. 플레이 중이 아니면 이 창의 세팅이 메모 대상이다.
     // 창의 세팅은 Undo(Ctrl+Z)로 되돌린다.
     internal sealed class TestSetupWindow : EditorWindow, INodeCanvasHost
     {
@@ -66,13 +67,11 @@ namespace BlackHole.EditorTools
         [SerializeField] private string _search = string.Empty;
         [SerializeField] private long _budget = 60000;
 
-        // 쓰는 중인 메모(M3). 창을 다시 불러도(플레이 진입) 남는다. 저장하면 비운다.
-        private const int NoChoice = int.MinValue;
-        [SerializeField] private int _noteDifficulty = NoChoice;
-        [SerializeField] private int _noteFun = NoChoice;
-        [SerializeField] private List<string> _noteTags = new List<string>();
-        [SerializeField] private string _noteText = string.Empty;
-        [SerializeField] private string _noteIntent = string.Empty;
+        // 열려 있는 창(하나). 플레이 메모 창이 메모 대상 세팅을 여기서 읽는다.
+        private static TestSetupWindow _open;
+
+        // 세팅이 바뀌어 다시 계산했다(플레이 메모 창이 대상과 목록을 고친다).
+        internal static event Action SetupChanged;
 
         private GameContentSetup _contentSetup;
         private LoadedContent _loaded;
@@ -91,11 +90,6 @@ namespace BlackHole.EditorTools
         private VisualElement _focusBox;
         private VisualElement _messagesBox;
         private VisualElement _reportBox;
-        private VisualElement _noteChoices;
-        private TextField _noteTextField;
-        private TextField _noteIntentField;
-        private VisualElement _notesList;
-        private (DateTime Write, long Length) _notesStamp;
 
         public NodeTreeData Tree => _contentSetup != null && _contentSetup.Nodes != null ? _contentSetup.Nodes.Tree : null;
         public bool Editing => false;
@@ -114,6 +108,7 @@ namespace BlackHole.EditorTools
 
         private void OnEnable()
         {
+            _open = this;
             Undo.undoRedoPerformed += OnUndoRedo;
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
             LiveDataSignal.Changed += OnLiveDataChanged;
@@ -125,6 +120,8 @@ namespace BlackHole.EditorTools
 
         private void OnDisable()
         {
+            if (_open == this)
+                _open = null;
             Undo.undoRedoPerformed -= OnUndoRedo;
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
             LiveDataSignal.Changed -= OnLiveDataChanged;
@@ -204,6 +201,7 @@ namespace BlackHole.EditorTools
             var toolbar = new Toolbar();
             toolbar.Add(new ToolbarButton(() => _canvas.FrameAll()) { text = "전체 보기 (F)" });
             toolbar.Add(new ToolbarButton(() => { LoadContent(); Recompute(); }) { text = "다시 불러오기" });
+            toolbar.Add(new ToolbarButton(PlaytestNotesWindow.Open) { text = "메모 창" });
             toolbar.Add(new ToolbarSpacer { flex = true });
             _title = new Label();
             _title.style.unityTextAlign = TextAnchor.MiddleRight;
@@ -236,9 +234,6 @@ namespace BlackHole.EditorTools
             _messagesBox = Box(side);
             side.Add(Header("세팅"));
             _fieldsBox = Box(side);
-            side.Add(Header("메모"));
-            BuildNoteInputs(Box(side));
-            _notesList = Box(side);
             side.Add(Header("노드"));
             _nodesBox = Box(side);
             var search = new TextField("찾기") { value = _search };
@@ -459,15 +454,7 @@ namespace BlackHole.EditorTools
             BuildFocus();
             BuildMessages();
             BuildReport();
-            BuildNotesList();
-        }
-
-        // 메모 파일이 바뀌면(개발 패널에서 적었거나 바깥에서 고쳤으면) 목록을 다시 그린다. 1초에 10번 불린다.
-        private void OnInspectorUpdate()
-        {
-            if (_notesList != null && PlaytestNotes.Stamp() != _notesStamp)
-                BuildNotesList();
-
+            SetupChanged?.Invoke();
         }
 
         private void UpdateTitle()
@@ -854,9 +841,9 @@ namespace BlackHole.EditorTools
             name.RegisterValueChangedCallback(evt => Change("세팅 이름", () => _setupName = evt.newValue));
             _fieldsBox.Add(name);
 
-            var note = new TextField("메모") { value = _note, multiline = true };
+            var note = new TextField("설명") { value = _note, multiline = true, tooltip = "이 세팅을 왜 만들었나(시나리오 JSON의 note). 플레이 느낌은 메모 창에 적는다." };
             note.isDelayed = true;
-            note.RegisterValueChangedCallback(evt => Change("세팅 메모", () => _note = evt.newValue));
+            note.RegisterValueChangedCallback(evt => Change("세팅 설명", () => _note = evt.newValue));
             _fieldsBox.Add(note);
             var category = new TextField("분류") { value = _category, isDelayed = true };
             category.RegisterValueChangedCallback(evt => Change("분류", () => _category = evt.newValue));
@@ -1087,166 +1074,20 @@ namespace BlackHole.EditorTools
 
         #endregion
 
-        #region 메모
+        #region 메모 대상
 
-        private static readonly Color ChosenColor = new Color(0.24f, 0.45f, 0.72f);
-        private const int MaxNotesShown = 10;
+        // 플레이 메모 창이 플레이 중이 아닐 때 쓰는 메모 대상: 열린 테스트 세팅 창의 세팅. 창이 없거나 세팅을 넣지 못했으면 null.
+        internal static FeelNote NoteForOpenSetup() => _open != null ? _open.NoteFromWindow() : null;
 
-        // 메모 칸: 난이도·재미·태그(누를 때마다 다시 그림) + 느낌·의도 글 + 저장. 글 칸은 한 번만 만든다(쓰는 중 포커스를 잃지 않게).
-        private void BuildNoteInputs(VisualElement box)
-        {
-            box.Add(Note("이 세팅으로 플레이한 느낌을 적는다. 세팅·수치 지문(·플레이 중이면 판 상태)과 함께 PlaytestData/notes.ndjson에 한 줄로 쌓인다."));
-            _noteChoices = new VisualElement();
-            box.Add(_noteChoices);
-            BuildNoteChoices();
-
-            _noteTextField = new TextField("느낌") { value = _noteText, multiline = true };
-            _noteTextField.RegisterValueChangedCallback(evt => _noteText = evt.newValue);
-            box.Add(_noteTextField);
-
-            _noteIntentField = new TextField("의도") { value = _noteIntent, multiline = true };
-            _noteIntentField.tooltip = "어떻게 되면 좋겠나. AI가 가장 먼저 읽는다.";
-            _noteIntentField.RegisterValueChangedCallback(evt => _noteIntent = evt.newValue);
-            box.Add(_noteIntentField);
-
-            var save = new Button(SaveWindowNote) { text = "메모 저장" };
-            save.style.height = 24;
-            box.Add(save);
-        }
-
-        private void BuildNoteChoices()
-        {
-            _noteChoices.Clear();
-
-            var difficulty = Row();
-            difficulty.Add(RowLabel("난이도"));
-            for (int value = FeelNote.DifficultyMin; value <= FeelNote.DifficultyMax; value++)
-            {
-                int chosen = value;
-                difficulty.Add(Choice(FeelNotes.DifficultyLabel(value), _noteDifficulty == value, () =>
-                    _noteDifficulty = _noteDifficulty == chosen ? NoChoice : chosen));
-            }
-            _noteChoices.Add(difficulty);
-
-            var fun = Row();
-            fun.Add(RowLabel("재미"));
-            for (int value = FeelNote.FunMin; value <= FeelNote.FunMax; value++)
-            {
-                int chosen = value;
-                fun.Add(Choice(value.ToString(CultureInfo.InvariantCulture), _noteFun == value, () =>
-                    _noteFun = _noteFun == chosen ? NoChoice : chosen));
-            }
-            _noteChoices.Add(fun);
-
-            string group = null;
-            VisualElement row = null;
-            foreach ((string tagGroup, string id, string label) in FeelNotes.Tags)
-            {
-                if (tagGroup != group)
-                {
-                    group = tagGroup;
-                    row = Row();
-                    row.style.flexWrap = Wrap.Wrap;
-                    row.Add(RowLabel(tagGroup));
-                    _noteChoices.Add(row);
-                }
-
-                string tagId = id;
-                row.Add(Choice(label, _noteTags.Contains(id), () =>
-                {
-                    if (!_noteTags.Remove(tagId))
-                        _noteTags.Add(tagId);
-                }));
-            }
-        }
-
-        private Button Choice(string text, bool chosen, Action toggle)
-        {
-            var button = new Button(() =>
-            {
-                toggle();
-                BuildNoteChoices();
-            })
-            {
-                text = text,
-            };
-
-            if (chosen)
-                button.style.backgroundColor = ChosenColor;
-
-            return button;
-        }
-
-        private static Label RowLabel(string text)
-        {
-            var label = new Label(text);
-            label.style.width = 52;
-            label.style.unityTextAlign = TextAnchor.MiddleLeft;
-            return label;
-        }
-
-        private bool HasNoteInput =>
-            _noteDifficulty != NoChoice || _noteFun != NoChoice || _noteTags.Count > 0
-            || _noteText.Trim().Length > 0 || _noteIntent.Trim().Length > 0;
-
-        private void SaveWindowNote()
-        {
-            if (!HasNoteInput)
-            {
-                _message = "난이도·재미·태그·느낌·의도 중 하나는 적어야 저장한다.";
-                BuildMessages();
-                return;
-            }
-
-            // 플레이 중이면 실제로 플레이한 판의 세팅과 판 상태를 담는다(창의 세팅과 다를 수 있다).
-            PlaytestPanel panel = EditorApplication.isPlaying ? FindAnyObjectByType<PlaytestPanel>() : null;
-            FeelNote note = panel != null ? panel.NewNote("window") : NoteFromWindow();
-
-            if (note == null)
-            {
-                _message = "세팅을 넣지 못해 메모를 쓸 수 없다. 위의 오류를 먼저 본다.";
-                BuildMessages();
-                return;
-            }
-
-            note.Difficulty = _noteDifficulty != NoChoice ? _noteDifficulty : (int?)null;
-            note.Fun = _noteFun != NoChoice ? _noteFun : (int?)null;
-            note.Tags.AddRange(_noteTags);
-            note.Text = _noteText.Trim();
-            note.Intent = _noteIntent.Trim();
-
-            if (!PlaytestNotes.TryAppend(note, out string id, out string error))
-            {
-                _message = $"메모를 저장하지 못했다: {error}";
-                BuildMessages();
-                return;
-            }
-
-            _noteDifficulty = NoChoice;
-            _noteFun = NoChoice;
-            _noteTags.Clear();
-            _noteText = string.Empty;
-            _noteIntent = string.Empty;
-            _noteTextField.SetValueWithoutNotify(string.Empty);
-            _noteIntentField.SetValueWithoutNotify(string.Empty);
-            BuildNoteChoices();
-
-            _message = panel != null
-                ? $"메모 {id}를 저장했다(플레이 중인 판 · 세팅 키 {note.SetupKey})."
-                : $"메모 {id}를 저장했다(세팅 키 {note.SetupKey}).";
-            BuildMessages();
-            BuildNotesList();
-        }
-
-        // 창의 세팅으로 만든 메모(판 없이). 노드는 실제로 적용된 Rank(확정 정보의 진행 상태)를 쓴다.
+        // 창의 세팅으로 만든 메모(판 없이). 노드는 실제로 적용된 Rank(확정 정보의 진행 상태)를 쓴다. 느낌 칸은 부르는 쪽이 채운다.
         private FeelNote NoteFromWindow()
         {
-            if (_report == null || !_report.Succeeded || NodeTree == null)
+            if (_report == null || !_report.Succeeded || NodeTree == null || _playtest == null)
                 return null;
 
             var note = new FeelNote
             {
-                Source = "window",
+                Source = "notes",
                 SetupName = _setupName,
                 GrowthStage = _report.Progress.GrowthStage,
                 StartLevel = _level,
@@ -1268,92 +1109,6 @@ namespace BlackHole.EditorTools
 
             return note;
         }
-
-        // 지금 창의 세팅 키. 세팅을 넣지 못했으면 null.
-        private string CurrentSetupKey() => NoteFromWindow()?.SetupKey;
-
-        // 이 세팅 키의 최근 메모. 지금과 다른 수치(지문)로 적은 메모는 흐리게 "이전 수치"로 보인다.
-        private void BuildNotesList()
-        {
-            if (_notesList == null)
-                return;
-
-            _notesList.Clear();
-            _notesStamp = PlaytestNotes.Stamp();
-            string key = CurrentSetupKey();
-
-            if (key == null)
-                return;
-
-            IReadOnlyList<FeelNoteView> all = PlaytestNotes.ReadAll(out int skipped);
-            var mine = new List<FeelNoteView>();
-            for (int i = all.Count - 1; i >= 0; i--)
-            {
-                if (all[i].SetupKey == key)
-                    mine.Add(all[i]);
-            }
-
-            string current = _playtest != null ? _playtest.Fingerprint : string.Empty;
-            string header = $"이 세팅의 메모 {mine.Count}개 · 세팅 키 {key}";
-            if (skipped > 0)
-                header += $" · 읽지 못한 줄 {skipped}개";
-            _notesList.Add(Note(header));
-
-            for (int i = 0; i < mine.Count && i < MaxNotesShown; i++)
-                _notesList.Add(NoteRow(mine[i], current));
-        }
-
-        private static VisualElement NoteRow(FeelNoteView note, string currentFingerprint)
-        {
-            var box = new VisualElement();
-            box.style.marginBottom = 6;
-            box.style.paddingLeft = 4;
-            box.style.borderLeftWidth = 2;
-            box.style.borderLeftColor = new Color(0.5f, 0.5f, 0.55f);
-
-            var parts = new List<string> { LocalTime(note.AtUtc) };
-            if (note.Difficulty.HasValue)
-                parts.Add(FeelNotes.DifficultyLabel(note.Difficulty.Value));
-            if (note.Fun.HasValue)
-                parts.Add($"재미 {note.Fun.Value}");
-            foreach (string tag in note.Tags)
-                parts.Add("#" + FeelNotes.TagLabel(tag));
-            if (note.HasBattle)
-                parts.Add($"Lv {note.BattleLevel} · {note.BattleElapsed:0.#}초");
-            if (!string.IsNullOrEmpty(note.Profile))
-                parts.Add(note.Profile);
-
-            bool old = !string.IsNullOrEmpty(currentFingerprint) && note.Fingerprint != currentFingerprint;
-            if (old)
-                parts.Add($"이전 수치({note.Fingerprint})");
-
-            var head = new Label(string.Join(" · ", parts));
-            head.style.unityFontStyleAndWeight = FontStyle.Bold;
-            head.style.whiteSpace = WhiteSpace.Normal;
-            box.Add(head);
-
-            if (note.Text.Length > 0)
-                box.Add(Wrapped(note.Text));
-            if (note.Intent.Length > 0)
-                box.Add(Wrapped("의도: " + note.Intent));
-
-            if (old)
-                box.style.opacity = 0.5f;
-
-            return box;
-        }
-
-        private static Label Wrapped(string text)
-        {
-            var label = new Label(text);
-            label.style.whiteSpace = WhiteSpace.Normal;
-            return label;
-        }
-
-        private static string LocalTime(string atUtc) =>
-            DateTime.TryParse(atUtc, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out DateTime time)
-                ? time.ToLocalTime().ToString("MM-dd HH:mm", CultureInfo.InvariantCulture)
-                : atUtc;
 
         #endregion
 
