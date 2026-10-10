@@ -35,6 +35,7 @@ class Program
         Check(PlaytestScenario.Parse("{\"name\":\"bad\",\"nodes\":[{\"nodeId\":\"a\",\"rank\":1},{\"nodeId\":\"a\",\"rank\":1}]}",out _) == null,"duplicate nodes rejected");
         foreach(string file in Directory.GetFiles("Assets/Playtest/Scenarios","*.json"))
             Check(PlaytestScenario.Parse(File.ReadAllText(file),out _)!=null,"sample parses: "+file);
+        NodeSuiteChecks.Run();
         Console.WriteLine("PASS: all Core compiled, deterministic budget, snapshot, Gold, invalid node/rank, duplicates and sample JSON");
     }
 }

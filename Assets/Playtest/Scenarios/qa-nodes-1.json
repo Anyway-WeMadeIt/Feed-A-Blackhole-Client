@@ -1,0 +1,98 @@
+{
+  "name": "qa-nodes-1",
+  "category": "QA/노드 단계",
+  "note": "노드 1~1단계를 모두 산 상태(구매 비용 합계 757 Gold). 성장 단계는 이 금액이 넘은 이정표 목표 잔액 수로 추정.",
+  "expected": "1단계에서 새로 열리는 것: 브레이커 피해·범위·속도·치명타, 소행성 수·크기·질량. 확정 정보의 수치와 실제 화면·피해·사운드가 맞는지 확인.",
+  "growthStage": 0,
+  "gold": 0,
+  "nodes": [
+    {
+      "nodeId": "asteroid.count-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.count-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.massScale-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.massScale-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.size-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.size-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critBonus-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critChance-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critChance-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critChance-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "timer-01",
+      "rank": 1
+    }
+  ],
+  "autoBuyBudget": 0,
+  "startLevel": 0,
+  "seed": 1,
+  "freezeTime": false
+}

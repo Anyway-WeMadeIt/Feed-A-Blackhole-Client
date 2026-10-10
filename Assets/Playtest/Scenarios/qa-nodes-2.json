@@ -1,0 +1,170 @@
+{
+  "name": "qa-nodes-2",
+  "category": "QA/노드 단계",
+  "note": "노드 1~2단계를 모두 산 상태(구매 비용 합계 14,732 Gold). 성장 단계는 이 금액이 넘은 이정표 목표 잔액 수로 추정.",
+  "expected": "2단계에서 새로 열리는 것: Level업 때 시간·소행성 추가 공급, 소행성 파괴 시 시간 추가·재생성. 확정 정보의 수치와 실제 화면·피해·사운드가 맞는지 확인.",
+  "growthStage": 0,
+  "gold": 0,
+  "nodes": [
+    {
+      "nodeId": "asteroid.count-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.count-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.massScale-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.massScale-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.massScale-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.massScale-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.respawnChance-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.respawnChance-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.size-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.size-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.timeChance-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.timeChance-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critBonus-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critChance-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critChance-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critChance-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-06",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-07",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-08",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-06",
+      "rank": 1
+    },
+    {
+      "nodeId": "growth.asteroids-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "growth.asteroids-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "growth.time-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "timer-01",
+      "rank": 1
+    }
+  ],
+  "autoBuyBudget": 0,
+  "startLevel": 0,
+  "seed": 1,
+  "freezeTime": false
+}
