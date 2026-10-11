@@ -202,6 +202,7 @@ namespace BlackHole.EditorTools
             toolbar.Add(new ToolbarButton(() => _canvas.FrameAll()) { text = "전체 보기 (F)" });
             toolbar.Add(new ToolbarButton(() => { LoadContent(); Recompute(); }) { text = "다시 불러오기" });
             toolbar.Add(new ToolbarButton(PlaytestNotesWindow.Open) { text = "메모 창" });
+            toolbar.Add(new ToolbarButton(BalanceProfileWindow.Open) { text = "프로필 창" });
             toolbar.Add(new ToolbarSpacer { flex = true });
             _title = new Label();
             _title.style.unityTextAlign = TextAnchor.MiddleRight;

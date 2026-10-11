@@ -685,8 +685,8 @@ namespace BlackHole.Unity
             GUILayout.EndHorizontal();
         }
 
-        // 프로필을 바꿔 다시 시작한다. 판이나 세팅이 있으면 같은 세팅·같은 시드로 판을 바로 다시 시작한다(원본과 AI 초안 비교).
-        // 테스트 세팅 창의 "초안 켜기·원본으로"도 플레이 중에는 이것을 부른다.
+        // 프로필을 바꿔 다시 시작한다. 판이나 세팅이 있으면 같은 세팅·같은 시드로 판을 바로 다시 시작한다(원본과 프로필 비교).
+        // 프로필 창(BalanceProfileWindow)도 플레이 중에 저장하면 이것을 부른다.
         internal void RestartWithProfile(string profile)
         {
             PlaytestSession.SelectProfile(profile ?? string.Empty);

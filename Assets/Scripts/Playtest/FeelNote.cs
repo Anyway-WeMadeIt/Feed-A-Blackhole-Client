@@ -212,6 +212,8 @@ namespace BlackHole.Unity
         public bool HasBattle;
         public int? BattleLevel;
         public double? BattleElapsed;
+        // 세팅의 노드와 Rank(setup.nodes). 프로필 창이 이 메모의 노드만 보여 줄 때 쓴다.
+        public List<(string NodeId, int Rank)> Nodes = new List<(string NodeId, int Rank)>();
     }
 
     internal static class FeelNotes
@@ -338,6 +340,16 @@ namespace BlackHole.Unity
                 BattleLevel = battle?.Int("level"),
                 BattleElapsed = battle?.Number("elapsed"),
             };
+
+            List<object> nodes = setup?.Array("nodes");
+            if (nodes != null)
+            {
+                foreach (object node in nodes)
+                {
+                    if (node is JsonObject item && item.Text("nodeId") is string nodeId && item.Int("rank") is int rank)
+                        view.Nodes.Add((nodeId, rank));
+                }
+            }
 
             List<object> tags = obj.Array("tags");
             if (tags != null)

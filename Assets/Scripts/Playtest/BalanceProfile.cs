@@ -9,7 +9,7 @@ namespace BlackHole.Unity
     // 밸런스 프로필: 콘텐츠 값을 덮어쓰는 패치 묶음(JSON). 원본 에셋은 건드리지 않는다.
     // 경로 문법과 적용은 BalanceProfilePatcher가 맡는다. 이름은 그대로 전투 요약의 contentVersion이 된다(ContentTag).
     // 예: { "name": "golden-x5", "note": "황금 기본 배율 x50 -> x5", "patches": [ { "path": "enemy/asteroid/trait/golden/multiplier", "value": 5 } ] }
-    // 패치마다 이유와 근거 메모를 선택적으로 남길 수 있다.
+    // 패치마다 이유와 근거 메모(저장 이름)를 선택적으로 남길 수 있다. 프로필 창(BalanceProfileWindow)이 만들고 고친다.
     [Serializable]
     internal sealed class BalanceProfile
     {
@@ -28,11 +28,15 @@ namespace BlackHole.Unity
         {
             public string path;
             public double value;
-            // 왜 바꾸나(한 줄). 승격하면 변경 기록에 남는다.
+            // 왜 바꾸나(한 줄).
             public string reason;
-            // 근거가 된 느낌 메모 ID(n-…).
-            public List<string> noteIds = new();
+            // 근거가 된 느낌 메모의 저장 이름(예: qa-nodes-3_원본_006). PlaytestData/notes/<저장 이름>.json.
+            public List<string> memos = new();
         }
+
+        // 프로필 이름으로 쓸 수 있나: 영문·숫자·. _ - 로 MaxNameLength자까지.
+        public static bool IsValidName(string name) =>
+            !string.IsNullOrEmpty(name) && name.Length <= MaxNameLength && NamePattern.IsMatch(name);
 
         // JSON을 읽는다. 형식이 틀리면 null이고 error에 이유가 있다.
         public static BalanceProfile Parse(string json, out string error)
@@ -55,7 +59,7 @@ namespace BlackHole.Unity
                 return null;
             }
 
-            if (string.IsNullOrEmpty(profile.name) || profile.name.Length > MaxNameLength || !NamePattern.IsMatch(profile.name))
+            if (!IsValidName(profile.name))
             {
                 error = $"name은 영문·숫자·. _ - 로 {MaxNameLength}자까지다. 받은 값: '{profile.name}'.";
                 return null;
