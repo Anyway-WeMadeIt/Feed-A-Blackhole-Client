@@ -13,7 +13,7 @@ namespace BlackHole.Unity
         private const float Duration = 1.6f;
         private const int SortingOrder = 20;
         // TMP 폰트 크기는 폰트 에셋 메트릭에 따라 달라진다. 적 반지름(0.2~0.3 안팎)에 맞춰 에디터에서 눈으로 보고 조절할 값이다.
-        private const float FontSize = 5f;
+        private const float FontSize = 8f;
         
         private static readonly Color NormalColor = new Color32(0x32, 0xA4, 0x62, 0xFF);
         private static readonly Color GoldenColor = new Color32(0xCC, 0xB0, 0x50, 0xFF);

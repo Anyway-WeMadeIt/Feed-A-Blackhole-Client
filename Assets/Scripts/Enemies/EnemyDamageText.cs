@@ -11,7 +11,7 @@ namespace BlackHole.Unity
         private const float RiseDistance = -0.4f;
         private const float Duration = 1.6f;
         private const int SortingOrder = 21;
-        private const float FontSize = 4f;
+        private const float FontSize = 7f;
 
         // 아래쪽 검정 음영이 명도 대비를 책임지므로, 다크모드와 무관하게 흰색으로 고정한다.
         private static readonly Color NormalColor = Color.white;
