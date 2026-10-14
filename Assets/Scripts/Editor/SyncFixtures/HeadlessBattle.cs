@@ -74,7 +74,7 @@ namespace BlackHole.EditorTools.SyncFixtures
                 Seed = seed,
                 Bot = bot.Name,
                 Stage = raw.Stage,
-                NextStage = raw.NextGrowthStage,
+                NextStage = raw.NextStage,
                 StartLevel = hq.StartLevel,
                 GoalLevel = hq.GoalLevel,
                 ReachedLevel = raw.ReachedLevel,

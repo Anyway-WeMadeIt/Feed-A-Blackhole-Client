@@ -18,13 +18,16 @@ namespace BlackHole.Core
         // 칸은 중복되지 않고 처치 수는 1 이상이다. 합계는 TotalKills와 같다.
         public IReadOnlyList<KillBucketCount> KillBuckets { get; }
 
+        // SyncLogFactoryTests 클래스에 아래 필드들이 set이 안되어 있어 일부러 set을 설정
+        // 확인하시고 고칠 부분 있으면 수정하셔도 됩니다.
+
         // 황금 치명타 횟수와 보너스 Gold 합계. 보너스는 EarnedGold에 이미 들어 있다.
         // EarnedGold == Σ(칸 처치 수 × 칸 Gold) + GoldenCritBonusGold.
-        public int GoldenCritCount { get; }
-        public long GoldenCritBonusGold { get; }
+        public int GoldenCritCount { get; set; }
+        public long GoldenCritBonusGold { get; set; }
 
         // 시간 추가 성공 수
-        public int TimeBonusCount { get; }
+        public int TimeBonusCount { get; set; }
 
         // 이 판에서 번 Gold. 사망 순간마다 그 적의 Gold가 더해진 합계다. 이정표로 끝나지 않았으면 결산이 진행 상태에 더한 값(SettledGold)과 같다.
         public long EarnedGold { get; }
@@ -37,7 +40,7 @@ namespace BlackHole.Core
         // 이 판의 성장도와 결산 뒤의 성장도(이정표에 닿았으면 +1).
         public int Stage { get; }
 
-        public int NextGrowthStage { get; }
+        public int NextStage { get; }
 
         // 이 판에서 닿은 이정표. 없으면 null이다. 있으면 판은 그 Step에서 끝났다.
         public HqMilestone Milestone { get; }
@@ -78,7 +81,7 @@ namespace BlackHole.Core
             ReachedLevel = reachedLevel;
             Exp = exp;
             Stage = stage;
-            NextGrowthStage = nextStage;
+            NextStage = nextStage;
             Milestone = milestone;
             SettledGold = settledGold;
             Stats = stats;

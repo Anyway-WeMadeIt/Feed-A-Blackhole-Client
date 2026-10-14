@@ -139,7 +139,7 @@ namespace BlackHole.Core
                 stats);
         }
 
-        // 결산: 끝난 판의 Gold를 진행 상태에 더하고, 이 판이 이정표에 닿았으면 성장도를 1 올린다(Hq.NextGrowthStage).
+        // 결산: 끝난 판의 Gold를 진행 상태에 더하고, 이 판이 이정표에 닿았으면 성장도를 1 올린다(Hq.NextStage).
         public void Settle()
         {
             if (_settled)
