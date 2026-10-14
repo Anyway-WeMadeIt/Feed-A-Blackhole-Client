@@ -20,12 +20,9 @@ namespace BlackHole.Net.Tests
         private static SyncLogFactory Factory(DateTime now) =>
             new(new TestJson(), "0.4.0", "4d6c398ad1f5e49c", () => now);
 
-        private static BattleRawData Raw(float played, long earned, int level, long exp, int stage, int nextStage,
+        private static BattleRawData Raw(float played, int goldCrit, long goldCritBonus, int timer, long earned, int level, long exp, int stage, int nextStage,
             long settled, params KillBucketCount[] kills) =>
-            new(123456, played, Array.Empty<EnemyKillCount>(), earned, level, exp, stage, nextStage, null, settled, null)
-            {
-                KillBuckets = kills,
-            };
+            new(123456, played, Array.Empty<EnemyKillCount>(), kills, goldCrit, goldCritBonus , timer, earned, level, exp, stage, nextStage, null, settled, null);
 
         [Test]
         public void RunStartLogMatchesTheSample()
@@ -42,7 +39,7 @@ namespace BlackHole.Net.Tests
         [Test]
         public void SettlementLogMatchesTheSample()
         {
-            BattleRawData raw = Raw(12f, 20, 0, 20, 0, 0, 20,
+            BattleRawData raw = Raw(12f, 0, 0, 0, 20, 0, 20, 0, 0, 20,
                 new KillBucketCount(new KillBucket(Asteroid, 0, 1, false), 20));
 
             PendingLog log = Factory(new DateTime(2026, 10, 12, 10, 0, 15, DateTimeKind.Utc)).Settlement(2, RunId, raw);
@@ -74,7 +71,7 @@ namespace BlackHole.Net.Tests
         [Test]
         public void SettlementCarriesBucketsAndTotals()
         {
-            BattleRawData raw = Raw(31.4f, 48210, 14, 91234, 1, 2, 690000,
+            BattleRawData raw = Raw(31.4f, 10, 5, 5, 48210, 14, 91234, 1, 2, 690000,
                 new KillBucketCount(new KillBucket(Asteroid, 0, 1, false), 140),
                 new KillBucketCount(new KillBucket(Asteroid, 2, 2, true), 3));
             raw.GoldenCritCount = 1;
@@ -103,7 +100,7 @@ namespace BlackHole.Net.Tests
         [Test]
         public void SettlementWithoutKillsHasAnEmptyArray()
         {
-            PendingLog log = Factory(DateTime.UtcNow).Settlement(2, RunId, Raw(1f, 0, 0, 0, 0, 0, 0));
+            PendingLog log = Factory(DateTime.UtcNow).Settlement(2, RunId, Raw(1f, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 
             StringAssert.Contains("\"kills\":[]", log.Json);
         }
