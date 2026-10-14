@@ -88,7 +88,8 @@ namespace BlackHole.Unity
             Slider(EffectsVolume, "Effects Volume", 0.5f),
             Slider(MusicVolume, "Music Volume", 0.25f),
             Toggle(ShuffleMusic, "Shuffle Music", false),
-            Options(Kind.Choice, Language, "Language", LanguageOptions, 0),
+            // 기본 언어는 한국어(1). 저장된 값이 있으면 그 값을 쓴다.
+            Options(Kind.Choice, Language, "Language", LanguageOptions, 1),
             Options(Kind.Choice, FpsLimit, "FPS Limit", FpsLimitOptions, DefaultFpsLimitIndex),
             Options(Kind.Stepper, TextSize, "Text Size", PercentOptions, DefaultPercentIndex),
             Toggle(ShowMoneyText, "Show Money Text", true),

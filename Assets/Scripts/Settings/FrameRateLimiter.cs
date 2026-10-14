@@ -29,7 +29,13 @@ namespace BlackHole.Unity
                 Apply();
         }
 
-        private void Apply() =>
-            Application.targetFrameRate = Application.platform == RuntimePlatform.WebGLPlayer ? -1 : _settings.FrameRateLimit;
+        private void Apply()
+        {
+#if UNITY_WEBGL
+            Application.targetFrameRate = -1;
+#else
+            Application.targetFrameRate = _settings.FrameRateLimit;
+#endif
+        }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -88,8 +87,10 @@ namespace BlackHole.Unity
             BindEvent(_quitButton, ReleaseQuitButton, ETouchEvent.PointerUp);
 
             // 웹(브라우저)에서는 게임이 페이지를 닫을 수 없어 종료 버튼을 숨긴다.
-            if (Application.platform == RuntimePlatform.WebGLPlayer)
-                _quitButton.gameObject.SetActive(false);
+            // 빌드 대상이 Web인 에디터 플레이에서도 숨겨, 웹 빌드와 같은 화면을 에디터에서 미리 본다.
+#if UNITY_WEBGL
+            _quitButton.gameObject.SetActive(false);
+#endif
         }
 
         private void ClickStartButton(PointerEventData _) => StartClicked?.Invoke();

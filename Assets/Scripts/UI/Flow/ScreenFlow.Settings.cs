@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Globalization;
-using UnityEngine;
 
 namespace BlackHole.Unity
 {
@@ -67,9 +66,11 @@ namespace BlackHole.Unity
 
             foreach (GameSettings.Definition definition in GameSettings.Definitions)
             {
+#if UNITY_WEBGL
                 // 웹은 프레임 제한을 브라우저에 맡긴다(FrameRateLimiter). 고를 수 없는 행은 보이지 않는다.
-                if (definition.Id == GameSettings.FpsLimit && Application.platform == RuntimePlatform.WebGLPlayer)
+                if (definition.Id == GameSettings.FpsLimit)
                     continue;
+#endif
 
                 items.Add(new SettingsPanel.SettingItem(
                     definition.Id, SettingLabel(definition), definition.Kind, _settings.ValueOf(definition.Id), SettingOptions(definition)));
