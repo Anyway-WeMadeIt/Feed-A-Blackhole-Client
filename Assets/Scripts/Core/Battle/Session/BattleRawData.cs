@@ -37,7 +37,7 @@ namespace BlackHole.Core
         // 이 판의 성장도와 결산 뒤의 성장도(이정표에 닿았으면 +1).
         public int Stage { get; }
 
-        public int NextStage { get; }
+        public int NextGrowthStage { get; }
 
         // 이 판에서 닿은 이정표. 없으면 null이다. 있으면 판은 그 Step에서 끝났다.
         public HqMilestone Milestone { get; }
@@ -78,7 +78,7 @@ namespace BlackHole.Core
             ReachedLevel = reachedLevel;
             Exp = exp;
             Stage = stage;
-            NextStage = nextStage;
+            NextGrowthStage = nextStage;
             Milestone = milestone;
             SettledGold = settledGold;
             Stats = stats;

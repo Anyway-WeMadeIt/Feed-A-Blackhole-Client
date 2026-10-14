@@ -19,7 +19,7 @@ namespace BlackHole.Unity
 
                     BindView(root, ApplyBindings);
                     root.ShowResult(raw.ReachedMilestone);
-                    root.ShowStage(raw.Stage, raw.NextStage, _growth.MaxStage);
+                    root.ShowStage(raw.Stage, raw.NextGrowthStage, _growth.MaxStage);
                     root.ShowMatter(asteroids, planets, stars);
                     root.ShowGold(raw.EarnedGold, raw.SettledGold, raw.ReachedMilestone, _progress.Gold);
                     root.ShowStats(raw.Stats, asteroids, planets, stars);

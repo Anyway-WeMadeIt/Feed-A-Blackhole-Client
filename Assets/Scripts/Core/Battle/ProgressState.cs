@@ -41,7 +41,7 @@ namespace BlackHole.Core
             Gold = checked(Gold + amount);
         }
 
-        // 결산(GameSession.Settle)이 판의 결산 뒤 성장도(Hq.NextStage)를 반영한다. 그대로이거나 1 오른다.
+        // 결산(GameSession.Settle)이 판의 결산 뒤 성장도(Hq.NextGrowthStage)를 반영한다. 그대로이거나 1 오른다.
         internal void KeepGrowthStage(int stage)
         {
             if (stage < GrowthStage || stage > GrowthStage + 1)

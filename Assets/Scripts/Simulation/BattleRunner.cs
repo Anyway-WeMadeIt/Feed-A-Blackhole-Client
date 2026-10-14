@@ -71,7 +71,7 @@ namespace BlackHole.Simulation
                 Seed = seed,
                 Bot = bot.Name,
                 Stage = raw.Stage,
-                NextStage = raw.NextStage,
+                NextStage = raw.NextGrowthStage,
                 StartLevel = hq.StartLevel,
                 GoalLevel = hq.GoalLevel,
                 ReachedLevel = raw.ReachedLevel,
