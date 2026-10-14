@@ -187,22 +187,37 @@ namespace BlackHole.Core
 
                     if (count > 1)
                         clock.LastRainAt = _elapsed;
-                    EnemyTraitDefinition trait = composition.Traits[0];
 
-                    for (int i = 0; i < count; i++)
-                    {
-                        int tier = _tierPickers[kind].Pick();
-                        Point2 position = _periodicSpawnPlacement.Resolve(_placement).Pick(_periodicSpawnPlacementRandom);
-
-                        _enemies.Spawn(
-                            kind,
-                            tier,
-                            trait,
-                            SizeRule.Base,
-                            _stats.Of(kind, tier, trait),
-                            position);
-                    }
+                    SpawnPeriodic(kind, count);
                 }
+            }
+        }
+
+        // 판 시작 때 주기 출현 종류(혜성)를 하나씩 미리 둔다. 등장 확률이 있는 종류만(comet.spawnChance 노드를 산 경우) — 확률 판정 없이 반드시 하나.
+        // 혜성 비는 판정하지 않는다. 다음 주기 판정은 그대로 SpawnPeriod초 뒤부터다.
+        internal void SpawnStartPickups()
+        {
+            foreach (SpawnClock clock in _spawnClocks)
+                SpawnPeriodic(clock.Kind, 1);
+        }
+
+        // 주기 출현 종류를 count개 주기 출현 띠 안에 만든다. 성질은 그 종류의 첫 성질(혜성 버프)이다.
+        private void SpawnPeriodic(EnemyDefinition kind, int count)
+        {
+            EnemyTraitDefinition trait = _stats.CompositionOf(kind).Traits[0];
+
+            for (int i = 0; i < count; i++)
+            {
+                int tier = _tierPickers[kind].Pick();
+                Point2 position = _periodicSpawnPlacement.Resolve(_placement).Pick(_periodicSpawnPlacementRandom);
+
+                _enemies.Spawn(
+                    kind,
+                    tier,
+                    trait,
+                    SizeRule.Base,
+                    _stats.Of(kind, tier, trait),
+                    position);
             }
         }
 

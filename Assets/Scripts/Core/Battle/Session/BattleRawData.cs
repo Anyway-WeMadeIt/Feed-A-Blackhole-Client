@@ -14,6 +14,18 @@ namespace BlackHole.Core
 
         public int TotalKills { get; }
 
+        // 칸(종류, 색 등급, 크기, 황금 여부)별 처치 수(처음 처치한 순서). 결산 로그(SETTLEMENT)의 kills, 서버 결산 검증의 장부다(계약 5.3).
+        // 칸은 중복되지 않고 처치 수는 1 이상이다. 합계는 TotalKills와 같다.
+        public IReadOnlyList<KillBucketCount> KillBuckets { get; }
+
+        // 황금 치명타 횟수와 보너스 Gold 합계. 보너스는 EarnedGold에 이미 들어 있다.
+        // EarnedGold == Σ(칸 처치 수 × 칸 Gold) + GoldenCritBonusGold.
+        public int GoldenCritCount { get; }
+        public long GoldenCritBonusGold { get; }
+
+        // 처치 때 시간 추가에 성공한 횟수(쿨타임으로 건너뛴 판정과 수거형은 세지 않는다).
+        public int TimeBonusCount { get; }
+
         // 이 판에서 번 Gold. 사망 순간마다 그 적의 Gold가 더해진 합계다. 이정표로 끝나지 않았으면 결산이 진행 상태에 더한 값(SettledGold)과 같다.
         public long EarnedGold { get; }
 
@@ -38,21 +50,14 @@ namespace BlackHole.Core
         // 스킬별 피해와 수집 통계.
         public BattleStats Stats { get; }
 
-        // 칸별(종류, 색 등급, 크기, 황금 여부) 처치 수(처음 처치한 순서, 0인 칸 없음). 서버 결산 검증의 장부다(계약 5.3).
-        // [임시] W3-1이 세는 코드를 채우기 전까지는 비어 있다. 아래 세 값도 같다.
-        public IReadOnlyList<KillBucketCount> KillBuckets { get; internal set; } = System.Array.Empty<KillBucketCount>();
-
-        // 황금 보너스 치명 횟수와 그 보너스 Gold의 합.
-        public int GoldenCritCount { get; internal set; }
-        public long GoldenCritBonusGold { get; internal set; }
-
-        // 처치 때 시간 추가에 성공한 횟수.
-        public int TimeBonusCount { get; internal set; }
-
         internal BattleRawData(
             int seed,
             float playedSeconds,
             IReadOnlyList<EnemyKillCount> kills,
+            IReadOnlyList<KillBucketCount> killBuckets,
+            int goldenCritCount,
+            long goldenCritBonusGold,
+            int timeBonusCount,
             long earnedGold,
             int reachedLevel,
             long exp,
@@ -65,6 +70,10 @@ namespace BlackHole.Core
             Seed = seed;
             PlayedSeconds = playedSeconds;
             Kills = kills;
+            KillBuckets = killBuckets;
+            GoldenCritCount = goldenCritCount;
+            GoldenCritBonusGold = goldenCritBonusGold;
+            TimeBonusCount = timeBonusCount;
             EarnedGold = earnedGold;
             ReachedLevel = reachedLevel;
             Exp = exp;

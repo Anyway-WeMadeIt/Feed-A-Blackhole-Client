@@ -54,9 +54,10 @@ namespace BlackHole.EditorTools.SyncFixtures
             session.End();
             session.ClearRemainingEnemies();
             BattleRawData raw = session.CreateRawData();
+            string ledgerProblem = KillLedgerCheck.Check(raw, session.World);
             session.Settle();
 
-            return new HeadlessBattleResult(seed, goldBefore, progress.Gold, session.StartInfo, raw, capped);
+            return new HeadlessBattleResult(seed, goldBefore, progress.Gold, session.StartInfo, raw, capped, ledgerProblem);
         }
     }
 
@@ -78,7 +79,10 @@ namespace BlackHole.EditorTools.SyncFixtures
         // 판이 끝나지 않아 안전 상한에서 끊었는가.
         public bool Capped { get; }
 
-        public HeadlessBattleResult(int seed, long goldBefore, long goldAfter, RunStartInfo startInfo, BattleRawData raw, bool capped)
+        // 칸별 처치 장부가 판의 EXP·Gold·처치 수와 어긋난 내용(KillLedgerCheck). 맞으면 null이다.
+        public string LedgerProblem { get; }
+
+        public HeadlessBattleResult(int seed, long goldBefore, long goldAfter, RunStartInfo startInfo, BattleRawData raw, bool capped, string ledgerProblem)
         {
             Seed = seed;
             GoldBefore = goldBefore;
@@ -86,6 +90,7 @@ namespace BlackHole.EditorTools.SyncFixtures
             StartInfo = startInfo;
             Raw = raw;
             Capped = capped;
+            LedgerProblem = ledgerProblem;
         }
     }
 }

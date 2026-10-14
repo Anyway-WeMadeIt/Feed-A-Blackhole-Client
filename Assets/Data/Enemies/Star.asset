@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Star
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemyKind
   type: 2
-  moveSpeed: 0.5
+  moveSpeed: 0.68
   radius: 3
   radiusStep: 0.16
   upgradesTo: {fileID: 11400000, guid: 29e4d81e98ee4f70aa1065bfd408911e, type: 2}
@@ -25,23 +25,23 @@ MonoBehaviour:
   rainDelay: 0
   tiers:
   - color: {r: 0.62, g: 0.32, b: 0.26, a: 1}
-    maxHealth: 6200
+    maxHealth: 4800
     gold: 50000000000
-    exp: 1350000
+    exp: 1500000
   - color: {r: 0.93, g: 0.55, b: 0.2, a: 1}
-    maxHealth: 11100
+    maxHealth: 8800
     gold: 100000000000
-    exp: 1750000
+    exp: 1800000
   - color: {r: 0.95, g: 0.85, b: 0.3, a: 1}
-    maxHealth: 21500
+    maxHealth: 16800
     gold: 200000000000
-    exp: 2000000
+    exp: 2200000
   - color: {r: 0.4, g: 0.68, b: 0.42, a: 1}
-    maxHealth: 41000
+    maxHealth: 36800
     gold: 400000000000
-    exp: 2580000
+    exp: 2680000
   - color: {r: 0.33, g: 0.46, b: 0.81, a: 1}
-    maxHealth: 72000
+    maxHealth: 67000
     gold: 600000000000
     exp: 3200000
   - color: {r: 0.68, g: 0.47, b: 0.93, a: 1}

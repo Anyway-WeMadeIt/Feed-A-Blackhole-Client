@@ -73,7 +73,7 @@ growth.planets-01,1,growth.planets,60,Percent,+60%
 asteroid.toPlanet-01,1,asteroid.toPlanet,52,Flat,+52
 moonPlanet.rangeScale-01,1,moonPlanet.rangeScale,15,Percent,+15%
 planet.size-01,1,planet.size,2,Flat,+2
-moonPlanet.speedScale-01,1,moonPlanet.speedScale,12,Percent,+12%
+moonPlanet.speedScale-01,1,moonPlanet.speedScale,26,Percent,+26%
 moonPlanet.duration-01,1,moonPlanet.duration,1,Flat,+1
 breaker.damage-13,1,breaker.damage,25,Flat,+25
 breaker.damage-14,1,breaker.damage,45,Flat,+45
@@ -87,7 +87,7 @@ comet.spawnChance-01,1,comet.spawnChance,25,Percent,+25%
 planet.massScale-01,1,planet.massScale,110,Percent,+110%
 breaker.damage-15,1,breaker.damage,200,Flat,+200
 planet.massScale-02,1,planet.massScale,105,Percent,+105%
-breaker.planetBonusDamage-02,1,breaker.planetBonusDamage,30,Flat,+30
+breaker.planetBonusDamage-02,1,breaker.planetBonusDamage,50,Flat,+50
 goldenAsteroid.critChance-03,1,goldenAsteroid.critChance,35,Percent,+35%
 goldenAsteroid.critRewardScale-03,1,goldenAsteroid.critRewardScale,300,Percent,+300%
 electricAsteroid.critChance-02,1,electricAsteroid.critChance,20,Percent,+20%
@@ -97,7 +97,7 @@ electricAsteroid.critBonus-02,1,electricAsteroid.critBonus,100,Percent,+100%
 growth.asteroids-04,1,growth.asteroids,25,Percent,+25%
 planet.massScale-03,1,planet.massScale,100,Percent,+100%
 planet.massScale-04,1,planet.massScale,100,Percent,+100%
-moonPlanet.speedScale-02,1,moonPlanet.speedScale,20,Percent,+20%
+moonPlanet.speedScale-02,1,moonPlanet.speedScale,28,Percent,+28%
 moonPlanet.rangeScale-02,1,moonPlanet.rangeScale,20,Percent,+20%
 planet.size-02,1,planet.size,1,Flat,+1
 planet.respawnChance-02,1,planet.respawnChance,20,Percent,+20%
@@ -150,7 +150,7 @@ electricStar.chain-02,1,electricStar.chain,1,Flat,+1
 moonPlanet.rangeScale-05,1,moonPlanet.rangeScale,10,Percent,+10%
 star.respawnChance-02,1,star.respawnChance,20,Percent,+20%
 star.size-02,1,star.size,1,Flat,+1
-moonPlanet.speedScale-03,1,moonPlanet.speedScale,10,Percent,+10%
+moonPlanet.speedScale-03,1,moonPlanet.speedScale,12,Percent,+12%
 comet.rainChance-04,1,comet.rainChance,50,Percent,+50%
 electricStar.spawnChance-01,1,electricStar.spawnChance,10,Percent,+10%
 star.massScale-01,1,star.massScale,75,Percent,+75%
@@ -213,7 +213,7 @@ planet.toStar-04,1,planet.toStar,5,Flat,+5
 moonPlanet.rangeScale-06,1,moonPlanet.rangeScale,50,Percent,+50%
 moonPlanet.rangeScale-07,1,moonPlanet.rangeScale,50,Percent,+50%
 laserStar.critBonus-03,1,laserStar.critBonus,200,Percent,+200%
-moonPlanet.speedScale-04,1,moonPlanet.speedScale,100,Percent,+100%
+moonPlanet.speedScale-04,1,moonPlanet.speedScale,116,Percent,+116%
 supernovaStar.range-03,1,supernovaStar.range,10,Percent,+10%
 breaker.damage-28,1,breaker.damage,500,Flat,+500
 laserStar.width-08,1,laserStar.width,100,Percent,+100%

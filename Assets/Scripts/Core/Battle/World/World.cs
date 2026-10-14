@@ -77,6 +77,16 @@ namespace BlackHole.Core
         // 이 판에서 지금까지의 종류별 처치 수(처음 처치한 순서).
         internal IReadOnlyList<EnemyKillCount> GetKillCounts() => _enemies.GetKillCounts();
 
+        // 이 판에서 지금까지의 칸별 처치 수(처음 처치한 순서).
+        internal IReadOnlyList<KillBucketCount> GetKillBuckets() => _enemies.GetKillBuckets();
+
+        // 이 판의 황금 치명타 횟수와 보너스 Gold 합계(EarnedGold에 이미 들어 있다).
+        internal int GoldenCritCount => _enemies.GoldenCritCount;
+        internal long GoldenCritBonusGold => _enemies.GoldenCritBonusGold;
+
+        // 이 판의 시간 추가 성공 수.
+        internal int TimeBonusCount => _deathBonuses.TimeBonusCount;
+
         // 이 판에서 지금까지의 스킬별 피해와 수집 통계. 더해진 시간은 제한 시간을 가진 판(GameSession)이 넘긴다.
         internal BattleStats CreateStats(float addedSeconds) => _statsCounter.Snapshot(Breaker.TickCount, addedSeconds);
 
@@ -84,6 +94,9 @@ namespace BlackHole.Core
         internal void RequestSpawn(SupplyRequest request) => _supply.Request(request);
 
         internal void ProcessSpawnRequests() => _supply.ProcessRequests();
+
+        // 판 시작 때 주기 출현 종류(혜성)를 하나씩 둔다. 등장 확률이 0이면 두지 않는다.
+        internal void SpawnStartPickups() => _supply.SpawnStartPickups();
 
         // 판(GameSession)이 Step 뒤에 가져가는 시간 추가 성공 수. 가져가면 0이 된다.
         internal float TakeTimeBonusSeconds() => _deathBonuses.TakeTimeBonusSeconds();

@@ -21,11 +21,10 @@ namespace BlackHole.Net.Tests
             new(new TestJson(), "0.4.0", "4d6c398ad1f5e49c", () => now);
 
         private static BattleRawData Raw(float played, long earned, int level, long exp, int stage, int nextStage,
-            long settled, params KillBucketCount[] kills) =>
-            new(123456, played, Array.Empty<EnemyKillCount>(), earned, level, exp, stage, nextStage, null, settled, null)
-            {
-                KillBuckets = kills,
-            };
+            long settled, KillBucketCount[] kills = null, int goldenCritCount = 0, long goldenCritBonusGold = 0, int timeBonusCount = 0) =>
+            new(123456, played, Array.Empty<EnemyKillCount>(), kills ?? Array.Empty<KillBucketCount>(),
+                goldenCritCount, goldenCritBonusGold, timeBonusCount,
+                earned, level, exp, stage, nextStage, null, settled, null);
 
         [Test]
         public void RunStartLogMatchesTheSample()
@@ -43,7 +42,7 @@ namespace BlackHole.Net.Tests
         public void SettlementLogMatchesTheSample()
         {
             BattleRawData raw = Raw(12f, 20, 0, 20, 0, 0, 20,
-                new KillBucketCount(new KillBucket(Asteroid, 0, 1, false), 20));
+                new[] { new KillBucketCount(new KillBucket(Asteroid, 0, 1, false), 20) });
 
             PendingLog log = Factory(new DateTime(2026, 10, 12, 10, 0, 15, DateTimeKind.Utc)).Settlement(2, RunId, raw);
 
@@ -75,11 +74,12 @@ namespace BlackHole.Net.Tests
         public void SettlementCarriesBucketsAndTotals()
         {
             BattleRawData raw = Raw(31.4f, 48210, 14, 91234, 1, 2, 690000,
-                new KillBucketCount(new KillBucket(Asteroid, 0, 1, false), 140),
-                new KillBucketCount(new KillBucket(Asteroid, 2, 2, true), 3));
-            raw.GoldenCritCount = 1;
-            raw.GoldenCritBonusGold = 900;
-            raw.TimeBonusCount = 22;
+                new[]
+                {
+                    new KillBucketCount(new KillBucket(Asteroid, 0, 1, false), 140),
+                    new KillBucketCount(new KillBucket(Asteroid, 2, 2, true), 3),
+                },
+                goldenCritCount: 1, goldenCritBonusGold: 900, timeBonusCount: 22);
 
             var payload = PayloadOf<SettlementPayloadDto>(Factory(DateTime.UtcNow).Settlement(9, RunId, raw));
 

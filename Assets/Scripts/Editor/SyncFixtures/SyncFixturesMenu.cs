@@ -60,6 +60,7 @@ namespace BlackHole.EditorTools.SyncFixtures
         // 지금 콘텐츠로 빈 진행도에서 [판 → 결산 → 구매]를 battles번 돌리고 보고서를 돌려준다.
         // - 같은 시드로 첫 판을 두 번 돌려 결과가 같은지 확인한다(재현성).
         // - 판마다 걸린 실제 시간을 적는다(픽스처를 만드는 데 걸릴 시간을 가늠한다).
+        // - 판마다 칸별 처치 장부가 EXP·Gold·처치 수와 맞는지 검사한다(W3-1 완료 조건, KillLedgerCheck). 어긋난 판은 늘 적는다.
         // maxBattleSeconds: 판 하나의 상한(판 시간). 끝나지 않는 판을 이 시간에서 끊는다.
         // printEvery: 판 줄을 이 간격으로만 적는다(이정표에 닿은 판, 상한에서 끊긴 판, 마지막 판은 늘 적는다). 1이면 모두.
         // stallBattles: 이정표에 닿지 못한 채 이만큼 판이 이어지면 막힌 것으로 보고 멈춘다. 봇이 마지막 이정표를 못 넘으면 Gold만 쌓여 long이 넘치기 때문이다. 0 이하면 쓰지 않는다.
@@ -132,6 +133,9 @@ namespace BlackHole.EditorTools.SyncFixtures
             bool same = Same(first, second);
             report.AppendLine($"재현성(시드 1, 빈 진행도 두 번): {(same ? "같다" : "다르다 !!")}");
 
+            if (first.LedgerProblem != null)
+                report.AppendLine($"  재현성 판의 처치 장부 불일치 !!: {first.LedgerProblem}");
+
             if (!same)
             {
                 report.AppendLine($"  1회: {Describe(first)}");
@@ -142,6 +146,10 @@ namespace BlackHole.EditorTools.SyncFixtures
             var progress = new ProgressState();
             var total = Stopwatch.StartNew();
             int capped = 0;
+            int ledgerMismatches = 0;
+            long bucketTotal = 0;
+            long goldenCrits = 0;
+            long timeBonuses = 0;
             int sinceMilestone = 0;
             long maxBattleMs = 0;
 
@@ -166,10 +174,17 @@ namespace BlackHole.EditorTools.SyncFixtures
 
                 var purchases = CheapestFirstBuyer.BuyAll(progress, loaded.NodeTree);
                 capped += battle.Capped ? 1 : 0;
+                ledgerMismatches += battle.LedgerProblem != null ? 1 : 0;
+                bucketTotal += battle.Raw.KillBuckets.Count;
+                goldenCrits += battle.Raw.GoldenCritCount;
+                timeBonuses += battle.Raw.TimeBonusCount;
                 sinceMilestone = battle.Raw.ReachedMilestone ? 0 : sinceMilestone + 1;
 
-                if (index % printEvery == 0 || index == battles || battle.Raw.ReachedMilestone || battle.Capped)
+                if (index % printEvery == 0 || index == battles || battle.Raw.ReachedMilestone || battle.Capped || battle.LedgerProblem != null)
                     report.AppendLine($"  판 {index}: {Describe(battle)} | 구매 {purchases.Count}번, 남은 Gold {progress.Gold:N0}, 성장도 {progress.GrowthStage} | {battleMs}ms");
+
+                if (battle.LedgerProblem != null)
+                    report.AppendLine($"    처치 장부 불일치 !!: {battle.LedgerProblem}");
 
                 if (progress.GrowthStage >= loaded.Content.Growth.MaxStage)
                 {
@@ -187,6 +202,7 @@ namespace BlackHole.EditorTools.SyncFixtures
             }
 
             report.AppendLine($"상한에서 끊긴 판 {capped}개, 마지막 이정표 뒤 {sinceMilestone}판, 가장 오래 걸린 판 {maxBattleMs}ms");
+            report.AppendLine($"처치 장부(W3-1): {(ledgerMismatches == 0 ? "모든 판이 맞다" : $"어긋난 판 {ledgerMismatches}개 !!")}, 판당 평균 칸 {bucketTotal / (double)System.Math.Max(1, battles):F1}개, 황금 치명 합 {goldenCrits:N0}번, 시간 추가 합 {timeBonuses:N0}번");
 
             report.AppendLine($"합계 {total.ElapsedMilliseconds}ms, 판당 평균 {total.ElapsedMilliseconds / (double)System.Math.Max(1, battles):F0}ms, 성장도 {progress.GrowthStage}");
             return report.ToString();
@@ -206,6 +222,9 @@ namespace BlackHole.EditorTools.SyncFixtures
             && a.Raw.ReachedLevel == b.Raw.ReachedLevel
             && a.Raw.Exp == b.Raw.Exp
             && a.Raw.TotalKills == b.Raw.TotalKills
+            && a.Raw.KillBuckets.Count == b.Raw.KillBuckets.Count
+            && a.Raw.GoldenCritBonusGold == b.Raw.GoldenCritBonusGold
+            && a.Raw.TimeBonusCount == b.Raw.TimeBonusCount
             && a.GoldAfter == b.GoldAfter;
 
         private static string Describe(HeadlessBattleResult battle) =>

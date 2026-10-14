@@ -453,7 +453,7 @@ MonoBehaviour:
       Y: 12
       Links:
       - asteroid.massScale-07
-      - goldenAsteroid.critRewardScale-02
+      - asteroid.count-03
     - Id: growth.planets-01
       Start: 0
       X: 24
@@ -678,7 +678,8 @@ MonoBehaviour:
       Start: 0
       X: 20
       Y: 2
-      Links: []
+      Links:
+      - goldenAsteroid.rewardScale-04
     - Id: breaker.damage-17
       Start: 0
       X: 15
@@ -709,7 +710,6 @@ MonoBehaviour:
       X: 17
       Y: 2
       Links:
-      - breaker.damage-16
       - goldenAsteroid.rewardScale-04
       - goldenAsteroid.critChance-03
     - Id: goldenAsteroid.critRewardScale-04
@@ -811,8 +811,8 @@ MonoBehaviour:
       X: 19
       Y: -16
       Links:
-      - breaker.damage-21
       - electricStar.spawnChance-01
+      - breaker.damage-22
     - Id: electricStar.damage-01
       Start: 0
       X: 22
@@ -832,6 +832,7 @@ MonoBehaviour:
       Links:
       - star.respawnChance-01
       - star.timeChance-01
+      - breaker.damage-21
     - Id: electricStar.chain-01
       Start: 0
       X: 22
@@ -854,16 +855,15 @@ MonoBehaviour:
       - growth.stars-01
     - Id: breaker.damage-21
       Start: 0
+      X: 19
+      Y: -12
+      Links: []
+    - Id: breaker.damage-22
+      Start: 0
       X: 18
       Y: -16
       Links:
-      - star.massScale-02
-    - Id: breaker.damage-22
-      Start: 0
-      X: 20
-      Y: -22
-      Links:
-      - breaker.starBonusDamage-01
+      - moonPlanet.speedScale-03
     - Id: star.timeChance-01
       Start: 0
       X: 20
@@ -902,10 +902,12 @@ MonoBehaviour:
       Links: []
     - Id: breaker.starBonusDamage-01
       Start: 0
-      X: 19
-      Y: -22
+      X: 21
+      Y: -19
       Links:
       - breaker.damage-24
+      - electricStar.chain-02
+      - electricStar.spawnChance-01
     - Id: breaker.damage-23
       Start: 0
       X: 12
@@ -915,7 +917,7 @@ MonoBehaviour:
     - Id: breaker.damage-24
       Start: 0
       X: 18
-      Y: -22
+      Y: -19
       Links:
       - star.massScale-02
     - Id: breaker.speed-09

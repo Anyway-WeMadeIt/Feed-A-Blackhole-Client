@@ -64,6 +64,9 @@ namespace BlackHole.Core
                 World.RequestSpawn(request);
 
             World.ProcessSpawnRequests();
+
+            // 혜성 등장 확률이 있으면(comet.spawnChance) 판을 혜성 하나와 함께 시작한다.
+            World.SpawnStartPickups();
         }
 
         public AdvanceResult Advance(float delta)
@@ -125,6 +128,10 @@ namespace BlackHole.Core
                 _seed,
                 Elapsed,
                 World.GetKillCounts(),
+                World.GetKillBuckets(),
+                World.GoldenCritCount,
+                World.GoldenCritBonusGold,
+                World.TimeBonusCount,
                 World.EarnedGold,
                 hq.Level,
                 hq.Exp,
