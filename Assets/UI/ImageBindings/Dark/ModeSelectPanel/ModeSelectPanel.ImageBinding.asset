@@ -38,9 +38,9 @@ MonoBehaviour:
   - refId: ContinueBtn_Image
     baseSprite: {fileID: 21300000, guid: f65dcfb141fe63266d64bc36a53f5b03, type: 3}
     sprite: {fileID: 21300000, guid: c3d15f3faea24efb8254cf3bf0ce030f, type: 3}
-    highlightedSprite: {fileID: 21300000, guid: 4472870daead405591dda407d4b5706c, type: 3}
-    pressedSprite: {fileID: 21300000, guid: e2a86483aa364a689c3ce5e0ed37d1a8, type: 3}
-    disabledSprite: {fileID: 21300000, guid: f99ab14d96eb4cfaa81c69bd84cd3740, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: 1dbe86fb06544019b604b8857064bdf7, type: 3}
+    pressedSprite: {fileID: 21300000, guid: 96072248cb704b468a55840054d21043, type: 3}
+    disabledSprite: {fileID: 21300000, guid: bcb439eb7c90401f88566ef99ec6ff38, type: 3}
     stale: 0
   - refId: NewGameBtn_Image
     baseSprite: {fileID: 21300000, guid: f65dcfb141fe63266d64bc36a53f5b03, type: 3}

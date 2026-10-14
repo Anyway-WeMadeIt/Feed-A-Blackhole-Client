@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
+  m_Name: ConfirmPanel.ImageBinding
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
+  viewId: BlackHole.Unity.ConfirmPanel
+  images:
+  - refId: Panel_Image
+    baseSprite: {fileID: 21300000, guid: 8957c4c38765fb468103e265720a80f5, type: 3}
+    sprite: {fileID: 21300000, guid: 7ac3a456bec0481285df47255c161b85, type: 3}
+    stale: 0
+  - refId: ConfirmBtn_Image
+    baseSprite: {fileID: 21300000, guid: 7bbe9b795885450aae407f48686c9f75, type: 3}
+    sprite: {fileID: 21300000, guid: 8db19ccc63b04a89beac07531911f75f, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: dc3ee1986c1c4b4ca5fe5da60e7a039b, type: 3}
+    pressedSprite: {fileID: 21300000, guid: 7f1b1e95d01f4285b983fbf1f1cb2850, type: 3}
+    disabledSprite: {fileID: 21300000, guid: 63c67880b90d4773b96c64731823e6fe, type: 3}
+    stale: 0
+  - refId: CancelBtn_Image
+    baseSprite: {fileID: 21300000, guid: 7bbe9b795885450aae407f48686c9f75, type: 3}
+    sprite: {fileID: 21300000, guid: 8db19ccc63b04a89beac07531911f75f, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: dc3ee1986c1c4b4ca5fe5da60e7a039b, type: 3}
+    pressedSprite: {fileID: 21300000, guid: 7f1b1e95d01f4285b983fbf1f1cb2850, type: 3}
+    disabledSprite: {fileID: 21300000, guid: 63c67880b90d4773b96c64731823e6fe, type: 3}
+    stale: 0

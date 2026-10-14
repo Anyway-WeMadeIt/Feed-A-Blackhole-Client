@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BlackHole.Core;
+using BlackHole.Net;
 using BlackHole.Net.Unity;
 using BlackHole.Sync;
 using UnityEngine;
@@ -11,6 +14,10 @@ namespace BlackHole.Unity
     {
         [Header("Content")]
         [SerializeField] private GameContentSetup _content;
+
+        // 서버 설정(Assets/Data/ServerSettings.asset). 비우거나 꺼 두면 로그인하지 않고 오프라인으로 실행한다.
+        [Header("Server")]
+        [SerializeField] private ServerSettings _server;
 
         [Header("Looks")]
         [SerializeField] private BreakerLook _breakerLook;
@@ -78,6 +85,9 @@ namespace BlackHole.Unity
         private UISettingsSync _uiSettings;
         private FrameRateLimiter _frameRate;
         private GameHost _host;
+        private IAuthSession _auth;
+        // 로그인이 끝나기 전에는 화면이 없으므로 호스트를 돌리지 않는다.
+        private bool _loggingIn;
 
         private void Awake()
         {
@@ -87,9 +97,12 @@ namespace BlackHole.Unity
             LoadedContent loaded = LoadContent(playtest);
             // 프로필을 적용했으면 그 프로필의 저장을 따로 쓴다. 테스트 값으로 번 진행이 실제 저장을 덮지 않는다.
             string saveDirectory = playtest.SaveDirectory(Application.persistentDataPath);
+            // 밸런스 프로필을 적용한 실행은 콘텐츠가 서버와 달라 로그인하지 않는다(계약 C10).
+            bool profileApplied = playtest.AppliedProfile != null;
 #else
             LoadedContent loaded = GameContentLoader.Load(_content);
             string saveDirectory = Application.persistentDataPath;
+            const bool profileApplied = false;
 #endif
 
             if (loaded != null)
@@ -125,6 +138,7 @@ namespace BlackHole.Unity
                 loaded.NodeTree.Content,
                 loaded.Content.Growth,
                 _progress);
+            _auth = CreateAuthSession(saveDirectory, profileApplied);
             // 서버 동기화 로그를 만든다. 로그는 빌드 버전과 이 콘텐츠의 서버 콘텐츠 버전을 싣는다.
             SyncLogFactory syncLogs = new(new UnityJsonSerializer(), Application.version, loaded.ServerContentVersion, () => DateTime.UtcNow);
             Localizer localizer = Localizer.Create(_texts, _settings);
@@ -197,13 +211,30 @@ namespace BlackHole.Unity
         }
 #endif
 
-        private void Start()
+        // 콘텐츠를 읽은 뒤 타이틀로 가기 전에 로그인을 마친다(W2-3). 대기 중에는 아무것도 띄우지 않는다.
+        // StartAsync는 예외를 던지지 않고 loginBudgetSeconds 안에 끝난다.
+        private IEnumerator Start()
         {
+            _loggingIn = true;
+            Task login = _auth.StartAsync();
+
+            while (!login.IsCompleted)
+                yield return null;
+
+            _loggingIn = false;
+            Debug.Log(_auth.State == ConnectionState.Online
+                ? "[인증] 온라인"
+                : $"[인증] 오프라인: {_auth.OfflineReason}");
+
             _host.Start();
             SoundManager.Instance.Bind(_settings);
         }
 
-        private void Update() => _host.Tick(Time.deltaTime);
+        private void Update()
+        {
+            if (!_loggingIn)
+                _host.Tick(Time.deltaTime);
+        }
 
         private void OnApplicationPause(bool paused)
         {
@@ -220,6 +251,24 @@ namespace BlackHole.Unity
             _viewTexts?.Dispose();
             _uiSettings?.Dispose();
             _host?.Dispose();
+        }
+
+        // 설정이 없거나 꺼져 있거나 프로필을 적용했으면 요청 없이 오프라인(Disabled)이다. 계정은 진행 저장과 같은 폴더에 둔다(계약 2.5).
+        private IAuthSession CreateAuthSession(string saveDirectory, bool profileApplied)
+        {
+            if (_server == null || !_server.Enabled || profileApplied)
+            {
+                return new OfflineAuthSession(OfflineReason.Disabled);
+            }
+
+            return new AuthSession(
+                new UnityHttpTransport(_server.BaseUrl),
+                new UnityJsonSerializer(),
+                new FileCredentialStore(saveDirectory),
+                _server.RequestTimeoutSeconds,
+                _server.LoginBudgetSeconds,
+                Debug.Log,
+                Debug.LogError);
         }
 
         private UIManager CreateUI()

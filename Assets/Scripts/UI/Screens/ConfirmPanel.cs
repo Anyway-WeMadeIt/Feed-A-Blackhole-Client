@@ -7,7 +7,7 @@ namespace BlackHole.Unity
 {
     // 확인 창. 부르는 쪽이 글자(Present)와 확인·취소 때 할 일을 정한다.
     // 뒤를 가리개(Blocker)가 덮어, 창이 열린 동안 아래 화면은 눌리지 않는다.
-    public sealed class ConfirmPanel : UIPanel<ConfirmPanel.Refs>, IStyleView
+    public sealed class ConfirmPanel : UIPanel<ConfirmPanel.Refs>
     {
         public enum Refs
         {
@@ -16,14 +16,17 @@ namespace BlackHole.Unity
             // 노치·둥근 모서리를 피하는 영역. 화면을 열 때와 해상도가 바뀔 때 UIManager가 Safe Area에 맞춘다(SafeAreaUtility).
             SafeAreaRoot,
 
-            // 부르는 쪽이 정하는 글자.
+            // 부르는 쪽이 정하는 글자. 크기·글꼴·색은 Presentation(TextBinding)이 맞춘다.
             Title_Text,
             Body_Text,
             ConfirmBtn_Text,
             CancelBtn_Text,
 
             // Presentation이 바꾸는 그림. 코드는 건드리지 않는다.
+            // 버튼의 올림·누름·막힘 그림은 프리팹의 Button(Sprite Swap)에 있다.
             Panel_Image,
+            ConfirmBtn_Image,
+            CancelBtn_Image,
         }
 
         private Button _confirmButton;
@@ -38,16 +41,6 @@ namespace BlackHole.Unity
         public event Action ConfirmClicked;
         public event Action CancelClicked;
 
-        private readonly StyledTexts _styled = new();
-        private readonly ThemedImages _themed = new();
-
-        // 글자 크기·언어별 글꼴·테마. 이 창은 Presentation이 비어 있어 글자·그림을 모두 여기서 맞춘다.
-        public void ApplyStyle(in UIStyle style)
-        {
-            _styled.SetStyle(style);
-            _themed.SetStyle(style);
-        }
-
         protected override void OnInitialize()
         {
             ScreenRefs.WarnMissing<Refs>(this);
@@ -58,16 +51,6 @@ namespace BlackHole.Unity
             _body = View.Text(Refs.Body_Text);
             _confirmLabel = View.Text(Refs.ConfirmBtn_Text);
             _cancelLabel = View.Text(Refs.CancelBtn_Text);
-
-            _styled.Add(_title, UITextRole.Title);
-            _styled.Add(_body, UITextRole.Body);
-            _styled.Add(_confirmLabel, UITextRole.Body);
-            _styled.Add(_cancelLabel, UITextRole.Body);
-
-            // 창 바탕은 단색이라 테마의 표면색으로, 버튼 그림은 테마 짝으로.
-            _themed.AddColor(View.Image(Refs.Panel_Image), UIColorRole.Surface);
-            _themed.AddSprite(_confirmButton.image);
-            _themed.AddSprite(_cancelButton.image);
 
             _confirmAnimation = ButtonAnimation.Of(_confirmButton);
             _cancelAnimation = ButtonAnimation.Of(_cancelButton);

@@ -1757,6 +1757,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.GameBootstrap
   _content: {fileID: 11400000, guid: 144505f3c8c54fd49cb1d73ce3c80682, type: 2}
+  _server: {fileID: 11400000, guid: 34f01e7e52e9a7f468fc36a1ec1b48eb, type: 2}
   _breakerLook: {fileID: 11400000, guid: 268024120f990294aa0012c4df22b246, type: 2}
   _explosionLook: {fileID: 11400000, guid: 6e2d9e09239144f7a488e776ef97fac6, type: 2}
   _lightningLook: {fileID: 11400000, guid: e181953d102745b387176d400f5ea790, type: 2}
