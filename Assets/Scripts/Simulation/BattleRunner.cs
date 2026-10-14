@@ -23,6 +23,18 @@ namespace BlackHole.Simulation
             IAimBot bot,
             int seed,
             float frameSeconds = DefaultFrameSeconds,
+            float maxSeconds = SafetySeconds) =>
+            RunDetailed(content, progress, upgrades, bot, seed, frameSeconds, maxSeconds).Record;
+
+        // Run과 같지만 판의 원본 기록(BattleRawData)과 판이 끝난 World(Hq 포함)도 돌려준다.
+        // 결산 로그(SETTLEMENT)의 값이 판과 맞는지 검사하는 테스트가 쓴다.
+        public static BattleRun RunDetailed(
+            GameContent content,
+            ProgressState progress,
+            UpgradeStatValues upgrades,
+            IAimBot bot,
+            int seed,
+            float frameSeconds = DefaultFrameSeconds,
             float maxSeconds = SafetySeconds)
         {
             if (content == null) throw new ArgumentNullException(nameof(content));
@@ -85,7 +97,24 @@ namespace BlackHole.Simulation
             foreach (EnemyKillCount kill in raw.Kills)
                 record.Kills[kill.Enemy.Type] = record.KillsOf(kill.Enemy.Type) + kill.Count;
 
-            return record;
+            return new BattleRun(record, raw, session.World); //record;
+        }
+    }
+
+    // RunDetailed의 결과: 요약 기록, 판의 원본 기록, 판이 끝난 World.
+    public sealed class BattleRun
+    {
+        public BattleRecord Record { get; }
+        public BattleRawData Raw { get; }
+
+        // 결산과 남은 적 정리까지 끝난 World. Hq의 Exp·시작 Level은 판이 끝난 그대로다.
+        public World World { get; }
+
+        internal BattleRun(BattleRecord record, BattleRawData raw, World world)
+        {
+            Record = record;
+            Raw = raw;
+            World = world;
         }
     }
 }
