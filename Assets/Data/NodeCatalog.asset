@@ -1756,7 +1756,6 @@ MonoBehaviour:
       - moonPlanet.duration-02
       - breaker.damage-16
       - breaker.damage-17
-      - breaker.damage-18
       - breaker.planetBonusDamage-03
       - breaker.planetBonusDamage-04
       - asteroid.toPlanet-03
@@ -1764,27 +1763,23 @@ MonoBehaviour:
       - goldenAsteroid.rewardScale-04
       - moonPlanet.duration-03
       - goldenAsteroid.rewardScale-05
-      - planet.massScale-05
       - planet.massScale-06
-      - breaker.damage-19
+      - growth.asteroids-04
     - Id: comets
       Nodes:
       - growth.planets-02
       - breaker.radius-07
       - planet.respawnChance-03
       - moonPlanet.rangeScale-03
-      - comet.rainChance-02
       - planet.massScale-07
       - breaker.damage-20
       - breaker.radius-08
       - breaker.critChance-04
-      - moonPlanet.rangeScale-04
       - breaker.radius-09
-      - breaker.critChance-05
       - comet.rainChance-03
       - asteroid.count-04
-      - asteroid.count-05
-      - planet.massScale-08
+      - breaker.damage-18
+      - planet.massScale-05
     - Id: cradle
       Nodes:
       - breaker.speed-08
@@ -1816,13 +1811,13 @@ MonoBehaviour:
       - star.massScale-01
       - star.massScale-02
       - star.massScale-03
+      - star.respawnChance-03
     - Id: pulsar
       Nodes:
       - breaker.radius-11
       - asteroid.respawnChance-04
       - timer-02
       - planet.toStar-02
-      - star.respawnChance-03
       - breaker.starBonusDamage-02
       - planet.respawnChance-04
       - star.massScale-04
@@ -1837,23 +1832,17 @@ MonoBehaviour:
       - laserStar.critBonus-01
       - breaker.speed-10
       - electricStar.splitChance-02
-      - supernovaStar.range-01
       - moonPlanet.maxCount-01
       - electricStar.chain-03
       - breaker.damage-26
       - breaker.radius-12
       - asteroid.respawnChance-05
       - laserStar.width-02
-      - supernovaStar.damage-01
       - star.respawnChance-04
       - laserStar.damage-02
       - supernovaStar.spawnChance-01
       - star.massScale-05
       - laserStar.critBonus-02
-      - supernovaStar.range-02
-      - comet.spawnChance-03
-      - supernovaStar.damage-02
-      - breaker.damage-27
       - laserStar.width-03
       - laserStar.damage-03
       - laserStar.damage-04
@@ -1889,15 +1878,21 @@ MonoBehaviour:
       - timer-04
       - laserStar.width-09
       - star.massScale-09
+      - supernovaStar.range-01
+      - supernovaStar.damage-01
+      - breaker.damage-27
+      - comet.spawnChance-03
+      - supernovaStar.damage-02
+      - supernovaStar.range-02
+      - galaxy.size-01
+      - galaxy.massScale-01
     - Id: core
       Nodes:
       - star.toGalaxy-01
       - growth.galaxies-01
       - breaker.galaxyBonusDamage-01
       - gravityGalaxy.spawnChance-01
-      - galaxy.size-01
       - galaxy.timeChance-01
-      - galaxy.massScale-01
       - gravityGalaxy.radius-01
       - gravityGalaxy.force-01
       - gravityGalaxy.duration-01

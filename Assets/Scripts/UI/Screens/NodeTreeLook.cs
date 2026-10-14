@@ -7,6 +7,9 @@ namespace BlackHole.Unity
 {
     // 업그레이드 트리의 모양: 스탯마다의 노드 그림(BlackHoleGUI Stat Nodes)과 선·가격 글자의 색.
     // 노드는 Rank 1 첫 효과의 StatId(UpgradeStats 시트)로 그림을 찾는다. 모르는 스탯은 기본 그림을 쓴다.
+    // 보이는 단계: 산 노드 → 그 이웃(살 수 있음·Gold 모자람, 노드 그림을 조금 어둡게) → 열린 구역의 닿지 않은 노드(자물쇠)
+    //   → 먼 구역의 닿지 않은 노드(흐린 점). 열린 구역은 산 노드나 시작 노드가 든 구역이다(NodeTreeView가 가린다).
+    //   보이는 노드에서 선으로 LockAhead칸 안의 노드는 구역이 닫혀 있어도 자물쇠다(다음 구역 입구 너머 미리 보기).
     // 트리 보기(NodeTreeView)가 들고 있고, 비어 있으면 트리 보기는 예전처럼 색 칸으로 그린다.
     [CreateAssetMenu(fileName = "NodeTreeLook", menuName = "BlackHole/Node Tree Look")]
     public sealed class NodeTreeLook : ScriptableObject
@@ -30,20 +33,32 @@ namespace BlackHole.Unity
         [SerializeField] private NodeSprites _fallback = new NodeSprites();
         [SerializeField] private List<NodeSprites> _stats = new List<NodeSprites>();
 
+        [Header("지금 살 수 있는 노드(Purchasable)")]
+        [Tooltip("살 수 있음 그림에 곱하는 색. 산 노드보다 조금 어둡게. 손을 올리면 원래 밝기로.")]
+        [SerializeField] private Color _purchasableTint = new Color(0.88f, 0.88f, 0.88f, 1);
+
         [Header("보이지만 Gold가 모자란 노드(Revealed)")]
-        [Tooltip("살 수 있음 그림에 곱하는 색. 흐리게 보인다.")]
-        [SerializeField] private Color _revealedTint = new Color(1, 1, 1, 0.5f);
+        [Tooltip("살 수 있음 그림에 곱하는 색. 살 수 있는 노드보다 더 어둡게.")]
+        [SerializeField] private Color _revealedTint = new Color(0.68f, 0.68f, 0.68f, 1);
         [Tooltip("켜면 흐린 그림 대신 자물쇠(locked) 그림을 쓴다. 무엇인지 숨기고 싶을 때.")]
         [SerializeField] private bool _revealedAsLocked;
 
         [Header("아직 닿지 않은 노드(Hidden) — 안개")]
-        [Tooltip("켜면 아직 닿지 않은 노드도 흐린 윤곽으로 보인다(지도 전체가 처음부터 보이고, 멀리 있는 구역은 안개 속). 끄면 원작처럼 이웃을 사야 나타난다.")]
+        [Tooltip("켜면 아직 닿지 않은 노드도 보인다(열린 구역은 자물쇠, 먼 구역은 흐린 점). 끄면 원작처럼 이웃을 사야 나타난다.")]
         [SerializeField] private bool _showHidden = true;
-        [Tooltip("안개 속 노드의 그림. 켜면 자물쇠(locked) 그림, 끄면 살 수 있음 그림을 쓴다.")]
-        [SerializeField] private bool _hiddenAsLocked = true;
-        [Tooltip("안개 속 노드 그림에 곱하는 색. 알파를 낮춰 흐리게.")]
-        [SerializeField] private Color _hiddenTint = new Color(1, 1, 1, 0.18f);
-        [Tooltip("안개 속 선의 색(알파 포함).")]
+        [Tooltip("열린 구역(산 노드나 시작 노드가 든 구역)의 닿지 않은 노드: 자물쇠(locked) 그림에 곱하는 색. 올리면 이름만 보인다.")]
+        [SerializeField] private Color _lockedTint = new Color(1, 1, 1, 0.6f);
+        [Tooltip("보이는 노드(산 노드와 다음 노드)에서 선으로 이 칸 수 안의 닿지 않은 노드는 구역이 닫혀 있어도 자물쇠로 보인다. 0이면 구역만 본다.")]
+        [Min(0)]
+        [SerializeField] private int _lockAhead = 1;
+        [Tooltip("먼 구역(아직 열리지 않은 구역)의 노드를 그리는 점. 비우면 기본 그림의 locked를 쓴다. 올림·누름을 받지 않는다.")]
+        [SerializeField] private Sprite _farSprite;
+        [Tooltip("먼 노드 점의 크기(노드 크기에 대한 비율).")]
+        [Range(0.1f, 1)]
+        [SerializeField] private float _farScale = 0.3f;
+        [Tooltip("먼 노드 점에 곱하는 색. 알파를 낮춰 흐리게.")]
+        [SerializeField] private Color _farTint = new Color(1, 1, 1, 0.35f);
+        [Tooltip("안개 속 선의 색(알파 포함). 한쪽 끝이라도 닿지 않은 노드인 선.")]
         [SerializeField] private Color _hiddenLinkColor = new Color(0.722f, 0.729f, 0.725f, 0.18f);
 
         [Header("선")]
@@ -69,6 +84,12 @@ namespace BlackHole.Unity
 
         public Color HiddenLinkColor => _hiddenLinkColor;
 
+        // 먼 노드(열리지 않은 구역의 안개 속 노드)의 점: 그림, 곱하는 색, 크기 비율.
+        public Sprite FarSprite => _farSprite != null ? _farSprite : _fallback.locked;
+        public Color FarTint => _farTint;
+        public float FarScale => _farScale;
+        // 보이는 노드에서 선으로 이 칸 수 안의 닿지 않은 노드는 자물쇠(구역과 상관없이).
+        public int LockAhead => _lockAhead;
 
         // 노드 그림. hovered는 손을 올린 노드(샀으면 무시한다).
         public Sprite SpriteOf(string stat, NodeState state, bool hovered)
@@ -79,7 +100,7 @@ namespace BlackHole.Unity
             {
                 case NodeState.Owned:
                     return Pick(sprites?.purchased, _fallback.purchased);
-                case NodeState.Hidden when _hiddenAsLocked:
+                case NodeState.Hidden:
                 case NodeState.Revealed when _revealedAsLocked:
                     return Pick(sprites?.locked, _fallback.locked);
                 default:
@@ -89,13 +110,21 @@ namespace BlackHole.Unity
             }
         }
 
-        // 그림에 곱하는 색. Gold가 모자란 노드는 흐리게, 안개 속 노드는 더 흐리게.
-        public Color TintOf(NodeState state)
+        // 그림에 곱하는 색. 산 노드는 그대로, 다음 노드는 조금 어둡게(손을 올린 살 수 있는 노드는 그대로, Gold가 모자란 노드는 더),
+        // 열린 구역의 자물쇠는 흐리게. 먼 노드의 점은 FarTint.
+        public Color TintOf(NodeState state, bool hovered)
         {
-            if (state == NodeState.Hidden)
-                return _hiddenTint;
-
-            return state == NodeState.Revealed && !_revealedAsLocked ? _revealedTint : Color.white;
+            switch (state)
+            {
+                case NodeState.Owned:
+                    return Color.white;
+                case NodeState.Purchasable:
+                    return hovered ? Color.white : _purchasableTint;
+                case NodeState.Revealed:
+                    return _revealedAsLocked ? Color.white : _revealedTint;
+                default:
+                    return _lockedTint;
+            }
         }
 
         public Color LinkColorOf(NodeState a, NodeState b)

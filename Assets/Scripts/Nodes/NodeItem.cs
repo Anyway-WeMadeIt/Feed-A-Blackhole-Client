@@ -28,8 +28,10 @@ namespace BlackHole.Unity
         public string Stat { get; }
         // 최대 Rank. 둘 이상이면 Rank 딱지를 단다.
         public int MaxRank { get; }
+        // 시작 노드(처음부터 드러남). 그 노드가 든 구역은 처음부터 열린 구역이다(트리 보기의 안개).
+        public bool Start { get; }
 
-        public NodeItem(string id, int x, int y, long price, string stat, int maxRank)
+        public NodeItem(string id, int x, int y, long price, string stat, int maxRank, bool start)
         {
             Id = id;
             X = x;
@@ -37,6 +39,7 @@ namespace BlackHole.Unity
             Price = price;
             Stat = stat;
             MaxRank = maxRank;
+            Start = start;
         }
     }
 }

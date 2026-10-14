@@ -132,7 +132,7 @@ namespace BlackHole.Unity
                 tree.TryGet(placed.Id, out NodeDefinition node);
                 NodeRankDefinition first = node.RankAt(1);
                 string stat = tree.Content.StatOf(first.Effects[0].Stat).StatId;
-                items.Add(new NodeItem(node.Id, placed.X, placed.Y, first.Cost, stat, node.MaxRank));
+                items.Add(new NodeItem(node.Id, placed.X, placed.Y, first.Cost, stat, node.MaxRank, tree.Graph.IsStart(node.Id)));
             }
 
             return items.AsReadOnly();

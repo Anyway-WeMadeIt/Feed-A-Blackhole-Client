@@ -70,6 +70,7 @@ namespace BlackHole.Unity
         }
 
         // 툴팁은 호스트(업그레이드 화면)가 띄운다. 제목은 노드 ID, 본문은 Rank·효과·비용이다.
+        // 열린 구역의 자물쇠 노드(Hidden)는 제목(이름)만 보인다. 먼 구역의 점은 트리 보기가 올림을 알리지 않는다.
         // [임시] 수치의 표시 이름이 정해지면 StatId 대신 쓴다.
         private void HandleNodeTreeNodeHovered(string id, RectTransform node)
         {
@@ -87,11 +88,14 @@ namespace BlackHole.Unity
             return statId != null && _localizer.TryGet($"stat.{statId}.name", out string name) ? name : id;
         }
 
-        // 툴팁 본문: 산 Rank, 다음 Rank의 효과(지금 값 → 산 뒤 값), 다음 비용.
-        // 마지막 Rank까지 샀으면 마지막 Rank의 효과와 지금 값.
+        // 툴팁 본문: 산 Rank, 다음 Rank의 효과(지금 값 → 산 뒤 값), 다음 비용, Gold가 모자라면 모자란 만큼.
+        // 마지막 Rank까지 샀으면 마지막 Rank의 효과와 지금 값. 아직 닿지 않은 노드(자물쇠)는 비운다(이름만).
         private string NodeTooltipBody(string id)
         {
             if (!_tree.TryGet(id, out NodeDefinition node))
+                return string.Empty;
+
+            if (NodePurchase.StateOf(_progress, _tree, id) == NodeState.Hidden)
                 return string.Empty;
 
             int rank = _progress.RankOf(id);
@@ -138,6 +142,11 @@ namespace BlackHole.Unity
             }
 
             text.Append(maxed ? _localizer.Get("node.maxed") : _localizer.Format("node.cost", NumberText.Compact(shown.Cost)));
+
+            // 살 조건: Gold가 모자라면 모자란 만큼.
+            if (!maxed && _progress.Gold < shown.Cost)
+                text.Append('\n').Append(_localizer.Format("node.short", NumberText.Compact(shown.Cost - _progress.Gold)));
+
             return text.ToString();
         }
 

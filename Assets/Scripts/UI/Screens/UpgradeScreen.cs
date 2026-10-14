@@ -174,7 +174,11 @@ namespace BlackHole.Unity
                 _tooltipTitle.text = title;
 
             if (_tooltipBody != null)
+            {
                 _tooltipBody.text = body;
+                // 본문이 없으면(아직 닿지 않은 노드는 이름만) 글자 칸을 접어 상자가 제목만큼만 되게 한다.
+                _tooltipBody.gameObject.SetActive(!string.IsNullOrEmpty(body));
+            }
 
             _tooltip.gameObject.SetActive(true);
             _tooltip.SetAsLastSibling();
