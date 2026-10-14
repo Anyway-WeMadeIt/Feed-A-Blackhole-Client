@@ -850,7 +850,7 @@ namespace BlackHole.Unity
         private void DrawAccountReset()
         {
             GUILayout.Space(12);
-            string directory = _session.SaveDirectory(Application.persistentDataPath);
+            string directory = _session.SaveDirectory(SaveLocation.Root(Application.persistentDataPath));
 
             if (!_confirmReset)
             {

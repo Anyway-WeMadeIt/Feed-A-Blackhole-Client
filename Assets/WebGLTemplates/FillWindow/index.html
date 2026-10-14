@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <!--
+      Feed A Blackhole 웹 템플릿: 캔버스가 창(itch.io에서는 임베드 칸·전체화면)을 꽉 채운다.
+      Unity Default 템플릿은 캔버스 크기가 고정이고 아래에 바(footer)가 붙어 itch 임베드 칸과 맞추기 어렵다.
+      배경색은 Player Settings > Splash Image의 Background Color를 따른다.
+    -->
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: {{{ BACKGROUND_COLOR }}}; }
+      #unity-canvas { display: block; width: 100%; height: 100%; background: {{{ BACKGROUND_COLOR }}}; outline: none; }
+      #loading { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(320px, 60vw); }
+      #loading-track { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.15); overflow: hidden; }
+      #loading-fill { width: 0%; height: 100%; background: rgba(255, 255, 255, 0.85); transition: width 0.2s; }
+      #loading-label { margin-top: 10px; font: 14px sans-serif; color: rgba(255, 255, 255, 0.6); text-align: center; }
+      #banner { position: absolute; left: 0; right: 0; top: 0; font: 14px sans-serif; color: #fff; }
+      #banner div { padding: 10px 16px; background: #a33; }
+    </style>
+  </head>
+  <body>
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="loading">
+      <div id="loading-track"><div id="loading-fill"></div></div>
+      <div id="loading-label">Loading…</div>
+    </div>
+    <div id="banner"></div>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var loading = document.querySelector("#loading");
+      var loadingFill = document.querySelector("#loading-fill");
+      var banner = document.querySelector("#banner");
+
+      // Unity가 알리는 오류는 화면 위에 띄우고, 경고는 콘솔에만 남긴다.
+      function showBanner(message, type) {
+        if (type !== "error") {
+          console.warn(message);
+          return;
+        }
+        var line = document.createElement("div");
+        line.textContent = message;
+        banner.appendChild(line);
+      }
+
+      var buildUrl = "Build";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_WASM
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: showBanner,
+        // 고해상도 화면(특히 모바일)이 무거우면 렌더 배율을 제한한다. 예: Math.min(window.devicePixelRatio, 1.5)
+        // devicePixelRatio: 1,
+      };
+
+      var script = document.createElement("script");
+      script.src = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (progress) {
+          loadingFill.style.width = (100 * progress) + "%";
+        }).then(function () {
+          loading.style.display = "none";
+        }).catch(function (message) {
+          showBanner(String(message), "error");
+        });
+      };
+      script.onerror = function () {
+        showBanner("Failed to load " + script.src, "error");
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>

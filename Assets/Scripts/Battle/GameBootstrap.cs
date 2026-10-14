@@ -96,12 +96,13 @@ namespace BlackHole.Unity
             PlaytestSession playtest = PlaytestSession.Create(_playtest, new ContentTag());
             LoadedContent loaded = LoadContent(playtest);
             // 프로필을 적용했으면 그 프로필의 저장을 따로 쓴다. 테스트 값으로 번 진행이 실제 저장을 덮지 않는다.
-            string saveDirectory = playtest.SaveDirectory(Application.persistentDataPath);
+            string saveDirectory = playtest.SaveDirectory(SaveLocation.Root(Application.persistentDataPath));
             // 밸런스 프로필을 적용한 실행은 콘텐츠가 서버와 달라 로그인하지 않는다(계약 C10).
             bool profileApplied = playtest.AppliedProfile != null;
 #else
             LoadedContent loaded = GameContentLoader.Load(_content);
-            string saveDirectory = Application.persistentDataPath;
+            // 웹은 빌드를 올려도 바뀌지 않는 고정 폴더를 쓴다(SaveLocation).
+            string saveDirectory = SaveLocation.Root(Application.persistentDataPath);
             const bool profileApplied = false;
 #endif
 
@@ -254,9 +255,11 @@ namespace BlackHole.Unity
         }
 
         // 설정이 없거나 꺼져 있거나 프로필을 적용했으면 요청 없이 오프라인(Disabled)이다. 계정은 진행 저장과 같은 폴더에 둔다(계약 2.5).
+        // 웹 빌드도 오프라인이다: itch.io 페이지(HTTPS)에서 http 서버 요청은 브라우저가 막고, 다른 도메인이라 서버의 CORS 허용도 필요하다.
+        // 붙으려 하면 실패할 로그인을 기다리느라 첫 화면이 늦게 뜬다.
         private IAuthSession CreateAuthSession(string saveDirectory, bool profileApplied)
         {
-            if (_server == null || !_server.Enabled || profileApplied)
+            if (_server == null || !_server.Enabled || profileApplied || Application.platform == RuntimePlatform.WebGLPlayer)
             {
                 return new OfflineAuthSession(OfflineReason.Disabled);
             }

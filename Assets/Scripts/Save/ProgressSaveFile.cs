@@ -10,6 +10,7 @@ namespace BlackHole.Unity
     // 진행 저장 파일(JSON)을 읽고 쓴다. 내용 검사는 하지 않는다.
     // 쓰기: 임시 파일에 다 쓴 뒤 바꿔치기한다. 바뀌기 전 파일은 직전 저장(.prev)으로 남는다 — 본 파일이 깨지면 그것으로 이어 한다.
     // 깨진 파일은 덮어쓰지 않고 .bak으로 옮겨 보관한다.
+    // 웹은 쓰기·옮기기·지우기 뒤 브라우저 저장소에 동기화해야 남는다(SaveLocation.Flush).
     public sealed class ProgressSaveFile
     {
         private const string FileName = "progress.json";
@@ -34,6 +35,8 @@ namespace BlackHole.Unity
                 File.Replace(tmp, _path, _previousPath);
             else
                 File.Move(tmp, _path);
+
+            SaveLocation.Flush();
         }
 
         // 본 파일. 없거나 JSON으로 읽지 못하면 false.
@@ -55,6 +58,8 @@ namespace BlackHole.Unity
                 if (File.Exists(path))
                     File.Delete(path);
             }
+
+            SaveLocation.Flush();
         }
 
         private static bool TryRead(string path, out ProgressSaveData data)
@@ -89,6 +94,7 @@ namespace BlackHole.Unity
                 backup = $"{path}.{stamp}-{n}.bak";
 
             File.Move(path, backup);
+            SaveLocation.Flush();
             return backup;
         }
     }

@@ -8,6 +8,8 @@ namespace BlackHole.Unity
     //   기기 화면이 고른 값보다 느리면(60Hz 화면에서 120) OS가 화면에 맞춰 낮춘다.
     // - 에디터·PC에서는 품질 설정의 VSync가 켜져 있으면 targetFrameRate가 무시되고 모니터 주사율을 따른다
     //   (Game 뷰의 VSync 표시도 같다). 확인은 기기나 VSync를 끈 Game 뷰에서 한다.
+    // - 웹(브라우저)은 정하지 않는다(-1, 기본값). 브라우저의 그리기 주기(requestAnimationFrame)를 따를 때 가장 부드럽다.
+    //   그래서 웹은 설정 창에 FPS Limit 행이 없다(ScreenFlow.Settings).
     internal sealed class FrameRateLimiter : IDisposable
     {
         private readonly GameSettings _settings;
@@ -27,6 +29,7 @@ namespace BlackHole.Unity
                 Apply();
         }
 
-        private void Apply() => Application.targetFrameRate = _settings.FrameRateLimit;
+        private void Apply() =>
+            Application.targetFrameRate = Application.platform == RuntimePlatform.WebGLPlayer ? -1 : _settings.FrameRateLimit;
     }
 }
