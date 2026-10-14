@@ -278,11 +278,11 @@ namespace BlackHole.Core
                 }
                 case ExplosionDefinition explosion:
                 {
-                    float fraction = Math.Min(1, AddPercent(EnemyUpgradeStats.TraitHealthFraction, explosion.HealthFraction));
+                    float damage = Add(EnemyUpgradeStats.TraitDamage, explosion.Damage);
                     float radius = Scale(EnemyUpgradeStats.TraitRadius, explosion.Radius);
 
-                    bool same = fraction == explosion.HealthFraction && radius == explosion.Radius;
-                    return same ? null : new ExplosionDefinition(fraction, radius);
+                    bool same = damage == explosion.Damage && radius == explosion.Radius;
+                    return same ? null : new ExplosionDefinition(damage, radius);
                 }
                 case GravityFieldDefinition gravity:
                 {

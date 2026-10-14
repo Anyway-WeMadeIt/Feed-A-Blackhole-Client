@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Planet
   m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemyKind
   type: 1
-  moveSpeed: 0.8
-  radius: 1.4
-  radiusStep: 0.12
+  moveSpeed: 0.88
+  radius: 1.36
+  radiusStep: 0.108
   upgradesTo: {fileID: 11400000, guid: 0d5945d74a2a4975ab65cf7d32bbd8e8, type: 2}
   spawnPeriod: 0
   rainCount: 0
@@ -56,7 +56,6 @@ MonoBehaviour:
     branchChance: 0
     critChance: 0
     critMultiplier: 0
-    healthFraction: 0
     width: 0
     maxActive: 10
     force: 0

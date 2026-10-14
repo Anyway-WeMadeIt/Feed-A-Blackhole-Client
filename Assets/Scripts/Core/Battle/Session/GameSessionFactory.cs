@@ -50,7 +50,8 @@ namespace BlackHole.Core
                 timeLimit,
                 seed,
                 progress,
-                startSupply);
+                startSupply,
+                new RunStartInfo(seed, progress.GrowthStage, hq.StartLevel, timeLimit.Definition.Duration, startSupply));
         }
 
         // 적 종류마다의 판 구성.

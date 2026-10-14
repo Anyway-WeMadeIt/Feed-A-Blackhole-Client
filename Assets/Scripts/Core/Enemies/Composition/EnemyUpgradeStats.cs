@@ -120,12 +120,13 @@ namespace BlackHole.Core
             _ => null,
         };
 
-        // 피해(번개·레이저). 더한다.
+        // 피해(번개·레이저·슈퍼노바 폭발). 더한다. 슈퍼노바도 고정 피해다.
         public static UpgradeStat? TraitDamage(EnemyType kind, EnemyTraitType trait) => (kind, trait) switch
         {
             (EnemyType.Asteroid, EnemyTraitType.Electric) => UpgradeStat.ElectricAsteroidDamage,
             (EnemyType.Star, EnemyTraitType.Electric) => UpgradeStat.ElectricStarDamage,
             (EnemyType.Star, EnemyTraitType.Laser) => UpgradeStat.LaserStarDamage,
+            (EnemyType.Star, EnemyTraitType.Supernova) => UpgradeStat.SupernovaStarDamage,
             _ => null,
         };
 
@@ -193,11 +194,5 @@ namespace BlackHole.Core
             _ => null,
         };
 
-        // 폭발 피해 = 대상 현재 HP × 이 비율(0 ~ 1, 1을 넘지 않는다). %p ÷ 100을 더한다.
-        public static UpgradeStat? TraitHealthFraction(EnemyType kind, EnemyTraitType trait) => (kind, trait) switch
-        {
-            (EnemyType.Star, EnemyTraitType.Supernova) => UpgradeStat.SupernovaStarHpDamage,
-            _ => null,
-        };
     }
 }

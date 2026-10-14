@@ -14,7 +14,7 @@ namespace BlackHole.Core
     //   중첩 수는 따로 막지 않는다. 달 성질의 동시 상한(EnemyTraitDefinition.MaxActive, 원작 "달 최대 개수")이 화면의 달과 남은 중첩을
     //   합쳐 세어 달 출현을 막으므로(World.CountActive) 중첩도 그 수를 넘지 않는다.
     //   공격 속도 배율 = 노드 배율(Definition.Speed) + 달 속도 보너스 합 — 덧셈이다. 곱하면 노드 속도와 달이 서로를 키워 후반에 폭주한다.
-    //   반지름 = 노드가 반영된 반지름 × (1 + 달 범위 보너스 합).
+    //   반지름 = 노드가 반영된 반지름 × (1 + 달 범위 보너스 합). 체감(MoonRadiusDecay)이 있으면 범위 보너스는 상한이 되고 달마다 그 상한에 다가간다.
     //   반지름 배율은 MoonRadiusMaxScale(2배)에서 멈춘다 — 원작도 달 몇 개로 지름이 2배가 되면 더 먹어도 커지지 않는다. 중첩 수·공격 속도는 그대로 오른다.
     // - 혜성: 중첩이 하나라도 있으면 모든 Tick이 치명타다.
     //   치명타 피해 보너스 = 노드가 반영된 치명타 피해 보너스 × (1 + 혜성 보너스 합). 치명타 피해 = 피해 × (1 + 치명타 피해 보너스).
@@ -78,13 +78,47 @@ namespace BlackHole.Core
             }
         }
 
-        public float MoonRadiusBonus => _moon.Count * Definition.MoonRadiusBonus;
+        // 달 중첩의 범위 보너스 합. 중첩이 없으면 0이다.
+        // 체감(MoonRadiusDecay = d)이 있으면 Definition.MoonRadiusBonus(기본 + 노드 moonPlanet.rangeScale)는 상한이고, 달 n개의 합은 상한 × (1 − d^n)이다.
+        // 첫 달은 상한의 (1 − d)만 더하고 뒤로 갈수록 적게 더한다(d 0.7이면 30% → 51% → 66% → 76%). 0이면 선형(달 수 × 보너스).
+        public float MoonRadiusBonus
+        {
+            get
+            {
+                int n = _moon.Count;
+                float d = Definition.MoonRadiusDecay;
+
+                if (n == 0)
+                    return 0;
+
+                if (d <= 0)
+                    return n * Definition.MoonRadiusBonus;
+
+                return Definition.MoonRadiusBonus * (1 - (float)Math.Pow(d, n));
+            }
+        }
 
         // 혜성 버프의 중첩(받은 순서).
         public IReadOnlyList<BreakerBuff> CometBuffs { get; }
 
         // 혜성 중첩의 치명타 피해 보너스 증가 합. 중첩이 없으면 0이다.
-        public float CometCritDamageBonus => _comet.Count * Definition.CometCritDamageBonus;
+        // 체감(CometCritDecay = d)이 있으면 n개의 합은 보너스 × (1 − d^n) / (1 − d) — 상한 보너스 / (1 − d)에 수렴한다(달 속도와 같은 식). 0이면 선형.
+        public float CometCritDamageBonus
+        {
+            get
+            {
+                int n = _comet.Count;
+                float d = Definition.CometCritDecay;
+
+                if (n == 0)
+                    return 0;
+
+                if (d <= 0)
+                    return n * Definition.CometCritDamageBonus;
+
+                return Definition.CometCritDamageBonus * (1 - (float)Math.Pow(d, n)) / (1 - d);
+            }
+        }
 
         // 혜성 중첩이 하나라도 있는가(확정 치명타).
         public bool IsGuaranteedCritical => _comet.Count > 0;

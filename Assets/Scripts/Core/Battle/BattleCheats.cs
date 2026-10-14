@@ -8,7 +8,7 @@ namespace BlackHole.Core
     // - 소환한 적은 이 판의 판 구성 수치를 받는다(EnemyStatTable). 판 구성에 없는 성질·크기는 거부한다.
     // - 더한 EXP는 다음 Step에서 Level을 올리고, Level업의 성장 공급·성장 시간도 원래대로 따라온다.
     // - 더한 시간과 시간 고정은 판 통계의 더해진 시간(addedSeconds)에 세지 않는다.
-    // 조작한 판은 테스트 도구가 통계 요약에 표시를 붙인다(ContentTag).
+    // 조작한 판은 테스트 도구가 테스트 표시를 붙인다(ContentTag).
     public static class BattleCheats
     {
         // 시간 고정을 켤 때 남겨 두는 최소 시간(초). 남은 시간이 거의 없을 때 고정하면 Step이 그만큼으로 잘려 판이 멈춘 듯 느려진다.

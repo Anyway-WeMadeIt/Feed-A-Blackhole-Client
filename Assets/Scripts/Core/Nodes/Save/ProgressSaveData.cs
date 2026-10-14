@@ -9,7 +9,10 @@ namespace BlackHole.Core
     public sealed class ProgressSaveData
     {
         // 지금 쓰는 형식 버전. 형식을 바꾸면 올리고, 옛 버전을 읽는 길을 둔다.
-        public const int CurrentFormatVersion = 1;
+        public const int CurrentFormatVersion = 2;
+
+        // 읽을 수 있는 가장 옛 형식 버전. 1은 동기화 상태(Sync)가 없는 저장이다.
+        public const int OldestReadableFormatVersion = 1;
 
         public int FormatVersion;
         public long Gold;
@@ -18,5 +21,7 @@ namespace BlackHole.Core
         public List<NodeRankSaveData> Nodes = new();
         // 마지막 저장 시각(UTC, ISO 8601).
         public string SavedAtUtc;
+        // 서버 동기화 상태(저장 포맷 2). 포맷 1 파일에는 없고, 그때는 처음 상태다.
+        public SyncSaveData Sync = new();
     }
 }

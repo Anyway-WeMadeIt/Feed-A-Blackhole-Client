@@ -16,12 +16,14 @@ namespace BlackHole.Core
         public float MoonDuration { get; } // 달 버프 중첩 하나의 지속 시간(초)
         public float MoonSpeedBonus { get; }
         public float MoonRadiusBonus { get; }
+        public float MoonRadiusDecay { get; } // 달 범위 체감(0 ~ 1 미만). 0이면 선형, 0보다 크면 MoonRadiusBonus가 상한이고 달 n개는 상한 × (1 − d^n)
 
         // 달 중첩의 공격 속도 체감(0 ~ 1 미만). 0이면 선형(중첩 수 × 보너스).
         // d면 n번째 달은 보너스 × d^(n−1)만 더해 합이 보너스 / (1 − d)에 수렴한다 — 한 개는 제값, 여덟 개는 과하지 않게.
         public float MoonSpeedDecay { get; }
         public float CometDuration { get; } // 혜성 버프 중첩 하나의 지속 시간(초)
         public float CometCritDamageBonus { get; }
+        public float CometCritDecay { get; } // 혜성 치명타 피해 보너스의 체감(0 ~ 1 미만). 0이면 선형(중첩 수 × 보너스)
         public float PlanetBonusDamage { get; } // 행성 보너스 피해
         public float StarBonusDamage { get; } // 별 보너스 피해
         public float GalaxyBonusDamage { get; } // 은하 보너스 피해
@@ -44,7 +46,9 @@ namespace BlackHole.Core
             float galaxyBonusDamage,
             float holdSlow = 0.05f,
             float moonSpeedDecay = 0,
-            float speed = 1)
+            float speed = 1,
+            float cometCritDecay = 0,
+            float moonRadiusDecay = 0)
         {
             Damage = DefinitionGuard.Positive(damage, nameof(damage));
             Interval = DefinitionGuard.Positive(interval, nameof(interval));
@@ -65,6 +69,16 @@ namespace BlackHole.Core
             MoonSpeedDecay = moonSpeedDecay;
             CometDuration = DefinitionGuard.Positive(cometDuration, nameof(cometDuration));
             CometCritDamageBonus = NotNegative(cometCritDamageBonus, nameof(cometCritDamageBonus));
+
+            if (float.IsNaN(cometCritDecay) || cometCritDecay < 0 || cometCritDecay >= 1)
+                throw new ArgumentOutOfRangeException(nameof(cometCritDecay), "0 이상 1 미만이어야 한다(0 = 선형 중첩).");
+
+            CometCritDecay = cometCritDecay;
+
+            if (float.IsNaN(moonRadiusDecay) || moonRadiusDecay < 0 || moonRadiusDecay >= 1)
+                throw new ArgumentOutOfRangeException(nameof(moonRadiusDecay), "0 이상 1 미만이어야 한다(0 = 선형 중첩).");
+
+            MoonRadiusDecay = moonRadiusDecay;
             PlanetBonusDamage = NotNegative(planetBonusDamage, nameof(planetBonusDamage));
             StarBonusDamage = NotNegative(starBonusDamage, nameof(starBonusDamage));
             GalaxyBonusDamage = NotNegative(galaxyBonusDamage, nameof(galaxyBonusDamage));
@@ -107,7 +121,9 @@ namespace BlackHole.Core
                 GalaxyBonusDamage + upgrades.GainOf(UpgradeStat.BreakerGalaxyBonusDamage),
                 HoldSlow,
                 MoonSpeedDecay,
-                Speed * speed);
+                Speed * speed,
+                CometCritDecay,
+                MoonRadiusDecay);
         }
     }
 }

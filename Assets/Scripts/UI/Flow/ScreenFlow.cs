@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BlackHole.Core;
+using BlackHole.Sync;
 
 namespace BlackHole.Unity
 {
@@ -19,8 +20,10 @@ namespace BlackHole.Unity
         private readonly Localizer _localizer;// 코드가 쓰는 UI 글자의 번역.
         private readonly ScreenTransition _transition;
         private readonly KeyInput _keyInput;
-        private readonly BattleAnalytics _analytics;// 판의 시작·끝을 통계 서버로 보낸다.
+        private readonly SyncLogFactory _syncLogs;// 판 시작·결산, 노드 구매, 새 게임을 서버 동기화 로그로 만든다.
         private readonly Dictionary<UIBase, List<Action>> _cleanupByScreen = new();
+        // 지금 진행 중인 판의 runId(소문자 UUID). 판 시작 로그를 남긴 판만 가진다. 결산 로그가 같은 값을 싣는다.
+        private string _runId;
 
         public ScreenFlow(
             UIManager ui,
@@ -36,7 +39,7 @@ namespace BlackHole.Unity
             Localizer localizer,
             ScreenTransition transition,
             KeyInput keyInput,
-            BattleAnalytics analytics)
+            SyncLogFactory syncLogs)
         {
             _ui = ui;
             _presentations = presentations;
@@ -51,7 +54,7 @@ namespace BlackHole.Unity
             _localizer = localizer;
             _transition = transition;
             _keyInput = keyInput;
-            _analytics = analytics;
+            _syncLogs = syncLogs;
 
             _keyInput.ContinuePressed += HandleKeyActionSpace;
             _keyInput.UpgradePressed += HandleKeyActionShift;

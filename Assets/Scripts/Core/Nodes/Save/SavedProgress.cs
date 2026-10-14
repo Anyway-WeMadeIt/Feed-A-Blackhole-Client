@@ -12,6 +12,9 @@ namespace BlackHole.Core
         // 마지막 저장 시각(UTC, ISO 8601).
         public string SavedAtUtc => Data.SavedAtUtc;
 
+        // 불러온 동기화 상태(포맷 1이면 처음 상태).
+        public SyncSaveData Sync => Data.Sync;
+
         // 불러온 원래 값. 다음 저장 때 게임에 쓰지 않은 값을 되돌려 적는다.
         internal ProgressSaveData Data { get; }
 

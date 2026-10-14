@@ -51,7 +51,8 @@ namespace BlackHole.Core
             return Guard("Breaker", into, () =>
                 new BreakerDefinition(item.Damage, item.Interval, item.Radius, item.CritChance, item.CritDamage,
                     item.MoonDuration, item.MoonSpeedBonus, item.MoonRadiusBonus, item.CometDuration, item.CometCritDamageBonus,
-                    item.PlanetBonusDamage, item.StarBonusDamage, item.GalaxyBonusDamage, item.HoldSlow, item.MoonSpeedDecay));
+                    item.PlanetBonusDamage, item.StarBonusDamage, item.GalaxyBonusDamage, item.HoldSlow, item.MoonSpeedDecay, cometCritDecay: item.CometCritDecay,
+                    moonRadiusDecay: item.MoonRadiusDecay));
         }
 
         private static T Guard<T>(string at, List<ContentDiagnostic> into, Func<T> create) where T : class

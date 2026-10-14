@@ -454,8 +454,7 @@ namespace BlackHole.Unity
             }
 
             // 체력 음영: 색을 내는 몸체(은하는 실루엣 팔)와 성질 속 채움에 음영 셰이더를 쓴다.
-            // 중심·반지름은 렌더러 자신의 좌표(오브젝트 공간)라 출현 때 한 번만 넣고, 이후엔 체력이 바뀔 때 문턱값만 고친다(UpdateShade).
-            // 처음부터 프로퍼티 블록이 붙어 있어야 셰이더가 오브젝트 공간을 믿을 수 있다(블록이 붙은 렌더러는 정점을 미리 합치는 배칭에서 빠진다).
+            // 중심·반지름은 스프라이트의 텍스처 좌표(UV)라 출현 때 한 번만 넣고, 이후엔 체력이 바뀔 때 문턱값만 고친다(UpdateShade).
             if (_shadeMaterial != null)
             {
                 visual.Body.sharedMaterial = _shadeMaterial;
@@ -526,7 +525,7 @@ namespace BlackHole.Unity
 
         // 체력 음영: 체력이 바뀐 프레임에만 문턱값을 다시 넣는다(평소 프레임에는 아무것도 하지 않는다).
         // 음영 면적 = 남은 체력 비율, 기본색 면적 = 잃은 체력 비율. 기본색 쪽은 몸체의 로컬 위쪽이고,
-        // 셰이더가 오브젝트 공간에서 재므로 경계선은 자전·피격 흔들림·출현 크기 변화를 저절로 따라간다.
+        // 셰이더가 스프라이트의 UV로 재므로 경계선은 자전·피격 흔들림·출현 크기 변화를 저절로 따라간다.
         private void UpdateShade(EnemyVisual visual, Enemy enemy)
         {
             if (_shadeMaterial == null)
@@ -544,18 +543,37 @@ namespace BlackHole.Unity
                 SetShadeThreshold(visual.Fill, threshold);
         }
 
-        // 출현 때 한 번: 스프라이트 중심과 반지름(긴 변의 절반 — Create가 크기를 맞추는 기준과 같다)을 오브젝트 공간으로 넣는다.
+        // 출현 때 한 번: 스프라이트 중심(bounds.center)과 반지름(긴 변의 절반 — Create가 크기를 맞추는 기준과 같다)을
+        // 셰이더가 쓰는 UV 단위로 바꿔 넣는다. 로컬 y(단위) → 텍스처 픽셀 y = 스프라이트 원점 + pivot + y × PPU → ÷ 텍스처 높이.
         // 문턱값은 '전부 음영'으로 시작하고, 첫 Synchronize의 UpdateShade가 실제 체력으로 고친다.
         private void InitShade(SpriteRenderer renderer, float radiusScale)
         {
-            Bounds bounds = renderer.sprite.bounds;
+            Sprite sprite = renderer.sprite;
+            Bounds bounds = sprite.bounds;
             float radius = Mathf.Max(bounds.extents.x, bounds.extents.y) * radiusScale;
+            float pixelsPerUnit = sprite.pixelsPerUnit;
+            float textureHeight = sprite.texture.height;
+
+            float centerPixelY = SpriteOriginY(sprite) + sprite.pivot.y + bounds.center.y * pixelsPerUnit;
+            float centerUv = centerPixelY / textureHeight;
+            float radiusUv = radius * pixelsPerUnit / textureHeight;
 
             renderer.GetPropertyBlock(_shade);
-            _shade.SetVector(_shadeCenterId, new Vector4(bounds.center.x, bounds.center.y, 0, 0));
-            _shade.SetFloat(_shadeRadiusId, Mathf.Max(radius, 1e-4f));
+            _shade.SetVector(_shadeCenterId, new Vector4(0, centerUv, 0, 0));
+            _shade.SetFloat(_shadeRadiusId, Mathf.Max(radiusUv, 1e-6f));
             _shade.SetFloat(_shadeThresholdId, ShadeAllThreshold);
             renderer.SetPropertyBlock(_shade);
+        }
+
+        // 스프라이트 사각형의 아래쪽 끝이 텍스처에서 몇 번째 픽셀(y)인가. 아틀라스에 사각형으로 묶였으면 아틀라스 안 위치를 쓴다.
+        // 아틀라스에 Tight(모양대로)로 묶인 스프라이트는 textureRect를 읽을 수 없어(예외) 원본 사각형으로 대신한다 —
+        // 그 경우 경계 높이가 어긋날 수 있다(지금 적 스프라이트는 모두 코드로 만든 단독 텍스처라 해당 없음).
+        private static float SpriteOriginY(Sprite sprite)
+        {
+            if (sprite.packed && sprite.packingMode == SpritePackingMode.Tight)
+                return sprite.rect.y;
+
+            return sprite.textureRect.y - sprite.textureRectOffset.y;
         }
 
         private void SetShadeThreshold(SpriteRenderer renderer, float threshold)

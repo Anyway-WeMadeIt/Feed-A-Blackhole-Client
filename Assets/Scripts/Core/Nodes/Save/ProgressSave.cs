@@ -20,12 +20,16 @@ namespace BlackHole.Core
             var diagnostics = new List<ContentDiagnostic>();
             var adjustments = new List<ContentDiagnostic>();
 
-            if (data.FormatVersion != ProgressSaveData.CurrentFormatVersion)
+            if (data.FormatVersion < ProgressSaveData.OldestReadableFormatVersion || data.FormatVersion > ProgressSaveData.CurrentFormatVersion)
             {
                 diagnostics.Add(new ContentDiagnostic("FormatVersion",
-                    $"지원하지 않는 형식 버전이다. 받은 값: {data.FormatVersion}, 지금 형식: {ProgressSaveData.CurrentFormatVersion}."));
+                    $"지원하지 않는 형식 버전이다. 받은 값: {data.FormatVersion}, 읽을 수 있는 형식: {ProgressSaveData.OldestReadableFormatVersion}~{ProgressSaveData.CurrentFormatVersion}."));
                 return new ProgressLoadResult(null, diagnostics, adjustments);
             }
+
+            // 포맷 1에는 동기화 상태가 없다. 처음 상태로 읽는다. 쓸 때는 포맷 2가 된다.
+            data.Sync ??= new SyncSaveData();
+            CheckSync(data.Sync, diagnostics);
 
             if (data.Gold < 0)
                 diagnostics.Add(new ContentDiagnostic("Gold", $"0 이상이어야 한다. 받은 값: {data.Gold}."));
@@ -89,9 +93,59 @@ namespace BlackHole.Core
             return new ProgressLoadResult(progress, diagnostics, adjustments);
         }
 
+        // 동기화 상태 검사: 다음 seq는 1 이상, 대기 로그는 글자가 있고 seq가 빈틈 없이 이어지며 마지막 로그 바로 다음이 다음 seq다.
+        private static void CheckSync(SyncSaveData sync, List<ContentDiagnostic> diagnostics)
+        {
+            if (sync.NextSeq < 1)
+                diagnostics.Add(new ContentDiagnostic("Sync.NextSeq", $"1 이상이어야 한다. 받은 값: {sync.NextSeq}."));
+
+            sync.Pending ??= new List<PendingLogSaveData>();
+
+            for (int i = 0; i < sync.Pending.Count; i++)
+            {
+                PendingLogSaveData log = sync.Pending[i];
+                string at = $"Sync.Pending[{i}]";
+
+                if (log == null || log.Seq < 1 || string.IsNullOrEmpty(log.Type) || string.IsNullOrEmpty(log.Json))
+                {
+                    diagnostics.Add(new ContentDiagnostic(at, "seq(1 이상), type, json이 모두 있어야 한다."));
+                    return;
+                }
+
+                if (i > 0 && log.Seq != sync.Pending[i - 1].Seq + 1)
+                {
+                    diagnostics.Add(new ContentDiagnostic(at, $"seq가 앞 로그에 이어지지 않는다({sync.Pending[i - 1].Seq} → {log.Seq})."));
+                    return;
+                }
+            }
+
+            if (sync.Pending.Count > 0 && sync.Pending[sync.Pending.Count - 1].Seq + 1 != sync.NextSeq)
+                diagnostics.Add(new ContentDiagnostic("Sync.NextSeq",
+                    $"마지막 대기 로그 다음 seq여야 한다. 마지막 로그 {sync.Pending[sync.Pending.Count - 1].Seq}, 받은 값 {sync.NextSeq}."));
+
+            sync.LastRejection ??= new RejectionSaveData();
+        }
+
         // 저장으로 진행 상태를 덮어쓴다. 지금 값은 모두 버린다.
         public static void Restore(ProgressState progress, SavedProgress saved) =>
             progress.Restore(saved.Gold, saved.GrowthStage, saved.Ranks);
+
+        // 불러온 저장의 원래 값(게임에 쓰지 않은 값 포함)에 동기화 상태만 바꿔 다시 저장 형식으로 만든다.
+        // 새 게임·계속을 고르기 전(타이틀)에 동기화 응답을 저장할 때 쓴다 — 진행 상태는 아직 저장에서 이어 오지 않았다.
+        public static ProgressSaveData WithSync(SavedProgress saved, SyncSaveData sync)
+        {
+            var data = new ProgressSaveData
+            {
+                FormatVersion = ProgressSaveData.CurrentFormatVersion,
+                Gold = saved.Data.Gold,
+                GrowthStage = saved.Data.GrowthStage,
+                SavedAtUtc = saved.Data.SavedAtUtc,
+                Sync = sync,
+            };
+
+            data.Nodes.AddRange(saved.Data.Nodes);
+            return data;
+        }
 
         // 새 게임: 진행 상태를 처음(새 ProgressState와 같은 상태)으로 되돌린다.
         public static void StartNew(ProgressState progress) =>

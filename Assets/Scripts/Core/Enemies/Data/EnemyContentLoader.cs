@@ -74,7 +74,7 @@ namespace BlackHole.Core
 
                 EnemyDefinition enemy = Guard(at, into, () =>
                     new EnemyDefinition(item.Type, item.MoveSpeed, item.Radius, item.RadiusStep, tiers, traits, item.UpgradesTo, item.SpawnPeriod,
-                        item.RainCount, item.KillTimeBonus));
+                        item.RainCount, item.KillTimeBonus, item.RespawnDecay, item.RainCooldown, item.RainDelay));
 
                 if (enemy != null)
                     enemies.Add(enemy);
@@ -156,7 +156,7 @@ namespace BlackHole.Core
                     return Guard(at, into, () => new ChainLightningDefinition(
                         item.Damage, item.Radius, item.MaxTargets, item.BranchChance, item.CritChance, item.CritMultiplier));
                 case EnemyTraitType.Supernova:
-                    return Guard(at, into, () => new ExplosionDefinition(item.HealthFraction, item.Radius));
+                    return Guard(at, into, () => new ExplosionDefinition(item.Damage, item.Radius));
                 case EnemyTraitType.Laser:
                     return Guard(at, into, () => new LaserBurstDefinition(item.Damage, item.Width, item.CritChance, item.CritMultiplier));
                 case EnemyTraitType.Moon:

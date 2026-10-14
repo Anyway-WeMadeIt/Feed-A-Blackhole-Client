@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using BlackHole.Analytics;
 using BlackHole.Core;
 
 namespace BlackHole.Unity
@@ -71,7 +70,9 @@ namespace BlackHole.Unity
                 { "moonDuration", R(d.MoonDuration) },
                 { "moonSpeedBonus", R(d.MoonSpeedBonus) },
                 { "moonSpeedDecay", R(d.MoonSpeedDecay) },
+                { "cometCritDecay", R(d.CometCritDecay) },
                 { "moonRadiusBonus", R(d.MoonRadiusBonus) },
+                { "moonRadiusDecay", R(d.MoonRadiusDecay) },
                 { "cometDuration", R(d.CometDuration) },
                 { "cometCritDamageBonus", R(d.CometCritDamageBonus) },
                 { "planetBonusDamage", R(d.PlanetBonusDamage) },
@@ -126,7 +127,7 @@ namespace BlackHole.Unity
                     EnemyTraitDefinition trait = composition.Traits[i];
                     var item = new JsonObject
                     {
-                        { "trait", ContractIds.Of(trait.Type.ToString()) },
+                        { "trait", PlaytestIds.Of(trait.Type.ToString()) },
                         { "chance", kind.IsPickup ? 1d : R(composition.TraitChances[i]) },
                         { "alive", Count(aliveTraits, (kind.Type, trait.Type)) },
                         { "effect", EffectOf(trait) },
@@ -143,7 +144,7 @@ namespace BlackHole.Unity
                 }
 
                 entry.Add("traits", traits);
-                enemies.Add(ContractIds.Of(kind.Type.ToString()), entry);
+                enemies.Add(PlaytestIds.Of(kind.Type.ToString()), entry);
             }
 
             return enemies;

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using BlackHole.Analytics;
 using BlackHole.Core;
 
 namespace BlackHole.Unity
@@ -13,11 +12,11 @@ namespace BlackHole.Unity
     //
     // 경로는 슬래시로 나눈다. 종류·성질은 계약 ID처럼 열거형 이름의 첫 글자만 소문자다(asteroid, golden).
     //   battle/<timeLimit|killTimeBonus|maxKillTimeBonus|killTimeCooldown>
-    //   breaker/<damage|interval|radius|critChance|critDamage|moonDuration|moonSpeedBonus|moonRadiusBonus|moonSpeedDecay|cometDuration|cometCritDamageBonus|planetBonusDamage|starBonusDamage|galaxyBonusDamage|holdSlow>
+    //   breaker/<damage|interval|radius|critChance|critDamage|moonDuration|moonSpeedBonus|moonRadiusBonus|moonRadiusDecay|moonSpeedDecay|cometDuration|cometCritDamageBonus|cometCritDecay|planetBonusDamage|starBonusDamage|galaxyBonusDamage|holdSlow>
     //   placement/<minDistance|maxDistance>           적 출현 띠(HQ로부터 거리, 전장 배율 1 기준)
-    //   enemy/<종류>/<moveSpeed|radius|radiusStep|spawnPeriod|rainCount|killTimeBonus>
+    //   enemy/<종류>/<moveSpeed|radius|radiusStep|spawnPeriod|rainCount|killTimeBonus|respawnDecay|rainCooldown|rainDelay>
     //   enemy/<종류>/tier/<색 등급, 1부터>/<hp|gold|exp>
-    //   enemy/<종류>/trait/<성질>/<multiplier|critRewardScale|damage|radius|maxTargets|branchChance|critChance|critMultiplier|healthFraction|width|force|duration|maxActive>
+    //   enemy/<종류>/trait/<성질>/<multiplier|critRewardScale|damage|radius|maxTargets|branchChance|critChance|critMultiplier|width|force|duration|maxActive>
     //   supply/<종류>/count                       시작 공급에 없는 종류면 더한다(없는 종류의 지금 값은 0)
     //   growth/levelExp/<Level, 1부터>             그 Level에 닿는 누적 EXP
     //   growth/milestone/<번호, 1부터>/<level|targetGold|fieldScale>
@@ -47,7 +46,7 @@ namespace BlackHole.Unity
         {
             { EnemyTraitType.Golden, new[] { "multiplier", "critChance", "critRewardScale" } },
             { EnemyTraitType.Electric, new[] { "damage", "radius", "maxTargets", "branchChance", "critChance", "critMultiplier" } },
-            { EnemyTraitType.Supernova, new[] { "healthFraction", "radius" } },
+            { EnemyTraitType.Supernova, new[] { "damage", "radius" } },
             { EnemyTraitType.Laser, new[] { "damage", "width", "critChance", "critMultiplier" } },
             { EnemyTraitType.Moon, Array.Empty<string>() },
             { EnemyTraitType.Comet, Array.Empty<string>() },
@@ -58,12 +57,12 @@ namespace BlackHole.Unity
 
         private static readonly string[] BreakerFields =
         {
-            "damage", "interval", "radius", "critChance", "critDamage", "moonDuration", "moonSpeedBonus", "moonRadiusBonus", "moonSpeedDecay",
-            "cometDuration", "cometCritDamageBonus", "planetBonusDamage", "starBonusDamage", "galaxyBonusDamage", "holdSlow",
+            "damage", "interval", "radius", "critChance", "critDamage", "moonDuration", "moonSpeedBonus", "moonRadiusBonus", "moonRadiusDecay", "moonSpeedDecay",
+            "cometDuration", "cometCritDamageBonus", "cometCritDecay", "planetBonusDamage", "starBonusDamage", "galaxyBonusDamage", "holdSlow",
         };
 
         private static readonly string[] PlacementFields = { "minDistance", "maxDistance" };
-        private static readonly string[] EnemyFields = { "moveSpeed", "radius", "radiusStep", "spawnPeriod", "rainCount", "killTimeBonus" };
+        private static readonly string[] EnemyFields = { "moveSpeed", "radius", "radiusStep", "spawnPeriod", "rainCount", "killTimeBonus", "respawnDecay", "rainCooldown", "rainDelay" };
         private static readonly string[] TierFields = { "hp", "gold", "exp" };
         private static readonly string[] MilestoneFields = { "level", "targetGold", "fieldScale" };
 
@@ -181,12 +180,12 @@ namespace BlackHole.Unity
             foreach (SupplyData supply in content.Enemies.StartSupply)
             {
                 if (supply?.Enemy != null)
-                    paths.Add($"supply/{ContractIds.Of(supply.Enemy.Value.ToString())}/count");
+                    paths.Add($"supply/{PlaytestIds.Of(supply.Enemy.Value.ToString())}/count");
             }
 
             foreach (EnemyData enemy in content.Enemies.Enemies)
             {
-                string kind = "enemy/" + ContractIds.Of(enemy.Type.ToString());
+                string kind = "enemy/" + PlaytestIds.Of(enemy.Type.ToString());
 
                 foreach (string field in EnemyFields)
                     paths.Add($"{kind}/{field}");
@@ -199,7 +198,7 @@ namespace BlackHole.Unity
 
                 foreach (EnemyTraitData trait in enemy.Traits)
                 {
-                    string at = $"{kind}/trait/{ContractIds.Of(trait.Type.ToString())}";
+                    string at = $"{kind}/trait/{PlaytestIds.Of(trait.Type.ToString())}";
 
                     if (trait.Effect != null && TraitFields.TryGetValue(trait.Type, out string[] fields))
                     {
@@ -289,7 +288,9 @@ namespace BlackHole.Unity
                 case "moonDuration": return Real(() => breaker.MoonDuration, v => breaker.MoonDuration = v, out error);
                 case "moonSpeedBonus": return Real(() => breaker.MoonSpeedBonus, v => breaker.MoonSpeedBonus = v, out error);
                 case "moonSpeedDecay": return Real(() => breaker.MoonSpeedDecay, v => breaker.MoonSpeedDecay = v, out error);
+                case "cometCritDecay": return Real(() => breaker.CometCritDecay, v => breaker.CometCritDecay = v, out error);
                 case "moonRadiusBonus": return Real(() => breaker.MoonRadiusBonus, v => breaker.MoonRadiusBonus = v, out error);
+                case "moonRadiusDecay": return Real(() => breaker.MoonRadiusDecay, v => breaker.MoonRadiusDecay = v, out error);
                 case "cometDuration": return Real(() => breaker.CometDuration, v => breaker.CometDuration = v, out error);
                 case "cometCritDamageBonus": return Real(() => breaker.CometCritDamageBonus, v => breaker.CometCritDamageBonus = v, out error);
                 case "planetBonusDamage": return Real(() => breaker.PlanetBonusDamage, v => breaker.PlanetBonusDamage = v, out error);
@@ -323,7 +324,7 @@ namespace BlackHole.Unity
             if (path.Length < 3)
                 return Unknown(string.Join("/", path), out error);
 
-            EnemyData enemy = enemies.Enemies.Find(e => ContractIds.Of(e.Type.ToString()) == path[1]);
+            EnemyData enemy = enemies.Enemies.Find(e => PlaytestIds.Of(e.Type.ToString()) == path[1]);
 
             if (enemy == null)
             {
@@ -341,6 +342,9 @@ namespace BlackHole.Unity
                     case "spawnPeriod": return Real(() => enemy.SpawnPeriod, v => enemy.SpawnPeriod = v, out error);
                     case "rainCount": return Int(() => enemy.RainCount, v => enemy.RainCount = v, out error);
                     case "killTimeBonus": return Real(() => enemy.KillTimeBonus, v => enemy.KillTimeBonus = v, out error);
+                    case "respawnDecay": return Real(() => enemy.RespawnDecay, v => enemy.RespawnDecay = v, out error);
+                    case "rainCooldown": return Real(() => enemy.RainCooldown, v => enemy.RainCooldown = v, out error);
+                    case "rainDelay": return Real(() => enemy.RainDelay, v => enemy.RainDelay = v, out error);
                     default: return Unknown(path[2], out error);
                 }
             }
@@ -363,7 +367,7 @@ namespace BlackHole.Unity
 
             if (path.Length == 5 && path[2] == "trait")
             {
-                EnemyTraitData trait = enemy.Traits.Find(t => ContractIds.Of(t.Type.ToString()) == path[3]);
+                EnemyTraitData trait = enemy.Traits.Find(t => PlaytestIds.Of(t.Type.ToString()) == path[3]);
 
                 if (trait == null)
                 {
@@ -392,7 +396,6 @@ namespace BlackHole.Unity
                     case "branchChance": return Real(() => effect.BranchChance, v => effect.BranchChance = v, out error);
                     case "critChance": return Real(() => effect.CritChance, v => effect.CritChance = v, out error);
                     case "critMultiplier": return Real(() => effect.CritMultiplier, v => effect.CritMultiplier = v, out error);
-                    case "healthFraction": return Real(() => effect.HealthFraction, v => effect.HealthFraction = v, out error);
                     case "width": return Real(() => effect.Width, v => effect.Width = v, out error);
                     case "force": return Real(() => effect.Force, v => effect.Force = v, out error);
                     case "duration": return Real(() => effect.Duration, v => effect.Duration = v, out error);
@@ -409,7 +412,7 @@ namespace BlackHole.Unity
 
             foreach (EnemyType candidate in Enum.GetValues(typeof(EnemyType)))
             {
-                if (ContractIds.Of(candidate.ToString()) == kind)
+                if (PlaytestIds.Of(candidate.ToString()) == kind)
                     type = candidate;
             }
 

@@ -162,8 +162,11 @@ namespace BlackHole.Unity
             section.Row("치명 배율", $"×{Number(d.CritDamage)}");
             section.Row("달 버프", $"{Number(d.MoonDuration)}초 · 속도 +{Percent(d.MoonSpeedBonus)}"
                 + (d.MoonSpeedDecay > 0 ? $" (체감 {Number(d.MoonSpeedDecay)}, 상한 +{Percent(d.MoonSpeedBonus / (1 - d.MoonSpeedDecay))})" : "")
-                + $" · 반경 +{Percent(d.MoonRadiusBonus)}");
-            section.Row("혜성 버프", $"{Number(d.CometDuration)}초 · 치명 피해 +{Percent(d.CometCritDamageBonus)}");
+                + (d.MoonRadiusDecay > 0
+                    ? $" · 반경 상한 +{Percent(d.MoonRadiusBonus)} (체감 {Number(d.MoonRadiusDecay)}, 첫 달 +{Percent(d.MoonRadiusBonus * (1 - d.MoonRadiusDecay))})"
+                    : $" · 반경 +{Percent(d.MoonRadiusBonus)}"));
+            section.Row("혜성 버프", $"{Number(d.CometDuration)}초 · 치명 피해 +{Percent(d.CometCritDamageBonus)}"
+                + (d.CometCritDecay > 0 ? $" (체감 {Number(d.CometCritDecay)}, 상한 +{Percent(d.CometCritDamageBonus / (1 - d.CometCritDecay))})" : ""));
             section.Row("행성·별 보너스 피해", $"{Number(d.PlanetBonusDamage)} · {Number(d.StarBonusDamage)}");
         }
 

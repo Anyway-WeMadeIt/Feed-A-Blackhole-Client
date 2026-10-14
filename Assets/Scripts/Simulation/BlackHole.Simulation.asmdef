@@ -1,7 +1,0 @@
-{
-  "name": "BlackHole.Simulation",
-  "rootNamespace": "BlackHole.Simulation",
-  "references": ["BlackHole.Core.Common", "BlackHole.Core.Hq", "BlackHole.Core.Enemies", "BlackHole.Core.Battle", "BlackHole.Core.Nodes"],
-  "noEngineReferences": true,
-  "defineConstraints": ["UNITY_EDITOR || DEVELOPMENT_BUILD"]
-}

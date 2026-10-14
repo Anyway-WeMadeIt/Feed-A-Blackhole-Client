@@ -46,7 +46,12 @@ namespace BlackHole.Core
         {
             public EnemyDefinition Kind;
             public float Elapsed;
+            // 마지막 혜성 비가 내린 판 시각(초). 없으면 음수.
+            public float LastRainAt = -1;
         }
+
+        // 판이 흐른 시간(초). 혜성 비의 시작 유예(RainDelay)와 쿨타임(RainCooldown) 판정에 쓴다.
+        private float _elapsed;
 
         internal EnemySupply(
             int seed,
@@ -150,7 +155,7 @@ namespace BlackHole.Core
                         size,
                         _stats.Of(kind, tier, trait, size),
                         _placement.Pick(_placementRandom),
-                        request.Respawn);
+                        request.RespawnGeneration);
                 }
             }
 
@@ -160,6 +165,8 @@ namespace BlackHole.Core
         // 주기 출현 종류마다 출현 주기가 찰 때마다 등장 확률로 하나를 주기 출현 띠 안에 만듬.
         internal void AdvancePeriodicSpawns(float delta)
         {
+            _elapsed += delta;
+
             foreach (SpawnClock clock in _spawnClocks)
             {
                 clock.Elapsed += delta;
@@ -173,7 +180,13 @@ namespace BlackHole.Core
                     if (_periodicSpawnRandom.NextFloat() >= composition.SpawnChance)
                         continue;
 
-                    int count = kind.RainCount > 1 && _rainRandom.Roll(composition.RainChance) ? kind.RainCount : 1;
+                    // 혜성 비: 판 시작 유예(RainDelay)가 지났고 마지막 비로부터 쿨타임(RainCooldown)이 지났을 때만 판정한다. 아니면 하나만 나온다(난수도 쓰지 않는다).
+                    bool rainAllowed = kind.RainCount > 1 && _elapsed >= kind.RainDelay
+                        && (clock.LastRainAt < 0 || _elapsed - clock.LastRainAt >= kind.RainCooldown);
+                    int count = rainAllowed && _rainRandom.Roll(composition.RainChance) ? kind.RainCount : 1;
+
+                    if (count > 1)
+                        clock.LastRainAt = _elapsed;
                     EnemyTraitDefinition trait = composition.Traits[0];
 
                     for (int i = 0; i < count; i++)

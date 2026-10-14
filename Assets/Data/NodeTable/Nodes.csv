@@ -174,28 +174,23 @@ laserStar.damage-01,1,펄서 · 초신성
 breaker.damage-25,1,펄서 · 초신성
 laserStar.critBonus-01,1,펄서 · 초신성
 breaker.speed-10,1,펄서 · 초신성
-moonPlanet.duration-04,1,펄서 · 초신성
 electricStar.splitChance-02,1,펄서 · 초신성
 supernovaStar.range-01,1,펄서 · 초신성
-breaker.critBonus-02,1,펄서 · 초신성
 moonPlanet.maxCount-01,1,펄서 · 초신성
 electricStar.chain-03,1,펄서 · 초신성
 breaker.damage-26,1,펄서 · 초신성
 breaker.radius-12,1,펄서 · 초신성
 asteroid.respawnChance-05,1,펄서 · 초신성
 laserStar.width-02,1,펄서 · 초신성
-supernovaStar.hpDamage-01,1,펄서 · 초신성
+supernovaStar.damage-01,1,펄서 · 초신성
 star.respawnChance-04,1,펄서 · 초신성
 laserStar.damage-02,1,펄서 · 초신성
 supernovaStar.spawnChance-01,1,펄서 · 초신성
 star.massScale-05,1,펄서 · 초신성
 laserStar.critBonus-02,1,펄서 · 초신성
-breaker.speed-11,1,펄서 · 초신성
-electricStar.splitChance-03,1,펄서 · 초신성
 supernovaStar.range-02,1,펄서 · 초신성
-breaker.critBonus-03,1,펄서 · 초신성
 comet.spawnChance-03,1,펄서 · 초신성
-supernovaStar.hpDamage-02,1,펄서 · 초신성
+supernovaStar.damage-02,1,펄서 · 초신성
 breaker.damage-27,1,펄서 · 초신성
 laserStar.width-03,1,펄서 · 초신성
 laserStar.damage-03,1,펄서 · 초신성
@@ -205,15 +200,13 @@ laserStar.damage-05,1,펄서 · 초신성
 laserStar.width-05,1,펄서 · 초신성
 breaker.radius-13,1,펄서 · 초신성
 laserStar.width-06,1,펄서 · 초신성
-star.massScale-06,1,펄서 · 초신성
-supernovaStar.hpDamage-03,1,초신성 잔해
+supernovaStar.damage-03,1,초신성 잔해
 timer-03,1,초신성 잔해
 planet.toStar-03,1,초신성 잔해
 comet.spawnChance-04,1,초신성 잔해
 breaker.critBonus-04,1,초신성 잔해
 planet.timeChance-02,1,초신성 잔해
 star.timeChance-02,1,초신성 잔해
-star.massScale-07,1,초신성 잔해
 laserStar.width-07,1,초신성 잔해
 laserStar.damage-06,1,초신성 잔해
 planet.toStar-04,1,초신성 잔해
@@ -225,13 +218,12 @@ supernovaStar.range-03,1,초신성 잔해
 breaker.damage-28,1,초신성 잔해
 laserStar.width-08,1,초신성 잔해
 supernovaStar.range-04,1,초신성 잔해
-supernovaStar.hpDamage-04,1,초신성 잔해
+supernovaStar.damage-04,1,초신성 잔해
 planet.toStar-05,1,초신성 잔해
-supernovaStar.hpDamage-05,1,초신성 잔해
-supernovaStar.hpDamage-06,1,초신성 잔해
+supernovaStar.damage-05,1,초신성 잔해
+supernovaStar.damage-06,1,초신성 잔해
 timer-04,1,초신성 잔해
 laserStar.width-09,1,초신성 잔해
-star.massScale-08,1,초신성 잔해
 star.massScale-09,1,초신성 잔해
 star.toGalaxy-01,1,은하핵
 growth.galaxies-01,1,은하핵

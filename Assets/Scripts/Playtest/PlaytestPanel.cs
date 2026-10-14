@@ -15,7 +15,7 @@ namespace BlackHole.Unity
     // 개발 패널(에디터·개발 빌드). F1 또는 세 손가락 터치로 열고 닫는다. GameBootstrap이 붙인다.
     // 탭: 시나리오(정해 둔 시점에서 시작) / 프로필(밸런스 값 고르기) / 판(시간·Level·배속·끝내기) / 적(소환·치우기·멈추기) / 메모(느낌 기록).
     // HUD는 패널과 따로 켜고 끈다. 처음에는 꺼져 있고 F2나 '판' 탭의 HUD 토글로 켠다(판이 있을 때만 보인다).
-    // 판을 조작하면(배속 1이 아님 포함) 그 판의 전투 요약에 테스트 표시(+test)가 붙는다(ContentTag).
+    // 판을 조작하면(배속 1이 아님 포함) 그 판에 테스트 표시(+test)가 붙는다(ContentTag. HUD·메모에 보인다).
     // 패널이 열려 있는 동안 게임 UI 입력(EventSystem)을 막고, 고른 경우 판도 멈춘다.
     internal sealed class PlaytestPanel : MonoBehaviour
     {
@@ -51,7 +51,6 @@ namespace BlackHole.Unity
         private GameContent _content;
         // 노드 정의(메모에 노드마다 효과를 적을 때 쓴다).
         private NodeTree _nodeTree;
-        private BattleAnalytics _analytics;
         private readonly PlaytestHud _hud = new();
         private string[] _kindNames;
 
@@ -148,8 +147,7 @@ namespace BlackHole.Unity
             ScreenFlow screens,
             GameContent content,
             NodeTree nodeTree,
-            ProgressState progress,
-            BattleAnalytics analytics)
+            ProgressState progress)
         {
             _session = session;
             _battle = battle;
@@ -157,7 +155,6 @@ namespace BlackHole.Unity
             _content = content;
             _nodeTree = nodeTree;
             _progress = progress;
-            _analytics = analytics;
 #if UNITY_EDITOR
             _pendingLaunch = TestSetupLaunch.Take();
             _restartOnDataChange = PlayerPrefs.GetInt(LiveRestartKey, 1) == 1;
@@ -497,7 +494,7 @@ namespace BlackHole.Unity
 
         private void DrawScenarios()
         {
-            GUILayout.Label("정해 둔 시점(성장도·Gold·노드·Level)에서 바로 시작한다. 시나리오를 쓰면 이번 실행은 저장하지 않고, 전투 요약에 +test가 붙는다.", _small);
+            GUILayout.Label("정해 둔 시점(성장도·Gold·노드·Level)에서 바로 시작한다. 시나리오를 쓰면 이번 실행은 저장하지 않고, HUD·메모에 +test 표시가 붙는다.", _small);
 
             if (_session.Scenarios.Count == 0)
                 GUILayout.Label($"시나리오가 없다. {PlaytestLibrary.ScenariosFolder}나 기기 폴더에 JSON을 둔다.", _small);
@@ -1265,7 +1262,6 @@ namespace BlackHole.Unity
             if (session != null)
             {
                 note.Battle = _hud.Capture(session);
-                note.BattleId = _analytics.CurrentBattleId;
                 note.Stats = NoteStats.Capture(session, _content, _battle.Upgrades, NoteStats.AtNow);
             }
             else if (_battleSetup != null)

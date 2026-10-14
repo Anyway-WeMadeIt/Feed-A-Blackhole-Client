@@ -222,8 +222,8 @@ stat.laserStar.critBonus.name,Laser Crit Bonus,레이저 치명타 보너스
 stat.laserStar.critBonus.desc,Increases laser crit damage.,레이저의 치명타 피해량을 높입니다.
 stat.supernovaStar.range.name,Supernova Range,슈퍼노바 범위
 stat.supernovaStar.range.desc,Increases the blast range of supernovas.,슈퍼노바의 폭발 범위를 넓힙니다.
-stat.supernovaStar.hpDamage.name,Supernova Current-HP Damage,현재체력 비례 슈퍼노바 대미지
-stat.supernovaStar.hpDamage.desc,Increases supernova damage as a share of the target's current HP.,슈퍼노바가 현재 체력에 비례하여 주는 피해의 비율을 높입니다.
+stat.supernovaStar.damage.name,Supernova Damage,슈퍼노바 대미지
+stat.supernovaStar.damage.desc,Increases the damage of supernova blasts.,슈퍼노바 폭발의 대미지를 높입니다.
 stat.supernovaStar.spawnChance.name,Supernova Star Spawn Chance,슈퍼노바 별 생성 확률
 stat.supernovaStar.spawnChance.desc,Increases the chance supernova stars spawn.,슈퍼노바 별이 생성되는 확률을 높입니다.
 stat.growth.galaxies.name,Galaxies Spawned on Growth,블랙홀 성장 시 생성되는 은하 수

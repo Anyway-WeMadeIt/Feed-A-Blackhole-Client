@@ -26,5 +26,11 @@ namespace BlackHole.Core
         public int RainCount;
         // 파괴 때 시간 추가가 성공하면 더하는 초. 0이면 판 설정(BattleRules.killTimeBonus)을 쓴다.
         public float KillTimeBonus;
+        // 재생성 세대 감쇠(0~1). 재생성으로 나온 적이 죽을 때 재생성 확률에 세대마다 이 값을 곱한다. 0이면 1세대까지만(사슬 금지), 1이면 감쇠 없음.
+        public float RespawnDecay;
+        // 혜성 비 쿨타임(초). 혜성 비가 한 번 내리면 이 시간 동안은 혜성 비 판정을 하지 않는다(하나씩은 나온다). 0이면 없음.
+        public float RainCooldown;
+        // 판 시작 뒤 이 시간(초)까지는 혜성 비가 내리지 않는다. 0이면 없음.
+        public float RainDelay;
     }
 }

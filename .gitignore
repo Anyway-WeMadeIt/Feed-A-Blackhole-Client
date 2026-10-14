@@ -141,9 +141,5 @@ $RECYCLE.BIN/
 # Cowork(Claude)가 미리보기 이미지를 저장하는 폴더
 /Claude outputs/
 
-# 테스트 도구의 느낌 메모·AI 묶음·변경 기록(개인 테스트 데이터, Docs/BalanceLoop/M3-feel-notes.md)
+# 테스트 도구가 쓰는 개인 테스트 데이터(느낌 메모, 노드 검사 결과 등)
 /PlaytestData/
-
-# AI 초안 프로필(작업 중인 파일, Docs/BalanceLoop/AI-GUIDE.md). 반영하면 PlaytestData/drafts/로 옮겨진다.
-/Assets/Playtest/Profiles/ai-draft.json
-/Assets/Playtest/Profiles/ai-draft.json.meta

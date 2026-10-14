@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using BlackHole.Analytics;
 using BlackHole.Core;
 
 namespace BlackHole.Unity
 {
     // 느낌 메모 한 줄(schema 1, M3). 적는 순간의 세팅·수치 지문·판 상태와 느낌을 함께 담는다.
-    // 메모 하나 = 파일 하나(PlaytestNotes: notes/<저장 이름>.json). 필드 설명은 Docs/Archive/BalanceLoop/M3-feel-notes.md.
+    // 메모 하나 = 파일 하나(PlaytestNotes: notes/<저장 이름>.json).
     // - setup: 그 판(또는 창의 세팅)이 시작한 상태. 노드는 실제로 적용된 Rank다(콘텐츠에 없는 노드는 빠진다). 노드마다 그 Rank까지의 효과도 적는다(effect: "breaker.radius +75%").
     // - stats: 그 판에 실제로 쓰인 계산된 수치(NoteStats). 노드 ID를 시트와 맞춰 보지 않아도 읽힌다.
     // - battle: 플레이 중에 적었을 때만. 에디터에서 세팅만 보고 적으면 없다(null).
@@ -49,7 +48,6 @@ namespace BlackHole.Unity
         public JsonObject Stats;
 
         public HudSnapshot Battle;
-        public string BattleId;
         public bool Cheated;
 
         public int? Difficulty;
@@ -159,11 +157,10 @@ namespace BlackHole.Unity
         {
             var alive = new JsonObject();
             foreach ((var type, int count) in Battle.Alive)
-                alive.Add(ContractIds.Of(type.ToString()), count);
+                alive.Add(PlaytestIds.Of(type.ToString()), count);
 
             return new JsonObject
             {
-                { "battleId", BattleId },
                 { "elapsed", Round(Battle.Elapsed) },
                 { "remaining", Round(Battle.Remaining) },
                 { "stage", Battle.Stage },

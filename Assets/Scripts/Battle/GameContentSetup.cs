@@ -26,14 +26,6 @@ namespace BlackHole.Unity
         public EnemyCatalog Enemies => _enemies;
         public NodeCatalog Nodes => _nodes;
 
-#if UNITY_EDITOR
-        // 테스트 도구의 승격·되돌리기(M4)가 값을 고칠 에셋.
-        internal BattleRules BattleRules => _battleRules;
-        internal SkillSetup Skills => _skills;
-        internal EnemySupplySetup Supply => _supply;
-        internal HqGrowthSetup Growth => _growth;
-#endif
-
         // 연결하지 않은 칸. 비어 있어야 불러올 수 있다(GameContentLoader).
         internal IReadOnlyList<string> MissingReferences()
         {

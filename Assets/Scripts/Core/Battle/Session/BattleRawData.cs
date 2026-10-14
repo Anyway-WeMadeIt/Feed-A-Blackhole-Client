@@ -50,6 +50,17 @@ namespace BlackHole.Core
         // 스킬별 피해와 수집 통계.
         public BattleStats Stats { get; }
 
+        // 칸별(종류, 색 등급, 크기, 황금 여부) 처치 수(처음 처치한 순서, 0인 칸 없음). 서버 결산 검증의 장부다(계약 5.3).
+        // [임시] W3-1이 세는 코드를 채우기 전까지는 비어 있다. 아래 세 값도 같다.
+        public IReadOnlyList<KillBucketCount> KillBuckets { get; internal set; } = System.Array.Empty<KillBucketCount>();
+
+        // 황금 보너스 치명 횟수와 그 보너스 Gold의 합.
+        public int GoldenCritCount { get; internal set; }
+        public long GoldenCritBonusGold { get; internal set; }
+
+        // 처치 때 시간 추가에 성공한 횟수.
+        public int TimeBonusCount { get; internal set; }
+
         internal BattleRawData(
             int seed,
             float playedSeconds,

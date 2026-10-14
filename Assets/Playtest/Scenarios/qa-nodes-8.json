@@ -1,7 +1,7 @@
 {
   "name": "qa-nodes-8",
   "category": "QA/노드 단계",
-  "note": "노드 1~8단계를 모두 산 상태(구매 비용 합계 3,988,923,275,046,937 Gold). 성장 단계는 이 금액이 넘은 이정표 목표 잔액 수로 추정.",
+  "note": "노드 1~8단계를 모두 산 상태(구매 비용 합계 14,248,378,275,046,937 Gold). 성장 단계는 이 금액이 넘은 이정표 목표 잔액 수로 추정.",
   "expected": "8단계에서 새로 열리는 것: 슈퍼노바 범위·피해, 레이저 너비·피해 후반, 행성→별 변환 추가. 확정 정보의 수치와 실제 화면·피해·사운드가 맞는지 확인.",
   "growthStage": 4,
   "gold": 0,
@@ -116,14 +116,6 @@
     },
     {
       "nodeId": "breaker.critBonus-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "breaker.critBonus-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "breaker.critBonus-03",
       "rank": 1
     },
     {
@@ -363,10 +355,6 @@
       "rank": 1
     },
     {
-      "nodeId": "breaker.speed-11",
-      "rank": 1
-    },
-    {
       "nodeId": "breaker.starBonusDamage-01",
       "rank": 1
     },
@@ -496,10 +484,6 @@
     },
     {
       "nodeId": "electricStar.splitChance-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "electricStar.splitChance-03",
       "rank": 1
     },
     {
@@ -679,10 +663,6 @@
       "rank": 1
     },
     {
-      "nodeId": "moonPlanet.duration-04",
-      "rank": 1
-    },
-    {
       "nodeId": "moonPlanet.maxCount-01",
       "rank": 1
     },
@@ -835,18 +815,6 @@
       "rank": 1
     },
     {
-      "nodeId": "star.massScale-06",
-      "rank": 1
-    },
-    {
-      "nodeId": "star.massScale-07",
-      "rank": 1
-    },
-    {
-      "nodeId": "star.massScale-08",
-      "rank": 1
-    },
-    {
       "nodeId": "star.massScale-09",
       "rank": 1
     },
@@ -883,27 +851,27 @@
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-01",
+      "nodeId": "supernovaStar.damage-01",
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-02",
+      "nodeId": "supernovaStar.damage-02",
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-03",
+      "nodeId": "supernovaStar.damage-03",
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-04",
+      "nodeId": "supernovaStar.damage-04",
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-05",
+      "nodeId": "supernovaStar.damage-05",
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-06",
+      "nodeId": "supernovaStar.damage-06",
       "rank": 1
     },
     {

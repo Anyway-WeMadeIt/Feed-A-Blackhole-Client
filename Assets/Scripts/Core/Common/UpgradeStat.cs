@@ -63,7 +63,7 @@ namespace BlackHole.Core
         LaserStarDamage, // laserStar.damage · 레이저 대미지
         LaserStarCritBonus, // laserStar.critBonus · 레이저 치명타 보너스
         SupernovaStarRange, // supernovaStar.range · 슈퍼노바 범위
-        SupernovaStarHpDamage, // supernovaStar.hpDamage · 현재체력 비례 슈퍼노바 대미지
+        SupernovaStarDamage, // supernovaStar.damage · 슈퍼노바 대미지(고정 피해. 원작은 현재체력 비례 supernovaStar.hpDamage)
         SupernovaStarSpawnChance, // supernovaStar.spawnChance · 슈퍼노바 별 생성 확률
 
         // 신규(원작에 없음): 은하, 중력장 은하.

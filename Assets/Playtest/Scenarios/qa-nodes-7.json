@@ -1,7 +1,7 @@
 {
   "name": "qa-nodes-7",
   "category": "QA/노드 단계",
-  "note": "노드 1~7단계를 모두 산 상태(구매 비용 합계 673,923,275,046,937 Gold). 성장 단계는 이 금액이 넘은 이정표 목표 잔액 수로 추정.",
+  "note": "노드 1~7단계를 모두 산 상태(구매 비용 합계 2,244,378,275,046,937 Gold). 성장 단계는 이 금액이 넘은 이정표 목표 잔액 수로 추정.",
   "expected": "7단계에서 새로 열리는 것: 레이저 별, 슈퍼노바 별, 전기 별 확장. 확정 정보의 수치와 실제 화면·피해·사운드가 맞는지 확인.",
   "growthStage": 4,
   "gold": 0,
@@ -116,14 +116,6 @@
     },
     {
       "nodeId": "breaker.critBonus-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "breaker.critBonus-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "breaker.critBonus-03",
       "rank": 1
     },
     {
@@ -355,10 +347,6 @@
       "rank": 1
     },
     {
-      "nodeId": "breaker.speed-11",
-      "rank": 1
-    },
-    {
       "nodeId": "breaker.starBonusDamage-01",
       "rank": 1
     },
@@ -484,10 +472,6 @@
     },
     {
       "nodeId": "electricStar.splitChance-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "electricStar.splitChance-03",
       "rank": 1
     },
     {
@@ -647,10 +631,6 @@
       "rank": 1
     },
     {
-      "nodeId": "moonPlanet.duration-04",
-      "rank": 1
-    },
-    {
       "nodeId": "moonPlanet.maxCount-01",
       "rank": 1
     },
@@ -775,10 +755,6 @@
       "rank": 1
     },
     {
-      "nodeId": "star.massScale-06",
-      "rank": 1
-    },
-    {
       "nodeId": "star.respawnChance-01",
       "rank": 1
     },
@@ -807,11 +783,11 @@
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-01",
+      "nodeId": "supernovaStar.damage-01",
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.hpDamage-02",
+      "nodeId": "supernovaStar.damage-02",
       "rank": 1
     },
     {

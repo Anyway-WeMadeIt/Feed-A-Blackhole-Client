@@ -23,6 +23,9 @@ namespace BlackHole.Core
 
         public World World { get; }
 
+        // 판을 만들 때 정해진 시작 값(서버 동기화의 판 시작 로그에 싣는다).
+        public RunStartInfo StartInfo { get; }
+
         public bool IsEnded => _ended;
         public float Elapsed { get; private set; }
         public float Remaining => _timeLimit.Remaining(Elapsed);
@@ -41,9 +44,11 @@ namespace BlackHole.Core
             TimeLimitRule timeLimit,
             int seed,
             ProgressState progress,
-            IReadOnlyList<SupplyRequest> startSupply)
+            IReadOnlyList<SupplyRequest> startSupply,
+            RunStartInfo startInfo)
         {
             World = world;
+            StartInfo = startInfo;
             _timeLimit = timeLimit;
             _seed = seed;
             _progress = progress;

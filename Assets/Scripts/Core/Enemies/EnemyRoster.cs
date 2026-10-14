@@ -82,7 +82,7 @@ namespace BlackHole.Core
             return System.Array.AsReadOnly(buckets);
         }
 
-        public Enemy Spawn(EnemyDefinition definition, int tier, EnemyTraitDefinition trait, int size, EnemyStats stats, Point2 position, bool respawned = false)
+        public Enemy Spawn(EnemyDefinition definition, int tier, EnemyTraitDefinition trait, int size, EnemyStats stats, Point2 position, int respawnGeneration = 0)
         {
             EnemyId id = new(_nextEnemyId++);
             var enemy = new Enemy(
@@ -93,7 +93,7 @@ namespace BlackHole.Core
                 size,
                 stats,
                 position,
-                respawned);
+                respawnGeneration);
 
             _alive.Add(enemy);
             _aliveByKind[definition] = CountAlive(definition) + 1;

@@ -49,9 +49,12 @@ namespace BlackHole.Core
 
             EnemyComposition composition = _stats.CompositionOf(kind);
 
-            // 재생성으로 나온 적은 다시 재생성하지 않는다 — 1세대까지만. 사슬이면 처치 수가 1/(1-확률)배로 불어난다.
-            if (!dead.IsRespawned && _respawnRandom.Roll(composition.RespawnChance))
-                _supply.Request(new SupplyRequest(kind, 1, respawn: true));
+            // 재생성 확률은 세대마다 종류의 RespawnDecay를 곱해 줄인다: n세대의 확률 = RespawnChance × RespawnDecay^n.
+            // RespawnDecay 0(소행성·행성)이면 1세대까지만 — 사슬이면 처치 수가 1/(1-확률)배로 불어난다. 0 < decay < 1(별)이면 사슬이 남되 기대 처치 수는 1 + p / (1 - p·decay)로 유한하다.
+            float respawnChance = RespawnChanceAt(composition.RespawnChance, kind.RespawnDecay, dead.RespawnGeneration);
+
+            if (respawnChance > 0 && _respawnRandom.Roll(respawnChance))
+                _supply.Request(new SupplyRequest(kind, 1, respawnGeneration: dead.RespawnGeneration + 1));
 
             // 쿨타임 중이면 판정 자체를 건너뛴다(난수도 쓰지 않는다). 연쇄 처치가 시간을 몰아주지 않게.
             if (_timeBonusCooldownLeft > 0)
@@ -63,6 +66,18 @@ namespace BlackHole.Core
                 _timeBonusCooldownLeft = _timeBonusCooldown;
                 TimeBonusCount++;
             }
+        }
+
+        // n세대 적의 재생성 확률. 0세대는 그대로, 그 뒤는 세대마다 decay를 곱한다(decay 0이면 0).
+        internal static float RespawnChanceAt(float chance, float decay, int generation)
+        {
+            if (generation <= 0)
+                return chance;
+
+            if (decay <= 0)
+                return 0;
+
+            return chance * (float)Math.Pow(decay, generation);
         }
 
         // 모아 둔 시간 추가 초를 넘기고 0으로 되돌린다.

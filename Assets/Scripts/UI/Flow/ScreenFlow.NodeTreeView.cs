@@ -55,12 +55,15 @@ namespace BlackHole.Unity
 
         private void HandleNodeTreeNodeClicked(string id)
         {
+            // 비용은 사기 전에 읽는다. 산 뒤에는 다음 Rank의 비용이 된다.
+            NodePurchase.TryGetNextCost(_progress, _tree, id, out long cost);
             PurchaseResult result = NodePurchase.TryPurchase(_progress, _tree, id);
 
             if (result == PurchaseResult.Purchased)
             {
                 SoundManager.Instance?.PlayNodeUpgrade();
-                _progressStore.Save(_progress);
+                int rank = _progress.RankOf(id);
+                _progressStore.Commit(seq => _syncLogs.NodePurchase(seq, id, rank, cost));
             }
 
             RefreshUpgrade();

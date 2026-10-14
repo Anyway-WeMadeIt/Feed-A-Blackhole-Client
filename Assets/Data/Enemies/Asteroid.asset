@@ -56,7 +56,6 @@ MonoBehaviour:
     branchChance: 0
     critChance: 0
     critMultiplier: 0
-    healthFraction: 0
     width: 0
     maxActive: 0
     force: 0
@@ -71,7 +70,6 @@ MonoBehaviour:
     branchChance: 0
     critChance: 0
     critMultiplier: 2
-    healthFraction: 0
     width: 0
     maxActive: 0
     force: 0

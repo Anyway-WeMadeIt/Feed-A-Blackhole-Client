@@ -10,7 +10,7 @@ namespace BlackHole.Core
         public float Multiplier;
         // Golden 치명타 확률 발생 시 추가 골드 배율
         public float CritRewardScale;
-        // ChainLightning, LaserBurst
+        // ChainLightning, LaserBurst, Explosion(고정 피해)
         public float Damage;
         // ChainLightning(한 번 옮겨 가는 거리), Explosion(반경), GravityField(끌어들이는 범위)
         public float Radius;
@@ -21,8 +21,6 @@ namespace BlackHole.Core
         // ChainLightning, LaserBurst, Golden(치명타 확률 0 ~ 1, 치명타일 때 피해 배율)
         public float CritChance;
         public float CritMultiplier;
-        // Explosion(대상 현재 HP에 대한 피해 비율, 0 ~ 1)
-        public float HealthFraction;
         // LaserBurst(레이저 너비)
         public float Width;
         // GravityField(끌리는 속도, 초당 거리)

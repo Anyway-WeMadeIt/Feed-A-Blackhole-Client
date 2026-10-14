@@ -7,6 +7,8 @@
     "BlackHole.Sync",
     "BlackHole.Core.Common",
     "BlackHole.Core.Enemies",
+    "BlackHole.Core.Battle",
+    "BlackHole.Core.Hq",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

@@ -34,7 +34,7 @@ namespace BlackHole.Unity
             public float multiplier;
             [Tooltip("Golden: 치명타 Gold 배율.")]
             public float critRewardScale;
-            [Tooltip("Electric·Laser: 피해.")]
+            [Tooltip("Electric·Laser: 피해 · Supernova: 폭발 고정 피해.")]
             public float damage;
             [Tooltip("Electric: 번개가 한 번 옮겨 가는 최대 거리. Supernova: 폭발 반경(크기 1 기준, 죽은 별의 크기 배율만큼 넓어진다). Gravity: 끌어들이는 범위(은하 크기와 무관).")]
             public float radius;
@@ -46,8 +46,6 @@ namespace BlackHole.Unity
             public float critChance;
             [Tooltip("Electric·Laser: 치명타일 때 피해 배율.")]
             public float critMultiplier;
-            [Tooltip("Supernova: 맞는 순간 대상의 현재 HP에 대한 피해 비율(0 ~ 1). 올림, 최소 1.")]
-            public float healthFraction;
             [Tooltip("Laser: 레이저 너비.")]
             public float width;
             [Tooltip("이 성질의 동시 상한: 살아 있는 그 성질 적 + Breaker에 남은 그 버프 중첩. 0이면 상한 없음. 다 찼으면 뽑혀도 붙지 않는다(원작 달 최대 개수, 노드 moonPlanet.maxCount).")]
@@ -92,6 +90,15 @@ namespace BlackHole.Unity
         [Tooltip("파괴 때 시간 추가(노드 timeChance)가 성공하면 더하는 초. 0이면 판 설정(BattleRules.killTimeBonus)을 쓴다.")]
         [Min(0)]
         [SerializeField] private float killTimeBonus;
+        [Tooltip("재생성 세대 감쇠(0~1). 재생성으로 나온 적이 죽을 때 재생성 확률(노드 respawnChance)에 세대마다 이 값을 곱한다. 0이면 1세대까지만(사슬 금지), 1이면 감쇠 없음.")]
+        [Range(0, 1)]
+        [SerializeField] private float respawnDecay;
+        [Tooltip("픽업: 혜성 비가 한 번 내린 뒤 다시 내릴 수 있을 때까지의 쿨타임(초). 그동안은 하나씩만 나온다. 0이면 없음.")]
+        [Min(0)]
+        [SerializeField] private float rainCooldown;
+        [Tooltip("픽업: 판 시작 뒤 이 시간(초)까지는 혜성 비가 내리지 않는다. 0이면 없음.")]
+        [Min(0)]
+        [SerializeField] private float rainDelay;
         [Header("색 등급 (번호가 적의 색 등급, 빨주노초파보)")]
         [SerializeField] private List<Tier> tiers = new List<Tier>();
 
@@ -132,6 +139,9 @@ namespace BlackHole.Unity
                 SpawnPeriod = spawnPeriod,
                 RainCount = rainCount,
                 KillTimeBonus = killTimeBonus,
+                RespawnDecay = respawnDecay,
+                RainCooldown = rainCooldown,
+                RainDelay = rainDelay,
             };
 
             foreach (Trait trait in traits)
@@ -150,7 +160,6 @@ namespace BlackHole.Unity
                         BranchChance = trait.branchChance,
                         CritChance = trait.critChance,
                         CritMultiplier = trait.critMultiplier,
-                        HealthFraction = trait.healthFraction,
                         Width = trait.width,
                         Force = trait.force,
                         Duration = trait.duration,

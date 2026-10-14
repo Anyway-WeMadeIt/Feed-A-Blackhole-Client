@@ -20,8 +20,11 @@ namespace BlackHole.Core
         // 특수 적인가(성질이 붙었는가). 특수 적은 사망 때 성질의 효과가 발동하고, 사망 효과의 피해를 받지 않는다.
         public bool IsSpecial => Trait != null;
 
-        // 재생성(파괴 때 RespawnChance 성공)으로 나온 적인가. 죽어도 다시 재생성을 굴리지 않는다 — 사슬로 끝없이 불어나지 않게.
-        public bool IsRespawned { get; }
+        // 재생성 세대. 0이면 판 공급으로 나온 적, n이면 재생성을 n번 거쳐 나온 적. 다음 재생성 확률은 세대마다 종류의 RespawnDecay만큼 줄어든다(DeathBonuses).
+        public int RespawnGeneration { get; }
+
+        // 재생성(파괴 때 RespawnChance 성공)으로 나온 적인가.
+        public bool IsRespawned => RespawnGeneration > 0;
 
         // 적의 스탯 수치. 출현 때 판의 적 수치 표에서 (종류, 색 등급, 성질, 크기)의 값을 받음.
         public EnemyStats Stats { get; }
@@ -43,7 +46,7 @@ namespace BlackHole.Core
             int size,
             EnemyStats stats,
             Point2 position,
-            bool respawned = false)
+            int respawnGeneration = 0)
         {
             if (size < SizeRule.Base || size > SizeRule.Max)
                 throw new ArgumentOutOfRangeException(nameof(size), $"크기는 {SizeRule.Base}부터 {SizeRule.Max}까지다. 받은 값: {size}.");
@@ -56,7 +59,7 @@ namespace BlackHole.Core
             Stats = stats;
             Health = stats.MaxHealth;
             Position = position;
-            IsRespawned = respawned;
+            RespawnGeneration = respawnGeneration;
         }
 
         // 점 point에서 거리 reach 안에 이 적의 원(반지름 Stats.Radius)이 닿는가. 공격과 사망 효과가 적을 맞히는 판정이다.
