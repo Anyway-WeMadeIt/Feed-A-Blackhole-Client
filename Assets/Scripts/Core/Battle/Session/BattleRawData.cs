@@ -23,11 +23,11 @@ namespace BlackHole.Core
 
         // 황금 치명타 횟수와 보너스 Gold 합계. 보너스는 EarnedGold에 이미 들어 있다.
         // EarnedGold == Σ(칸 처치 수 × 칸 Gold) + GoldenCritBonusGold.
-        public int GoldenCritCount { get; set; }
-        public long GoldenCritBonusGold { get; set; }
+        public int GoldenCritCount { get; internal set; }
+        public long GoldenCritBonusGold { get; internal set; }
 
         // 시간 추가 성공 수
-        public int TimeBonusCount { get; set; }
+        public int TimeBonusCount { get; internal set; }
 
         // 이 판에서 번 Gold. 사망 순간마다 그 적의 Gold가 더해진 합계다. 이정표로 끝나지 않았으면 결산이 진행 상태에 더한 값(SettledGold)과 같다.
         public long EarnedGold { get; }
