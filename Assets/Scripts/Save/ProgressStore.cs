@@ -30,6 +30,8 @@ namespace BlackHole.Unity
         private bool _started;
         // 테스트 세션: 테스트 도구가 진행 상태를 시나리오로 바꿨다. 이번 실행은 저장하지 않고 로그도 만들지 않는다(저장 파일을 지킨다).
         private bool _testSession;
+        // 동기화 로그를 만들지 않는다(웹 빌드). 진행도 저장은 그대로 한다.
+        private bool _syncLogsDisabled;
 
         // 앱 시작 때 불러온 저장. 없으면 null.
         public SavedProgress Saved { get; private set; }
@@ -105,9 +107,24 @@ namespace BlackHole.Unity
             if (!_started || _testSession)
                 return;
 
+            if (_syncLogsDisabled)
+            {
+                Save(_progress);
+                return;
+            }
+
             _ledger.Append(makeLog);
             Save(_progress);
             LogAppended?.Invoke();
+        }
+
+        // 이번 실행에서 동기화 로그를 만들지 않는다. 보낼 서버가 없는 빌드(웹)에서 부른다 —
+        // 판 시작·결산(처치 장부 포함)·노드 구매 로그가 보내지지 않은 채 저장 파일에 계속 쌓이지 않게 한다.
+        // 불러온 장부의 대기 로그도 비운다. 다음 저장부터 장부는 처음 상태(NextSeq 1, 로그 없음)로 쓴다.
+        public void DisableSyncLogs()
+        {
+            _syncLogsDisabled = true;
+            _ledger = new SyncLedger();
         }
 
         // 테스트 도구가 진행 상태를 바꾸기 직전에 부른다. 이후 이번 실행은 진행 중으로 보고(계속은 메모리 상태 그대로) 저장하지 않는다.

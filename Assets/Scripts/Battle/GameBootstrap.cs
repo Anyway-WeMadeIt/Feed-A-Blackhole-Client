@@ -139,6 +139,11 @@ namespace BlackHole.Unity
                 loaded.NodeTree.Content,
                 loaded.Content.Growth,
                 _progress);
+
+            // 웹 빌드는 서버에 붙지 않아(CreateAuthSession) 동기화 로그를 보낼 곳이 없다. 로그가 판마다 저장 파일에 쌓이지 않게 끈다.
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+                _progressStore.DisableSyncLogs();
+
             _auth = CreateAuthSession(saveDirectory, profileApplied);
             // 서버 동기화 로그를 만든다. 로그는 빌드 버전과 이 콘텐츠의 서버 콘텐츠 버전을 싣는다.
             SyncLogFactory syncLogs = new(new UnityJsonSerializer(), Application.version, loaded.ServerContentVersion, () => DateTime.UtcNow);
