@@ -70,6 +70,10 @@ namespace BlackHole.Core
             Seed = seed;
             PlayedSeconds = playedSeconds;
             Kills = kills;
+            KillBuckets = killBuckets;
+            GoldenCritCount = goldenCritCount;
+            GoldenCritBonusGold = goldenCritBonusGold;
+            TimeBonusCount = timeBonusCount;
             EarnedGold = earnedGold;
             ReachedLevel = reachedLevel;
             Exp = exp;
