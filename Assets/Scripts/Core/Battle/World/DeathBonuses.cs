@@ -19,6 +19,10 @@ namespace BlackHole.Core
 
         private float _timeBonusSeconds; // 아직 판(GameSession)이 가져가지 않은 시간 추가 초.
 
+        // 이 판의 시간 추가 성공 수. 쿨타임으로 판정을 건너뛴 경우와 수거형은 세지 않는다.
+        // 결산 로그의 timeBonusCount
+        internal int TimeBonusCount { get; private set; }
+
         internal DeathBonuses(int seed, EnemyStatTable stats, EnemySupply supply, float killTimeBonus = 0, float timeBonusCooldown = 0)
         {
             _stats = stats;
@@ -57,6 +61,7 @@ namespace BlackHole.Core
             {
                 _timeBonusSeconds += kind.KillTimeBonus > 0 ? kind.KillTimeBonus : _killTimeBonus;
                 _timeBonusCooldownLeft = _timeBonusCooldown;
+                TimeBonusCount++;
             }
         }
 

@@ -11,6 +11,8 @@ namespace BlackHole.Core
         private readonly Dictionary<EnemyDefinition, int> _aliveByKind = new();
         private readonly Dictionary<EnemyDefinition, int> _killsByKind = new();
         private readonly List<EnemyDefinition> _killOrder = new();
+        private readonly Dictionary<KillBucket, int> _killsByBucket = new();
+        private readonly List<KillBucket> _bucketOrder = new();
         private readonly List<HitRecord> _hits = new();
         private readonly List<DeathRecord> _deaths = new();
         private readonly DeathRewards _rewards;
@@ -27,6 +29,10 @@ namespace BlackHole.Core
 
         // 이 판에서 확정된 처치 보상의 Gold 합계(황금 치명타 보너스 포함).
         public long KillGold { get; private set; }
+
+        // 이 판의 황금 치명타 횟수와 그 보너스 Gold의 합계(Kill Gold에 이미 들어 있다)
+        public int GoldenCritCount { get; private set; }
+        public long GoldenCritBonusGold { get; private set; }
 
         public EnemyRoster(DeathRewards rewards)
         {
@@ -63,6 +69,17 @@ namespace BlackHole.Core
                 kills[i] = new EnemyKillCount(_killOrder[i], _killsByKind[_killOrder[i]]);
 
             return System.Array.AsReadOnly(kills);
+        }
+
+        // 이 판에서 지금까지의 칸별 처치 수 (처음 처치한 순서)
+        public IReadOnlyList<KillBucketCount> GetKillBuckets()
+        {
+            var buckets = new KillBucketCount[_bucketOrder.Count];
+
+            for (int i = 0; i < buckets.Length; i++)
+                buckets[i] = new KillBucketCount(_bucketOrder[i], _killsByBucket[_bucketOrder[i]]);
+
+            return System.Array.AsReadOnly(buckets);
         }
 
         public Enemy Spawn(EnemyDefinition definition, int tier, EnemyTraitDefinition trait, int size, EnemyStats stats, Point2 position, bool respawned = false)
@@ -116,6 +133,14 @@ namespace BlackHole.Core
             _deaths.Add(new DeathRecord(_nextDeathSequence++, enemy, reward));
             KillGold = checked(KillGold + reward.TotalGold);
 
+            if (reward.IsCritical)
+            {
+                GoldenCritCount++;
+                GoldenCritBonusGold = checked(GoldenCritBonusGold + reward.BonusGold);
+            }
+
+            RecordBucket(enemy);
+
             if (_alive.Remove(enemy))
                 _aliveByKind[enemy.Definition] = CountAlive(enemy.Definition) - 1;
 
@@ -127,6 +152,26 @@ namespace BlackHole.Core
             {
                 _killsByKind.Add(enemy.Definition, 1);
                 _killOrder.Add(enemy.Definition);
+            }
+        }
+
+        // 처치 하나를 그 칸(종류, 색 등급, 크기, 황금 여부)에 더한다.
+        private void RecordBucket(Enemy enemy)
+        {
+            var bucket = new KillBucket(
+                enemy.Definition,
+                enemy.Tier,
+                enemy.Size,
+                DeathRewards.IsGolden(enemy));
+
+            if (_killsByBucket.TryGetValue(bucket, out int kills))
+            {
+                _killsByBucket[bucket] = kills + 1;
+            }
+            else
+            {
+                _killsByBucket.Add(bucket, 1);
+                _bucketOrder.Add(bucket);
             }
         }
 
