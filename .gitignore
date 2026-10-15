@@ -143,3 +143,7 @@ $RECYCLE.BIN/
 
 # 테스트 도구가 쓰는 개인 테스트 데이터(느낌 메모, 노드 검사 결과 등)
 /PlaytestData/
+
+# 개발 빌드 때 BuildStampWriter가 잠깐 만드는 빌드 정보(빌드가 끝나면 지운다)
+/[Aa]ssets/Diagnostics.Generated/
+/[Aa]ssets/Diagnostics.Generated.meta

@@ -1,11 +1,15 @@
 using System;
 using BlackHole.Core;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlackHole.Unity
 {
     internal sealed class GameHost : IDisposable
     {
+        // 성능 측정용 구간 이름표. 전투 진행(Battle.*)은 BattleSystem이 따로 붙인다.
+        private static readonly ProfilerMarker BattleHudMarker = new("Host.BattleHud");
+
         private readonly UIManager _ui;
         private readonly BattleSystem _battle;
         private readonly AimInput _aim;
@@ -59,6 +63,8 @@ namespace BlackHole.Unity
 
             if (result.RaisedLevels > 0)
             {
+                PerfProbe.LevelUp(result.RaisedLevels);
+
                 if (_settings.IsOn(GameSettings.ScreenShake))
                     _cameraShake.Play();
 
@@ -66,7 +72,8 @@ namespace BlackHole.Unity
             }
 
             // 화면을 먼저 맞춘다 — 판이 끝난 프레임이면 끝난 상태(10칸)를 보인 뒤에 연출·전환을 결정한다.
-            RefreshBattleHud();
+            using (BattleHudMarker.Auto())
+                RefreshBattleHud();
 
             if (result.Ended)
                 HandleBattleEnded();

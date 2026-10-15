@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BlackHole.Core;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlackHole.Unity
@@ -24,6 +25,15 @@ namespace BlackHole.Unity
         private const float IntroWidenSeconds = 2f;
         // 시작 카메라 배율(전장 전체 = 1). 작을수록 블랙홀에 더 다가간 채 시작한다.
         private const float IntroStartZoom = 0.3f;
+
+        // 성능 측정용 구간 이름표(Profiler의 Hierarchy·Timeline에 이 이름으로 보인다). 릴리스 빌드에서는 비용이 거의 없다.
+        private static readonly ProfilerMarker TickMarker = new("Battle.Tick");
+        private static readonly ProfilerMarker AdvanceMarker = new("Battle.Advance");
+        private static readonly ProfilerMarker IntroMarker = new("Battle.Intro");
+        private static readonly ProfilerMarker EnemyViewMarker = new("Battle.EnemyView");
+        private static readonly ProfilerMarker BreakerViewMarker = new("Battle.BreakerView");
+        private static readonly ProfilerMarker DeathEffectViewMarker = new("Battle.DeathEffectView");
+        private static readonly ProfilerMarker HqViewMarker = new("Battle.HqView");
 
         private readonly GameContent _content;
         private readonly ProgressState _progress;
@@ -98,6 +108,7 @@ namespace BlackHole.Unity
             _enemyView.Synchronize(Session.World, false, 0f);
 
             _state = State.Running;
+            PerfProbe.BattleStarted(LastSeed);
             return true;
         }
 
@@ -112,20 +123,37 @@ namespace BlackHole.Unity
             if (!HasBattle)
                 return default;
 
-            bool paused = _state == State.Paused;
-            AdvanceResult result = default;
+            using (TickMarker.Auto())
+            {
+                bool paused = _state == State.Paused;
+                AdvanceResult result = default;
 
-            if (!paused && _intro)
-                AdvanceIntro(delta);
-            else if (!paused)
-                result = Session.Advance(delta);
+                if (!paused && _intro)
+                {
+                    using (IntroMarker.Auto())
+                        AdvanceIntro(delta);
+                }
+                else if (!paused)
+                {
+                    using (AdvanceMarker.Auto())
+                        result = Session.Advance(delta);
+                }
 
-            _enemyView.Synchronize(Session.World, paused, delta);
-            _breakerView.Synchronize(Session.World, paused, delta);
-            _deathEffectView.Synchronize(Session.World, paused, delta);
-            _hqView.Synchronize(Session.World, delta);
+                using (EnemyViewMarker.Auto())
+                    _enemyView.Synchronize(Session.World, paused, delta);
 
-            return result;
+                using (BreakerViewMarker.Auto())
+                    _breakerView.Synchronize(Session.World, paused, delta);
+
+                using (DeathEffectViewMarker.Auto())
+                    _deathEffectView.Synchronize(Session.World, paused, delta);
+
+                using (HqViewMarker.Auto())
+                    _hqView.Synchronize(Session.World, delta);
+
+                PerfProbe.SetAliveEnemies(Session.World.Enemies.Count);
+                return result;
+            }
         }
 
         // 판을 멈추거나 다시 움직인다. 판이 없거나 이미 그 상태면 그대로 둔다.
@@ -159,6 +187,7 @@ namespace BlackHole.Unity
         // 판 종료(이미 끝났으면 결과 유지) -> 남은 적 정리 -> (결산이면) 집계·결산 -> 화면 정리 -> 판을 버림.
         private async Task<BattleRawData> ShutDownAsync(bool settle)
         {
+            PerfProbe.BattleEnded();
             _state = State.ShuttingDown;
             EndIntro();
 
