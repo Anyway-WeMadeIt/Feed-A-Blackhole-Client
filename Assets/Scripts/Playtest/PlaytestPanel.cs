@@ -397,6 +397,18 @@ namespace BlackHole.Unity
 
         private void MarkTest() => _session.Tag.MarkTestBattle();
 
+        private void DrawBotSelector(string caption)
+        {
+            GUILayout.Label(caption, _small);
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < BotNames.Length; i++)
+            {
+                if (GUILayout.Toggle(_botIndex == i, BotNames[i], GUI.skin.button) && _botIndex != i)
+                    SetBot(i);
+            }
+            GUILayout.EndHorizontal();
+        }
+
         // 조준 봇을 바꾼다. 판 중에 바꾸면 곧바로 그 판을 이어서 조준한다(봇은 다음 프레임에 그 판의 seed로 시작).
         private void SetBot(int index)
         {
@@ -518,6 +530,9 @@ namespace BlackHole.Unity
         private void DrawScenarios()
         {
             GUILayout.Label("정해 둔 시점(성장도·Gold·노드·Level)에서 바로 시작한다. 시나리오를 쓰면 이번 실행은 저장하지 않고, HUD·메모에 +test 표시가 붙는다.", _small);
+
+            // 시나리오를 누르면 곧바로 판이 시작되므로, 누가 조준할지는 여기서 먼저 고른다. 고른 값은 판이 바뀌어도 유지된다.
+            DrawBotSelector("조준 (시작 전에 고른다. 봇이면 같은 seed에 같은 플레이 — 성능 측정용)");
 
             if (_session.Scenarios.Count == 0)
                 GUILayout.Label($"시나리오가 없다. {PlaytestLibrary.ScenariosFolder}나 기기 폴더에 JSON을 둔다.", _small);
@@ -804,14 +819,7 @@ namespace BlackHole.Unity
                 _hudCorner = (_hudCorner + 1) % 4;
             GUILayout.EndHorizontal();
 
-            GUILayout.Label("조준: 봇이면 같은 seed에 같은 플레이(성능 측정용). 봇 판은 +test", _small);
-            GUILayout.BeginHorizontal();
-            for (int i = 0; i < BotNames.Length; i++)
-            {
-                if (GUILayout.Toggle(_botIndex == i, BotNames[i], GUI.skin.button) && _botIndex != i)
-                    SetBot(i);
-            }
-            GUILayout.EndHorizontal();
+            DrawBotSelector("조준: 봇이면 같은 seed에 같은 플레이(성능 측정용). 봇 판은 +test");
 
             GUILayout.Label("배속(판에만 건다. 1이 아니면 +test)", _small);
             GUILayout.BeginHorizontal();
