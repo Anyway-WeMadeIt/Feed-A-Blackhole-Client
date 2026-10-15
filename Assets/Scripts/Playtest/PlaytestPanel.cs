@@ -220,8 +220,12 @@ namespace BlackHole.Unity
         // 판이 이번 프레임의 Step을 마친 뒤에 잰다(GameHost는 Update에서 판을 진행한다).
         private void LateUpdate()
         {
-            if (_session != null)
-                _hud.Update(_battle.Session, _session.Tag, _lastScenario?.name, _session.Fingerprint, _liveStatus, Time.timeScale, Time.unscaledDeltaTime);
+            if (_session == null)
+                return;
+
+            _hud.Update(_battle.Session, _session.Tag, _lastScenario?.name, _session.Fingerprint, _liveStatus, Time.timeScale, Time.unscaledDeltaTime);
+            // 성능 기록(PerfHud)에 이번 판의 조건을 알린다. 값은 참조만 넘기므로 할당이 없다.
+            PerfProbe.SetContext(_lastScenario?.name, _session.Tag.ProfileName, BotNames[_botIndex]);
         }
 
         private void OnDisable()

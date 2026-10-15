@@ -18,7 +18,7 @@ namespace BlackHole.Unity
             "gc_kb,gc_count,draw_avg,batches_avg,setpass_avg,alive,alive_max,levelups,gc_used_mb,total_used_mb";
 
         private const string SummaryHeader =
-            "date,commit,branch,device,label,seed,target_fps,seconds,frames,avg_fps,p50_ms,p95_ms,p99_ms,max_ms," +
+            "date,commit,branch,device,label,scenario,profile,aim,seed,target_fps,seconds,frames,avg_fps,p50_ms,p95_ms,p99_ms,max_ms," +
             "frames_over_20ms,frames_over_33ms,main_avg_ms,main_p95_ms,main_max_ms,render_avg_ms,gpu_avg_ms," +
             "gc_kb_per_frame,gc_kb_total,draw_avg,batches_avg,alive_max,levelups,file";
 
@@ -44,6 +44,11 @@ namespace BlackHole.Unity
         private double _elapsedMs;
         private double _nextRowMs;
         private int _rows;
+
+        // 테스트 조건(요약 줄에 적는다). 테스트 패널이 넣고, 없으면 "-".
+        public string Scenario { get; set; }
+        public string Profile { get; set; }
+        public string Aim { get; set; }
 
         public bool IsRecording => _writer != null;
         public string Label => _label;
@@ -189,6 +194,9 @@ namespace BlackHole.Unity
             sb.Append(Clean(BuildStamp.Branch)).Append(',');
             sb.Append(Clean(SystemInfo.deviceModel)).Append(',');
             sb.Append(_label).Append(',');
+            sb.Append(Clean(Scenario)).Append(',');
+            sb.Append(Clean(Profile)).Append(',');
+            sb.Append(Clean(Aim)).Append(',');
             PerfText.Int(sb, _seed).Append(',');
             PerfText.Int(sb, Application.targetFrameRate).Append(',');
             PerfText.Fixed(sb, _elapsedMs / 1000.0, 1).Append(',');

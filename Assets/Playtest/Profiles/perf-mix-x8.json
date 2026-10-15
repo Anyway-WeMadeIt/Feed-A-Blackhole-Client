@@ -1,0 +1,216 @@
+{
+  "name": "perf-mix-x8",
+  "note": "성능: 적 전 종류 ×8. 시작 소행성 수, 소행성→행성·행성→별·별→은하 변환 수, 레벨업 성장 공급(소행성·행성·별·은하) 노드 효과를 모두 8배. 노드 효과 패치는 그 노드를 산 시나리오에서만 듣는다 → perf-4-stars(은하 제외) 또는 perf-5-all과 짝짓는다. x2·x4·x8로 적 수 대비 batches·main_ms 기울기를 잰다.",
+  "patches": [
+    {
+      "path": "supply/asteroid/count",
+      "value": 96,
+      "reason": "시작 소행성 ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-01/1/asteroid.toPlanet",
+      "value": 416,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-02/1/asteroid.toPlanet",
+      "value": 40,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-03/1/asteroid.toPlanet",
+      "value": 40,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/planet.toStar-01/1/planet.toStar",
+      "value": 80,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-04/1/asteroid.toPlanet",
+      "value": 560,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/planet.toStar-02/1/planet.toStar",
+      "value": 16,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-03/1/planet.toStar",
+      "value": 40,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-04/1/planet.toStar",
+      "value": 40,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-05/1/planet.toStar",
+      "value": 88,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/star.toGalaxy-01/1/star.toGalaxy",
+      "value": 24,
+      "reason": "star.toGalaxy ×8"
+    },
+    {
+      "path": "node/star.toGalaxy-02/1/star.toGalaxy",
+      "value": 40,
+      "reason": "star.toGalaxy ×8"
+    },
+    {
+      "path": "node/star.toGalaxy-03/1/star.toGalaxy",
+      "value": 80,
+      "reason": "star.toGalaxy ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/1/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/2/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/3/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/4/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/5/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/6/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/7/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/8/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/9/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/asteroid.toPlanet-05/10/asteroid.toPlanet",
+      "value": 80,
+      "reason": "asteroid.toPlanet ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/1/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/2/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/3/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/4/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/5/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/6/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/7/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/8/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/9/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/planet.toStar-06/10/planet.toStar",
+      "value": 24,
+      "reason": "planet.toStar ×8"
+    },
+    {
+      "path": "node/growth.asteroids-01/1/growth.asteroids",
+      "value": 200,
+      "reason": "growth.asteroids ×8"
+    },
+    {
+      "path": "node/growth.asteroids-02/1/growth.asteroids",
+      "value": 200,
+      "reason": "growth.asteroids ×8"
+    },
+    {
+      "path": "node/growth.asteroids-03/1/growth.asteroids",
+      "value": 200,
+      "reason": "growth.asteroids ×8"
+    },
+    {
+      "path": "node/growth.planets-01/1/growth.planets",
+      "value": 480,
+      "reason": "growth.planets ×8"
+    },
+    {
+      "path": "node/growth.asteroids-04/1/growth.asteroids",
+      "value": 200,
+      "reason": "growth.asteroids ×8"
+    },
+    {
+      "path": "node/growth.planets-02/1/growth.planets",
+      "value": 184,
+      "reason": "growth.planets ×8"
+    },
+    {
+      "path": "node/growth.stars-01/1/growth.stars",
+      "value": 480,
+      "reason": "growth.stars ×8"
+    },
+    {
+      "path": "node/growth.galaxies-01/1/growth.galaxies",
+      "value": 400,
+      "reason": "growth.galaxies ×8"
+    },
+    {
+      "path": "node/growth.galaxies-02/1/growth.galaxies",
+      "value": 400,
+      "reason": "growth.galaxies ×8"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "perf-growth-x4",
+  "note": "성능: 레벨업 성장 공급만 ×4(소행성·행성·별·은하 전부). 시작 수·변환은 원본. 레벨업 프레임의 생성 스파이크(H1)를 키워 마커 비율(EnemyView vs Advance)을 선명하게 본다. perf-2-spawn(소행성만) 또는 perf-4-stars(행성·별 섞임)와 짝짓는다.",
+  "patches": [
+    {
+      "path": "node/growth.asteroids-01/1/growth.asteroids",
+      "value": 100,
+      "reason": "growth.asteroids ×4"
+    },
+    {
+      "path": "node/growth.asteroids-02/1/growth.asteroids",
+      "value": 100,
+      "reason": "growth.asteroids ×4"
+    },
+    {
+      "path": "node/growth.asteroids-03/1/growth.asteroids",
+      "value": 100,
+      "reason": "growth.asteroids ×4"
+    },
+    {
+      "path": "node/growth.planets-01/1/growth.planets",
+      "value": 240,
+      "reason": "growth.planets ×4"
+    },
+    {
+      "path": "node/growth.asteroids-04/1/growth.asteroids",
+      "value": 100,
+      "reason": "growth.asteroids ×4"
+    },
+    {
+      "path": "node/growth.planets-02/1/growth.planets",
+      "value": 92,
+      "reason": "growth.planets ×4"
+    },
+    {
+      "path": "node/growth.stars-01/1/growth.stars",
+      "value": 240,
+      "reason": "growth.stars ×4"
+    },
+    {
+      "path": "node/growth.galaxies-01/1/growth.galaxies",
+      "value": 200,
+      "reason": "growth.galaxies ×4"
+    },
+    {
+      "path": "node/growth.galaxies-02/1/growth.galaxies",
+      "value": 200,
+      "reason": "growth.galaxies ×4"
+    }
+  ]
+}

@@ -100,6 +100,13 @@ namespace BlackHole.Unity
 
         public void AddLevelUps(int levels) => _levelUpsThisFrame += levels;
 
+        public void SetContext(string scenario, string profile, string aim)
+        {
+            _log.Scenario = scenario;
+            _log.Profile = profile;
+            _log.Aim = aim;
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)

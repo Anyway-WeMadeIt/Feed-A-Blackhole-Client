@@ -1,0 +1,14 @@
+{
+  "name": "perf-1-first",
+  "note": "노드 없는 첫 판(성장도 0). 가장 가벼운 판의 하한선이고, perf-count-x100/x200/x400 프로필과 짝지어 적 수 하나만 바꾸는 실험의 바탕이다.",
+  "category": "성능",
+  "expected": "avg_fps·main_avg_ms·batches_avg의 하한선. 봇(터치)으로 3회.",
+  "contentFingerprint": "",
+  "growthStage": 0,
+  "gold": 0,
+  "nodes": [],
+  "autoBuyBudget": 0,
+  "startLevel": 0,
+  "seed": 1,
+  "freezeTime": false
+}

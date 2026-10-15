@@ -1,0 +1,219 @@
+{
+  "name": "perf-3-crowd",
+  "note": "살아 있는 소행성 수를 최대로: 소행성 시작 수·성장 공급·재생성 노드 전부 + Breaker 반지름·속도 전부, 피해는 1/3만(천천히 죽어 쌓이되 EXP는 흘러 레벨업이 난다). 행성·별·은하·변환·질량·특수 성질은 뺐다(Level 1에서 못 부수는 적이 생기지 않게). 성장도 0.",
+  "category": "성능",
+  "expected": "평상 프레임의 batches_avg·draw_avg·main_avg_ms와 alive_max (H5·H11). 봇(터치)으로 3회. alive_max가 200 아래면 Breaker 피해 노드를 더 뺀다.",
+  "contentFingerprint": "",
+  "growthStage": 0,
+  "gold": 0,
+  "nodes": [
+    {
+      "nodeId": "timer-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "timer-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "timer-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "timer-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "growth.asteroids-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "growth.asteroids-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "growth.asteroids-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-06",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-07",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-08",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-09",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-10",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-11",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-12",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.radius-13",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-06",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-07",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-08",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-09",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.speed-10",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.count-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.count-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.count-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.count-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.timeChance-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.timeChance-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.respawnChance-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.respawnChance-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.respawnChance-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.respawnChance-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "asteroid.respawnChance-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "growth.asteroids-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-02",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-04",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-05",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-06",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-07",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-08",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.damage-09",
+      "rank": 1
+    }
+  ],
+  "autoBuyBudget": 0,
+  "startLevel": 0,
+  "seed": 1,
+  "freezeTime": false
+}

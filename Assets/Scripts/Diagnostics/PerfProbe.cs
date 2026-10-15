@@ -35,6 +35,16 @@ namespace BlackHole.Unity
 #endif
         }
 
+        // 테스트 조건: 시나리오 이름, 밸런스 프로필 이름(원본이면 ""), 조준(사람/봇). 요약 CSV에 그대로 적힌다. 테스트 패널이 매 프레임 넣는다.
+        [System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+        public static void SetContext(string scenario, string profile, string aim)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (PerfHud.Instance != null)
+                PerfHud.Instance.SetContext(scenario, profile, aim);
+#endif
+        }
+
         // 블랙홀 레벨이 올랐다(레벨업 프레임의 스파이크를 CSV에서 찾기 위해).
         [System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
         public static void LevelUp(int levels)
