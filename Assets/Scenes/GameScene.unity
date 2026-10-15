@@ -1782,7 +1782,7 @@ MonoBehaviour:
   _palette: {fileID: 11400000, guid: a18ac4e32e664af58b6332ea4a5e8bb5, type: 2}
   _sprites: {fileID: 11400000, guid: 7ee6a6a159ae49769f8343a17d89696e, type: 2}
   _texts: {fileID: 4900000, guid: 0fd5c068cd6e450ab06df5aecd221fa4, type: 3}
-  _playtest: {fileID: 0}
+  _playtest: {fileID: 11400000, guid: a1fc7e1b1ac44b8f8088a806653e8fbe, type: 2}
 --- !u!1001 &974995110
 PrefabInstance:
   m_ObjectHideFlags: 0
