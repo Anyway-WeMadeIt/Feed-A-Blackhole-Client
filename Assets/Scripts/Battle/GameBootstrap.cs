@@ -192,7 +192,7 @@ namespace BlackHole.Unity
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             PlaytestPanel panel = GetOrAdd<PlaytestPanel>(gameObject);
-            panel.Initialize(playtest, battle, screens, loaded.Content, loaded.NodeTree, _progress);
+            panel.Initialize(playtest, battle, aim, screens, loaded.Content, loaded.NodeTree, _progress);
 #endif
         }
 

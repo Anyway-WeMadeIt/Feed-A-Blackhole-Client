@@ -13,17 +13,41 @@ namespace BlackHole.Unity
     //   Device Simulator도 마우스 조작을 터치로 넘기므로 터치 경로를 탄다.
     // 포인터는 지금의 입력 출처일 뿐이다 — 판은 조준점만 안다. 규칙 평면은 장면의 z = 0이고 HQ가 장면의 원점이다.
     // 시작하거나 정리할 상태가 없다. 진행 중인 판이 없으면 아무것도 하지 않는다.
+    // 테스트 도구가 조준 봇(Bot)을 꽂으면 포인터 대신 봇이 조준점을 정한다(에디터·개발 빌드) — 같은 seed면 같은 플레이가 되어 성능 전후 비교에 쓴다.
     internal sealed class AimInput
     {
         private readonly BattleSystem _battle;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private GameSession _botSession;
+
+        // 조준 봇. null이면 포인터가 조준한다. 판이 바뀌면 그 판의 seed로 봇을 다시 시작한다.
+        public IAimBot Bot { get; set; }
+#endif
+
         public AimInput(BattleSystem battle) => _battle = battle;
 
-        // 전투 시스템보다 먼저 부른다. 이번 프레임의 Step이 이 조준점으로 공격한다.
-        public void Tick()
+        // 전투 시스템보다 먼저 부른다. 이번 프레임의 Step이 이 조준점으로 공격한다. delta: 이번 프레임에 흐른 시간(초, 봇만 쓴다).
+        public void Tick(float delta)
         {
             if (!_battle.IsRunning)
                 return;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (Bot != null)
+            {
+                if (_botSession != _battle.Session)
+                {
+                    _botSession = _battle.Session;
+                    Bot.Begin(_battle.LastSeed);
+                }
+
+                _battle.Session.SetAimPoint(Bot.Aim(_battle.Session.World, delta));
+                return;
+            }
+
+            _botSession = null;
+#endif
 
             _battle.Session.SetAimPoint(Read());
         }

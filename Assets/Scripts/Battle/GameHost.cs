@@ -54,7 +54,7 @@ namespace BlackHole.Unity
 
         public void Tick(float deltaTime)
         {
-            _aim.Tick();
+            _aim.Tick(deltaTime);
 
             // 적 공전 설정은 판 중에도 바꿀 수 있다. 판이 있으면 매 프레임 설정 값을 넣는다(bool 대입 하나).
             _battle.Session?.SetOrbitEnabled(_settings.IsOn(GameSettings.EnemyOrbit));

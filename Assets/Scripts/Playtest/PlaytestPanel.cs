@@ -47,6 +47,10 @@ namespace BlackHole.Unity
 
         private PlaytestSession _session;
         private BattleSystem _battle;
+        private AimInput _aim;
+        // 조준 봇(성능 측정용). 0 = 사람, 1 = 마우스 프로필, 2 = 터치 프로필. 켜면 그 판은 +test.
+        private int _botIndex;
+        private static readonly string[] BotNames = { "사람", "봇 (마우스)", "봇 (터치)" };
         private ScreenFlow _screens;
         private GameContent _content;
         // 노드 정의(메모에 노드마다 효과를 적을 때 쓴다).
@@ -144,6 +148,7 @@ namespace BlackHole.Unity
         internal void Initialize(
             PlaytestSession session,
             BattleSystem battle,
+            AimInput aim,
             ScreenFlow screens,
             GameContent content,
             NodeTree nodeTree,
@@ -151,6 +156,7 @@ namespace BlackHole.Unity
         {
             _session = session;
             _battle = battle;
+            _aim = aim;
             _screens = screens;
             _content = content;
             _nodeTree = nodeTree;
@@ -207,7 +213,7 @@ namespace BlackHole.Unity
             if (Time.timeScale != wanted)
                 Time.timeScale = wanted;
 
-            if (session != null && _timeScale != 1f)
+            if (session != null && (_timeScale != 1f || _botIndex != 0))
                 _session.Tag.MarkTestBattle();
         }
 
@@ -390,6 +396,23 @@ namespace BlackHole.Unity
         }
 
         private void MarkTest() => _session.Tag.MarkTestBattle();
+
+        // 조준 봇을 바꾼다. 판 중에 바꾸면 곧바로 그 판을 이어서 조준한다(봇은 다음 프레임에 그 판의 seed로 시작).
+        private void SetBot(int index)
+        {
+            _botIndex = index;
+            _aim.Bot = index switch
+            {
+                1 => new GreedyAimBot(AimBotProfile.Default),
+                2 => new GreedyAimBot(AimBotProfile.Touch),
+                _ => null,
+            };
+
+            if (index != 0 && _battle.Session != null)
+                MarkTest();
+
+            _status = index == 0 ? "조준: 사람" : $"조준: {BotNames[index]}";
+        }
 
         private void OnGUI()
         {
@@ -779,6 +802,15 @@ namespace BlackHole.Unity
             _showHud = GUILayout.Toggle(_showHud, " HUD (F2)");
             if (GUILayout.Button("HUD 위치 바꾸기"))
                 _hudCorner = (_hudCorner + 1) % 4;
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("조준: 봇이면 같은 seed에 같은 플레이(성능 측정용). 봇 판은 +test", _small);
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < BotNames.Length; i++)
+            {
+                if (GUILayout.Toggle(_botIndex == i, BotNames[i], GUI.skin.button) && _botIndex != i)
+                    SetBot(i);
+            }
             GUILayout.EndHorizontal();
 
             GUILayout.Label("배속(판에만 건다. 1이 아니면 +test)", _small);
