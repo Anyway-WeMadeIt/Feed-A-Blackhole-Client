@@ -1,7 +1,10 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using Unity.Profiling;
+using Unity.Profiling.LowLevel;
+using Unity.Profiling.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -13,8 +16,11 @@ namespace BlackHole.Unity
     //   1줄 빌드 정보(커밋·브랜치·기기) / 2줄 FPS·프레임·메인·GPU·GC / 3~4줄(자세히) 렌더 스레드·드로우콜·적 수·메모리·목표 FPS.
     // - 조작: F3 또는 네 손가락 탭 = 간단 → 자세히 → 숨김. F4 또는 네 손가락 1.5초 누르기 = 손으로 기록 켜기·끄기(판 밖 측정, S1·S4용).
     // - 기록: 판이 시작되면 자동으로 CSV를 열고 판이 끝나면 닫는다(PerfLog). 숨겨도 기록은 계속된다.
-    // - 값의 출처: 프레임 간격 = Time.unscaledDeltaTime, 메인·렌더·GPU = FrameTimingManager(개발 빌드에서 늘 켜짐, 4프레임 늦음),
-    //   GC·드로우콜·메모리 = ProfilerRecorder. 읽지 못하는 값은 '-'(기기에 따라 GPU 시간이 없을 수 있다).
+    // - 값의 출처: 프레임 간격 = Time.unscaledDeltaTime.
+    //   메인 = Profiler 마커 'PlayerLoop' − 'Gfx.WaitForPresentOnGfxThread'(메인 스레드가 일한 시간, Profiler Highlights의 CPU와 같은 뜻).
+    //   렌더·GPU = FrameTimingManager(개발 빌드에서 늘 켜짐, 4프레임 늦음). GC·드로우콜·메모리 = ProfilerRecorder.
+    //   읽지 못하는 값은 '-'(기기에 따라 GPU 시간이 없을 수 있다).
+    //   FrameTimingManager의 메인 스레드 값(프레임 시간 − Present 대기)은 일부 기기(SM-M446K)에서 0 이하로 나와 쓰지 않는다. 자세히 모드 넷째 줄에 원값을 보인다.
     // HUD 자체도 캔버스 하나(드로우콜 1~2개)를 쓰고, 글은 0.5초마다 할당 없이 다시 만든다.
     internal sealed class PerfHud : MonoBehaviour
     {
@@ -69,6 +75,12 @@ namespace BlackHole.Unity
         private ProfilerRecorder _drawCalls;
         private ProfilerRecorder _batches;
         private ProfilerRecorder _setPass;
+        // 메인 스레드 마커. 이름으로 범주를 찾아 연다(범주가 엔진 버전마다 다를 수 있어서).
+        private ProfilerRecorder _playerLoop;
+        private ProfilerRecorder _presentWait;
+        // FrameTimingManager 원값(진단용, 자세히 모드에만 보인다).
+        private float _ftMain = float.NaN;
+        private float _ftWait = float.NaN;
 
         private readonly PerfWindow _window = new();
         private readonly PerfLog _log = new();
@@ -130,6 +142,25 @@ namespace BlackHole.Unity
             _drawCalls = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
             _batches = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Batches Count");
             _setPass = ProfilerRecorder.StartNew(ProfilerCategory.Render, "SetPass Calls Count");
+            _playerLoop = StartMarker("PlayerLoop");
+            _presentWait = StartMarker("Gfx.WaitForPresentOnGfxThread");
+        }
+
+        // 이름이 같은 Profiler 마커를 찾아 그 범주로 연다. 없으면 빈 기록기(Valid = false).
+        private static ProfilerRecorder StartMarker(string name)
+        {
+            var handles = new List<ProfilerRecorderHandle>();
+            ProfilerRecorderHandle.GetAvailable(handles);
+
+            foreach (ProfilerRecorderHandle handle in handles)
+            {
+                ProfilerRecorderDescription description = ProfilerRecorderHandle.GetDescription(handle);
+                if (description.Name == name)
+                    return ProfilerRecorder.StartNew(description.Category, name);
+            }
+
+            Debug.LogWarning("[Perf] Profiler 마커를 찾지 못했습니다: " + name);
+            return default;
         }
 
         private void OnDisable()
@@ -142,6 +173,8 @@ namespace BlackHole.Unity
             _drawCalls.Dispose();
             _batches.Dispose();
             _setPass.Dispose();
+            _playerLoop.Dispose();
+            _presentWait.Dispose();
         }
 
         private void OnDestroy()
@@ -197,16 +230,23 @@ namespace BlackHole.Unity
 
             _levelUpsThisFrame = 0;
 
+            if (_playerLoop.Valid)
+            {
+                float loop = Milliseconds(_playerLoop);
+                float wait = _presentWait.Valid ? Milliseconds(_presentWait) : 0f;
+                if (loop > 0)
+                    sample.MainMs = Mathf.Max(0f, loop - wait);
+            }
+
             FrameTimingManager.CaptureFrameTimings();
             if (FrameTimingManager.GetLatestTimings(1, _timings) > 0)
             {
                 FrameTiming timing = _timings[0];
-                float main = (float)(timing.cpuMainThreadFrameTime - timing.cpuMainThreadPresentWaitTime);
                 float render = (float)timing.cpuRenderThreadFrameTime;
                 float gpu = (float)timing.gpuFrameTime;
+                _ftMain = (float)timing.cpuMainThreadFrameTime;
+                _ftWait = (float)timing.cpuMainThreadPresentWaitTime;
 
-                if (main > 0)
-                    sample.MainMs = main;
                 if (render > 0)
                     sample.RenderMs = render;
                 if (gpu > 0)
@@ -214,6 +254,13 @@ namespace BlackHole.Unity
             }
 
             return sample;
+        }
+
+        // 마커 기록기의 지난 프레임 값(ms). 시간 마커는 나노초로 준다.
+        private static float Milliseconds(ProfilerRecorder recorder)
+        {
+            long value = recorder.LastValue;
+            return recorder.UnitType == ProfilerMarkerDataUnit.TimeNanoseconds ? value * 1e-6f : value;
         }
 
         private static long Read(ProfilerRecorder recorder) => recorder.Valid ? recorder.LastValue : -1;
@@ -338,6 +385,13 @@ namespace BlackHole.Unity
                 AppendMb(sb, Read(_totalUsed)).Append("MB  target ");
                 PerfText.Int(sb, Application.targetFrameRate).Append(" @");
                 PerfText.Fixed(sb, Screen.currentResolution.refreshRateRatio.value, 0).Append("Hz");
+
+                // 진단: FrameTimingManager 원값(메인 스레드 프레임 시간 / Present 대기). 메인 값 출처를 확인할 때만 본다.
+                sb.Append("\nft main ");
+                PerfText.Fixed(sb, _ftMain, 1).Append(" wait ");
+                PerfText.Fixed(sb, _ftWait, 1).Append("  loop ");
+                PerfText.Fixed(sb, _playerLoop.Valid ? Milliseconds(_playerLoop) : float.NaN, 1).Append(" present ");
+                PerfText.Fixed(sb, _presentWait.Valid ? Milliseconds(_presentWait) : float.NaN, 1);
             }
 
             sb.Append("</mark>");
