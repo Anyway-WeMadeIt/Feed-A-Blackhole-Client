@@ -17,7 +17,8 @@ namespace BlackHole.Unity
     // - 조작: F3 또는 네 손가락 탭 = 간단 → 자세히 → 숨김. F4 또는 네 손가락 1.5초 누르기 = 손으로 기록 켜기·끄기(판 밖 측정, S1·S4용).
     // - 기록: 판이 시작되면 자동으로 CSV를 열고 판이 끝나면 닫는다(PerfLog). 숨겨도 기록은 계속된다.
     // - 값의 출처: 프레임 간격 = Time.unscaledDeltaTime.
-    //   메인 = Profiler 마커 'PlayerLoop' − 'Gfx.WaitForPresentOnGfxThread'(메인 스레드가 일한 시간, Profiler Highlights의 CPU와 같은 뜻).
+    //   메인 = Profiler 마커 'PlayerLoop' − 'WaitForTargetFPS' − 'Gfx.WaitForPresentOnGfxThread'(메인 스레드가 일한 시간, Highlights의 CPU와 같은 뜻).
+    //   목표 FPS를 맞추는 대기가 PlayerLoop 안에 들어 있는 기기가 있어서(SM-M446K, 60fps) 두 대기를 모두 뺀다.
     //   렌더·GPU = FrameTimingManager(개발 빌드에서 늘 켜짐, 4프레임 늦음). GC·드로우콜·메모리 = ProfilerRecorder.
     //   읽지 못하는 값은 '-'(기기에 따라 GPU 시간이 없을 수 있다).
     //   FrameTimingManager의 메인 스레드 값(프레임 시간 − Present 대기)은 일부 기기(SM-M446K)에서 0 이하로 나와 쓰지 않는다. 자세히 모드 넷째 줄에 원값을 보인다.
@@ -78,6 +79,7 @@ namespace BlackHole.Unity
         // 메인 스레드 마커. 이름으로 범주를 찾아 연다(범주가 엔진 버전마다 다를 수 있어서).
         private ProfilerRecorder _playerLoop;
         private ProfilerRecorder _presentWait;
+        private ProfilerRecorder _targetFpsWait;
         // FrameTimingManager 원값(진단용, 자세히 모드에만 보인다).
         private float _ftMain = float.NaN;
         private float _ftWait = float.NaN;
@@ -142,25 +144,43 @@ namespace BlackHole.Unity
             _drawCalls = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
             _batches = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Batches Count");
             _setPass = ProfilerRecorder.StartNew(ProfilerCategory.Render, "SetPass Calls Count");
-            _playerLoop = StartMarker("PlayerLoop");
-            _presentWait = StartMarker("Gfx.WaitForPresentOnGfxThread");
+            StartMarkers();
         }
 
-        // 이름이 같은 Profiler 마커를 찾아 그 범주로 연다. 없으면 빈 기록기(Valid = false).
-        private static ProfilerRecorder StartMarker(string name)
+        // 메인 스레드 마커를 이름으로 찾아 그 범주로 연다. 못 찾은 것은 빈 기록기(Valid = false).
+        // 항목 수천 개의 이름을 읽어 시작 때 한 번 크게 할당한다(측정 기록은 판이 시작될 때 열리므로 판 통계에는 들지 않는다).
+        // 이 기기에 있는 대기 마커 이름을 한 번 로그로 남긴다(main 값의 출처를 확인할 때 logcat에서 본다).
+        private void StartMarkers()
         {
             var handles = new List<ProfilerRecorderHandle>();
             ProfilerRecorderHandle.GetAvailable(handles);
 
+            ProfilerCategory? loop = null, present = null, target = null;
+            var waits = new StringBuilder("[Perf] 대기 마커:");
+
             foreach (ProfilerRecorderHandle handle in handles)
             {
                 ProfilerRecorderDescription description = ProfilerRecorderHandle.GetDescription(handle);
-                if (description.Name == name)
-                    return ProfilerRecorder.StartNew(description.Category, name);
+                string name = description.Name;
+
+                if (name == "PlayerLoop")
+                    loop = description.Category;
+                else if (name == "Gfx.WaitForPresentOnGfxThread")
+                    present = description.Category;
+                else if (name == "WaitForTargetFPS")
+                    target = description.Category;
+
+                if (name != null && name.Contains("Wait"))
+                    waits.Append(' ').Append(name);
             }
 
-            Debug.LogWarning("[Perf] Profiler 마커를 찾지 못했습니다: " + name);
-            return default;
+            _playerLoop = loop.HasValue ? ProfilerRecorder.StartNew(loop.Value, "PlayerLoop") : default;
+            _presentWait = present.HasValue ? ProfilerRecorder.StartNew(present.Value, "Gfx.WaitForPresentOnGfxThread") : default;
+            _targetFpsWait = target.HasValue ? ProfilerRecorder.StartNew(target.Value, "WaitForTargetFPS") : default;
+
+            Debug.Log(waits.ToString());
+            if (!loop.HasValue || !target.HasValue)
+                Debug.LogWarning("[Perf] 메인 스레드 마커를 다 찾지 못했습니다(PlayerLoop " + loop.HasValue + ", WaitForTargetFPS " + target.HasValue + ").");
         }
 
         private void OnDisable()
@@ -175,6 +195,7 @@ namespace BlackHole.Unity
             _setPass.Dispose();
             _playerLoop.Dispose();
             _presentWait.Dispose();
+            _targetFpsWait.Dispose();
         }
 
         private void OnDestroy()
@@ -233,7 +254,8 @@ namespace BlackHole.Unity
             if (_playerLoop.Valid)
             {
                 float loop = Milliseconds(_playerLoop);
-                float wait = _presentWait.Valid ? Milliseconds(_presentWait) : 0f;
+                float wait = (_presentWait.Valid ? Milliseconds(_presentWait) : 0f)
+                    + (_targetFpsWait.Valid ? Milliseconds(_targetFpsWait) : 0f);
                 if (loop > 0)
                     sample.MainMs = Mathf.Max(0f, loop - wait);
             }
@@ -391,7 +413,8 @@ namespace BlackHole.Unity
                 PerfText.Fixed(sb, _ftMain, 1).Append(" wait ");
                 PerfText.Fixed(sb, _ftWait, 1).Append("  loop ");
                 PerfText.Fixed(sb, _playerLoop.Valid ? Milliseconds(_playerLoop) : float.NaN, 1).Append(" present ");
-                PerfText.Fixed(sb, _presentWait.Valid ? Milliseconds(_presentWait) : float.NaN, 1);
+                PerfText.Fixed(sb, _presentWait.Valid ? Milliseconds(_presentWait) : float.NaN, 1).Append(" tfps ");
+                PerfText.Fixed(sb, _targetFpsWait.Valid ? Milliseconds(_targetFpsWait) : float.NaN, 1);
             }
 
             sb.Append("</mark>");
