@@ -22,6 +22,12 @@ namespace BlackHole.Core
         // 사망 효과의 대기열과 이번 Step의 효과 기록(번개 이동, 폭발, 레이저), 켜진 중력장.
         public DeathEffects DeathEffects { get; }
 
+        // Level업 성장 공급의 예약표. 화면은 이것으로 게이지·블랙홀 연출의 Level과 진행도를 읽는다.
+        public GrowthPacer GrowthPacer { get; }
+
+        // 테스트 도구(BattleCheats.ReachLevel): 다음 Step에 오르는 Level의 성장 공급을 시간차 없이 바로 낸다. 한 번 쓰고 꺼진다.
+        internal bool FlushGrowthOnNextStep { get; set; }
+
         // 블랙홀.
         public Hq Hq { get; }
 
@@ -46,6 +52,7 @@ namespace BlackHole.Core
             PeriodicSpawnPlacementDefinition periodicSpawnPlacement,
             Hq hq,
             BreakerDefinition breaker,
+            IReadOnlyList<SupplyRequest> startSupply,
             IReadOnlyList<SupplyRequest> growthSupply,
             float killTimeBonus = 0,
             float killTimeCooldown = 0)
@@ -56,6 +63,7 @@ namespace BlackHole.Core
             Stats = stats;
             Hq = hq;
             DeathEffects = new DeathEffects(seed);
+            GrowthPacer = new GrowthPacer(growthSupply);
 
             BattleRandom criticalRandom = new(seed, RandomStream.Critical);
             Breaker = new BreakerSkill(breaker, criticalRandom);
@@ -66,10 +74,10 @@ namespace BlackHole.Core
                 stats,
                 placement,
                 periodicSpawnPlacement,
-                growthSupply,
+                startSupply,
                 CountActive);
 
-            _deathBonuses = new DeathBonuses(seed, stats, _supply, killTimeBonus, killTimeCooldown);
+            _deathBonuses = new DeathBonuses(seed, stats, _supply, killTimeBonus, killTimeCooldown, hq.Stage);
         }
 
         internal void SetAimPoint(Point2? aimPoint) => AimPoint = aimPoint;
@@ -106,6 +114,7 @@ namespace BlackHole.Core
         internal void ClearRemainingEnemies()
         {
             _supply.Clear();
+            GrowthPacer.Clear();
             DeathEffects.Clear();
             _enemies.ClearAlive();
         }
@@ -116,6 +125,13 @@ namespace BlackHole.Core
 
         // 테스트 도구(BattleCheats)가 부른다. 살아 있는 적만 치운다. 처치가 아니다(사망 기록·처치 수·Gold 없음).
         internal void ClearAliveEnemies() => _enemies.ClearAlive();
+
+        // 테스트 도구(BattleCheats)가 부른다. 예약된 성장 공급을 지금 모두 만든다.
+        internal void FlushGrowthNow()
+        {
+            GrowthPacer.Flush(_supply);
+            _supply.ProcessRequests();
+        }
 
         internal bool DealDamage(Enemy enemy, Damage damage)
         {
@@ -142,6 +158,7 @@ namespace BlackHole.Core
                 MoveEnemies(delta * EnemyMoveScale);
 
             DeathEffects.AgeFields(delta);
+            GrowthPacer.Advance(delta);
             _deathBonuses.Advance(delta);
 
             // 2. Passive Attack: (DealDamage).
@@ -159,10 +176,17 @@ namespace BlackHole.Core
             if (Hq.ReachedMilestone)
                 return raised;
 
-            // 5. Growth: 오른 Level마다 성장 공급을 요청.
-            _supply.RequestGrowth(raised);
+            // 5. Growth: 오른 Level마다 성장 공급의 바퀴를 예약(GrowthPacer). 성장 시간은 GameSession이 raised로 바로 더한다.
+            GrowthPacer.Schedule(raised);
 
-            // 6. Enemy Supply: 쌓인 생성 요청(성장 공급·재생성)을 처리.
+            if (FlushGrowthOnNextStep)
+            {
+                GrowthPacer.Flush(_supply);
+                FlushGrowthOnNextStep = false;
+            }
+
+            // 6. Enemy Supply: 시각이 된 성장 공급을 요청에 올리고, 쌓인 생성 요청(성장 공급·재생성)을 처리.
+            GrowthPacer.Release(_supply);
             _supply.ProcessRequests();
 
             // 7. Periodic Spawn: 주기 출현(혜성)의 등장 판정 진행.
@@ -172,7 +196,7 @@ namespace BlackHole.Core
 
         // 적 이동: 중력장 범위 안의 적은 그 중력장에 끌리고(DeathEffects.Pull), 끌린 정도의 나머지만큼 공전한다.
         // 중력장이 켜지고 꺼지는 순간과 범위 가장자리에서는 둘이 섞여 움직임이 끊기지 않는다.
-        // 누르고 있는 동안(조준점) Breaker 공격 원 안의 적은 공전이 HoldSlow 배로 느려진다(붙잡힘). 중력장 끌림은 그대로다.
+        // 누르고 있는 동안(조준점) Breaker 공격 원 안의 적은 공전이 HoldSlow 배로 느려진다(붙잡힘, 픽업 제외 — Breaker.IsHolding). 중력장 끌림은 그대로다.
         private void MoveEnemies(float delta)
         {
             bool fields = DeathEffects.HasGravityFields;

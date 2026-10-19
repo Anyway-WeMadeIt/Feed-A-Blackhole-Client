@@ -23,6 +23,8 @@ namespace BlackHole.Unity
         [SerializeField] private BreakerLook _breakerLook;
         [SerializeField] private ExplosionLook _explosionLook;
         [SerializeField] private LightningLook _lightningLook;
+        [SerializeField] private StarLightningLook _starLightningLook;
+        [SerializeField] private LaserLook _laserLook;
         [SerializeField] private CometLook _cometLook;
         [SerializeField] private GameObject _blackHole;
 
@@ -86,7 +88,9 @@ namespace BlackHole.Unity
         private FrameRateLimiter _frameRate;
         private GameHost _host;
         private IAuthSession _auth;
-        // 로그인이 끝나기 전에는 화면이 없으므로 호스트를 돌리지 않는다.
+        // 서버를 쓰지 않는 실행(Offline(Disabled))이면 null이다.
+        private SyncSender _syncSender;
+        // 로그인·시작 동기화가 끝나기 전에는 화면이 없으므로 호스트를 돌리지 않는다.
         private bool _loggingIn;
 
         private void Awake()
@@ -96,13 +100,12 @@ namespace BlackHole.Unity
             PlaytestSession playtest = PlaytestSession.Create(_playtest, new ContentTag());
             LoadedContent loaded = LoadContent(playtest);
             // 프로필을 적용했으면 그 프로필의 저장을 따로 쓴다. 테스트 값으로 번 진행이 실제 저장을 덮지 않는다.
-            string saveDirectory = playtest.SaveDirectory(SaveLocation.Root(Application.persistentDataPath));
+            string saveDirectory = playtest.SaveDirectory(Application.persistentDataPath);
             // 밸런스 프로필을 적용한 실행은 콘텐츠가 서버와 달라 로그인하지 않는다(계약 C10).
             bool profileApplied = playtest.AppliedProfile != null;
 #else
             LoadedContent loaded = GameContentLoader.Load(_content);
-            // 웹은 빌드를 올려도 바뀌지 않는 고정 폴더를 쓴다(SaveLocation).
-            string saveDirectory = SaveLocation.Root(Application.persistentDataPath);
+            string saveDirectory = Application.persistentDataPath;
             const bool profileApplied = false;
 #endif
 
@@ -130,7 +133,7 @@ namespace BlackHole.Unity
             EnemyLooks enemyLooks = new(_content.Enemies.Kinds());
             EnemyView enemyView = new(transform, enemyLooks, _breakerLook, _cometLook, _settings);
             BreakerView breakerView = new(transform, _breakerLook);
-            DeathEffectView deathEffectView = new(transform, _lightningLook, _explosionLook);
+            DeathEffectView deathEffectView = new(transform, _lightningLook, _starLightningLook, _explosionLook, _laserLook);
             HqView hqView = new(transform, _blackHole, battleCamera, _settings);
 
             _progress = new ProgressState();
@@ -139,12 +142,7 @@ namespace BlackHole.Unity
                 loaded.NodeTree.Content,
                 loaded.Content.Growth,
                 _progress);
-
-            // 웹 빌드는 서버에 붙지 않아(CreateAuthSession) 동기화 로그를 보낼 곳이 없다. 로그가 판마다 저장 파일에 쌓이지 않게 끈다.
-            if (Application.platform == RuntimePlatform.WebGLPlayer)
-                _progressStore.DisableSyncLogs();
-
-            _auth = CreateAuthSession(saveDirectory, profileApplied);
+            CreateServerSession(saveDirectory, profileApplied);
             // 서버 동기화 로그를 만든다. 로그는 빌드 버전과 이 콘텐츠의 서버 콘텐츠 버전을 싣는다.
             SyncLogFactory syncLogs = new(new UnityJsonSerializer(), Application.version, loaded.ServerContentVersion, () => DateTime.UtcNow);
             Localizer localizer = Localizer.Create(_texts, _settings);
@@ -217,8 +215,8 @@ namespace BlackHole.Unity
         }
 #endif
 
-        // 콘텐츠를 읽은 뒤 타이틀로 가기 전에 로그인을 마친다(W2-3). 대기 중에는 아무것도 띄우지 않는다.
-        // StartAsync는 예외를 던지지 않고 loginBudgetSeconds 안에 끝난다.
+        // 콘텐츠를 읽은 뒤 타이틀로 가기 전에 로그인과 시작 동기화를 마친다(W2-3, W3-4, 계약 2.8). 대기 중에는 아무것도 띄우지 않는다.
+        // StartAsync는 예외를 던지지 않고 loginBudgetSeconds 안에, 시작 동기화는 syncTimeoutSeconds 안에 끝난다.
         private IEnumerator Start()
         {
             _loggingIn = true;
@@ -227,10 +225,26 @@ namespace BlackHole.Unity
             while (!login.IsCompleted)
                 yield return null;
 
-            _loggingIn = false;
+            if (login.IsFaulted)
+                Debug.LogError($"[인증] 로그인 처리 중 예외: {login.Exception}");
+
             Debug.Log(_auth.State == ConnectionState.Online
                 ? "[인증] 온라인"
                 : $"[인증] 오프라인: {_auth.OfflineReason}");
+
+            // 오프라인이면 보내지 않고 바로 끝난다. 응답의 진행도가 반영된 뒤에 타이틀로 간다.
+            if (_syncSender != null)
+            {
+                Task sync = _syncSender.SyncOnStartupAsync();
+
+                while (!sync.IsCompleted)
+                    yield return null;
+
+                if (sync.IsFaulted)
+                    Debug.LogError($"[동기화] 시작 동기화 중 예외: {sync.Exception}");
+            }
+
+            _loggingIn = false;
 
             _host.Start();
             SoundManager.Instance.Bind(_settings);
@@ -257,26 +271,33 @@ namespace BlackHole.Unity
             _viewTexts?.Dispose();
             _uiSettings?.Dispose();
             _host?.Dispose();
+            _syncSender?.Dispose();
         }
 
-        // 설정이 없거나 꺼져 있거나 프로필을 적용했으면 요청 없이 오프라인(Disabled)이다. 계정은 진행 저장과 같은 폴더에 둔다(계약 2.5).
-        // 웹 빌드도 오프라인이다: itch.io 페이지(HTTPS)에서 http 서버 요청은 브라우저가 막고, 다른 도메인이라 서버의 CORS 허용도 필요하다.
-        // 붙으려 하면 실패할 로그인을 기다리느라 첫 화면이 늦게 뜬다.
-        private IAuthSession CreateAuthSession(string saveDirectory, bool profileApplied)
+        // 설정이 없거나 꺼져 있거나 프로필을 적용했으면 요청 없이 오프라인(Disabled)이고 전송기를 만들지 않는다.
+        // 계정은 진행 저장과 같은 폴더에 둔다(계약 2.5). 전송기는 진행 저장소의 LogAppended를 보고 보낸다(계약 5.8).
+        private void CreateServerSession(string saveDirectory, bool profileApplied)
         {
-            if (_server == null || !_server.Enabled || profileApplied || Application.platform == RuntimePlatform.WebGLPlayer)
+            if (_server == null || !_server.Enabled || profileApplied)
             {
-                return new OfflineAuthSession(OfflineReason.Disabled);
+                _auth = new OfflineAuthSession(OfflineReason.Disabled);
+                return;
             }
 
-            return new AuthSession(
-                new UnityHttpTransport(_server.BaseUrl),
-                new UnityJsonSerializer(),
+            UnityHttpTransport transport = new(_server.BaseUrl);
+            UnityJsonSerializer json = new();
+
+            _auth = new AuthSession(
+                transport,
+                json,
                 new FileCredentialStore(saveDirectory),
                 _server.RequestTimeoutSeconds,
                 _server.LoginBudgetSeconds,
                 Debug.Log,
                 Debug.LogError);
+
+            SyncApi api = new(transport, _auth, json, _server.SyncTimeoutSeconds, Debug.Log, Debug.LogError);
+            _syncSender = new SyncSender(_auth, api, _progressStore, _server.SyncTimeoutSeconds, Debug.Log, Debug.LogError);
         }
 
         private UIManager CreateUI()
@@ -355,6 +376,20 @@ namespace BlackHole.Unity
             {
                 Debug.LogError("[외형] GameBootstrap에 번개 외형(LightningLook)을," +
                                " 번개 외형에 머티리얼을 연결해야 한다.", this);
+                configured = false;
+            }
+
+            if (_starLightningLook == null || _starLightningLook.Material == null)
+            {
+                Debug.LogError("[외형] GameBootstrap에 전기 별 번개 외형(StarLightningLook)을," +
+                               " 그 외형에 머티리얼을 연결해야 한다.", this);
+                configured = false;
+            }
+
+            if (_laserLook == null || _laserLook.Material == null)
+            {
+                Debug.LogError("[외형] GameBootstrap에 레이저 외형(LaserLook)을," +
+                               " 그 외형에 머티리얼을 연결해야 한다.", this);
                 configured = false;
             }
 

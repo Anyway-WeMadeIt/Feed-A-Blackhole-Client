@@ -5,7 +5,7 @@ namespace BlackHole.Core
 {
     // 한 판의 적 공급을 담당한다.
     // 생성 요청에 따라 일반 적을 만들고, 혜성 같은 주기 출현 적을 별도 주기로 생성한다.
-    // 적 종류의 변환과 시작, 성장 공급량은 판 조립 때 이미 정해져 들어온다.
+    // 적 종류의 변환과 시작 공급량은 판 조립 때 이미 정해져 들어온다. Level업의 성장 공급은 GrowthPacer가 시간차를 두고 여기에 요청한다.
     internal sealed class EnemySupply
     {
         // 일반 공급 적의 성능 보호용 상한. 게임 규칙상의 최대 개체 수는 아니다.
@@ -15,9 +15,6 @@ namespace BlackHole.Core
         private readonly EnemyStatTable _stats;
         private readonly EnemyPlacementDefinition _placement;
         private readonly PeriodicSpawnPlacementDefinition _periodicSpawnPlacement;
-
-        // Level업 한 번마다 요청할 적 종류와 수.
-        private readonly IReadOnlyList<SupplyRequest> _growthSupply;
 
         // 이 성질의 현재 활성 수.
         // 살아 있는 적과 Breaker에 남아 있는 해당 버프 중첩을 함께 센다.
@@ -32,6 +29,8 @@ namespace BlackHole.Core
         private readonly Dictionary<EnemyDefinition, QuotaPicker> _tierPickers = new();
         private readonly Dictionary<EnemyDefinition, QuotaPicker> _traitPickers = new();
         private readonly Dictionary<EnemyDefinition, QuotaPicker> _sizePickers = new();
+        // 마지막 색 등급의 톤을 같은 몫으로 고르는 선택기. 톤이 1개(없음)인 종류는 없다.
+        private readonly Dictionary<EnemyDefinition, QuotaPicker> _tonePickers = new();
 
         // 주기 출현 종류마다 다음 출현 판정까지 누적된 시간.
         private readonly List<SpawnClock> _spawnClocks = new();
@@ -59,14 +58,13 @@ namespace BlackHole.Core
             EnemyStatTable stats,
             EnemyPlacementDefinition placement,
             PeriodicSpawnPlacementDefinition periodicSpawnPlacement,
-            IReadOnlyList<SupplyRequest> growthSupply,
+            IReadOnlyList<SupplyRequest> startSupply,
             Func<EnemyDefinition, EnemyTraitDefinition, int> countActive)
         {
             _enemies = enemies;
             _stats = stats;
             _placement = placement;
             _periodicSpawnPlacement = periodicSpawnPlacement;
-            _growthSupply = growthSupply;
             _countActive = countActive;
             _placementRandom = new BattleRandom(seed, RandomStream.Placement);
             _periodicSpawnPlacementRandom = new BattleRandom(seed, RandomStream.PeriodicSpawnPlacement);
@@ -76,11 +74,24 @@ namespace BlackHole.Core
             var tierRandom = new BattleRandom(seed, RandomStream.Tier);
             var traitRandom = new BattleRandom(seed, RandomStream.Trait);
             var sizeRandom = new BattleRandom(seed, RandomStream.Size);
+            var toneRandom = new BattleRandom(seed, RandomStream.Tone);
 
             foreach (EnemyDefinition kind in stats.Kinds)
             {
                 EnemyComposition composition = stats.CompositionOf(kind);
                 _tierPickers.Add(kind, new QuotaPicker(stats.TierRatiosOf(kind), tierRandom));
+
+                int toneCount = LastTierTonesOf(kind, startSupply);
+
+                if (toneCount > 1)
+                {
+                    var tones = new float[toneCount];
+
+                    for (int i = 0; i < tones.Length; i++)
+                        tones[i] = 1;
+
+                    _tonePickers.Add(kind, new QuotaPicker(tones, toneRandom));
+                }
 
                 if (kind.IsPickup)
                 {
@@ -122,16 +133,6 @@ namespace BlackHole.Core
         // 생성 요청: 이 종류를 몇 마리. 다음 공급 처리(ProcessRequests) 때 사용.
         internal void Request(SupplyRequest request) => _requests.Add(request);
 
-        // Level업 한 번마다 성장 공급을 요청).
-        internal void RequestGrowth(int levels)
-        {
-            for (int i = 0; i < levels; i++)
-            {
-                foreach (SupplyRequest request in _growthSupply)
-                    _requests.Add(request);
-            }
-        }
-
         // 쌓인 생성 요청을 요청 순서대로, 요청한 수만큼 한 마리씩 출현 띠 안에 만듬.
         internal void ProcessRequests()
         {
@@ -155,7 +156,8 @@ namespace BlackHole.Core
                         size,
                         _stats.Of(kind, tier, trait, size),
                         _placement.Pick(_placementRandom),
-                        request.RespawnGeneration);
+                        request.RespawnGeneration,
+                        ToneOf(kind, tier));
                 }
             }
 
@@ -217,7 +219,8 @@ namespace BlackHole.Core
                     trait,
                     SizeRule.Base,
                     _stats.Of(kind, tier, trait),
-                    position);
+                    position,
+                    tone: ToneOf(kind, tier));
             }
         }
 
@@ -238,10 +241,41 @@ namespace BlackHole.Core
                     trait,
                     size,
                     _stats.Of(kind, tier, trait, size),
-                    _placement.Pick(_placementRandom));
+                    _placement.Pick(_placementRandom),
+                    tone: ToneOf(kind, tier));
             }
 
             return made;
+        }
+
+        // 이 색 등급 개체의 톤: 마지막 색 등급이고 이 판에 톤이 있으면 같은 몫으로 하나, 아니면 0(색 등급 색 그대로).
+        private int ToneOf(EnemyDefinition kind, int tier) =>
+            tier == kind.Tiers.Count - 1 && _tonePickers.TryGetValue(kind, out QuotaPicker picker) ? picker.Pick() : 0;
+
+        // 이 종류의 마지막 색 등급 톤 수(MassRule.LastTierTones). 화면에 나오는 색 = 이 종류의 색 수 + 변환 사슬에서 다음 종류들 중 이 판에
+        // 공급되는(시작 공급 > 0) 것의 색 수. 상위 종류가 나오면 그만큼 톤이 줄고, 상위가 두 색 이상이면 톤이 없어진다.
+        private int LastTierTonesOf(EnemyDefinition kind, IReadOnlyList<SupplyRequest> startSupply)
+        {
+            int visible = MassRule.ActiveTiers(_stats.TierRatiosOf(kind));
+
+            for (EnemyDefinition next = _stats.UpgradeTargetOf(kind); next != null && next != kind; next = _stats.UpgradeTargetOf(next))
+            {
+                if (IsSupplied(next, startSupply))
+                    visible += MassRule.ActiveTiers(_stats.TierRatiosOf(next));
+            }
+
+            return MassRule.LastTierTones(visible, kind.Tiers.Count);
+        }
+
+        private static bool IsSupplied(EnemyDefinition kind, IReadOnlyList<SupplyRequest> startSupply)
+        {
+            for (int i = 0; i < startSupply.Count; i++)
+            {
+                if (startSupply[i].Enemy == kind && startSupply[i].Count > 0)
+                    return true;
+            }
+
+            return false;
         }
 
         private int SuppliedAlive()

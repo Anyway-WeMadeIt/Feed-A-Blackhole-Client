@@ -28,9 +28,23 @@ namespace BlackHole.Core
         public float KillTimeBonus;
         // 재생성 세대 감쇠(0~1). 재생성으로 나온 적이 죽을 때 재생성 확률에 세대마다 이 값을 곱한다. 0이면 1세대까지만(사슬 금지), 1이면 감쇠 없음.
         public float RespawnDecay;
+        // 이정표 단계(성장도)별 재생성 규칙. 판을 시작할 때 성장도 이하에서 가장 높은 단계의 줄을 쓴다. 맞는 줄이 없으면 RespawnDecay(최대 세대 제한 없음).
+        public List<RespawnStageData> RespawnStages = new List<RespawnStageData>();
         // 혜성 비 쿨타임(초). 혜성 비가 한 번 내리면 이 시간 동안은 혜성 비 판정을 하지 않는다(하나씩은 나온다). 0이면 없음.
         public float RainCooldown;
         // 판 시작 뒤 이 시간(초)까지는 혜성 비가 내리지 않는다. 0이면 없음.
         public float RainDelay;
+    }
+
+    // 이정표 단계별 재생성 규칙 한 줄(저작 형식).
+    [Serializable]
+    public sealed class RespawnStageData
+    {
+        // 이 성장도부터 적용한다(0 이상). 2면 Lv20 이정표를 넘은 뒤의 판부터.
+        public int Stage;
+        // 재생성 세대 감쇠(0~1). n세대 적의 재생성 확률 = 노드 respawnChance × Decay^n.
+        public float Decay;
+        // 최대 세대(1 이상). 이 세대까지 나오고 더는 재생성하지 않는다. 0이면 제한 없음(감쇠만).
+        public int MaxGeneration;
     }
 }

@@ -6,7 +6,7 @@ namespace BlackHole.Core
     // 테스트 도구(개발 패널·시나리오)만 부르는 판 조작. 에디터와 개발 빌드에만 컴파일된다.
     // 게임 규칙을 새로 만들지 않고, 판이 원래 쓰는 길(출현·EXP·제한 시간)에 값을 넣는다:
     // - 소환한 적은 이 판의 판 구성 수치를 받는다(EnemyStatTable). 판 구성에 없는 성질·크기는 거부한다.
-    // - 더한 EXP는 다음 Step에서 Level을 올리고, Level업의 성장 공급·성장 시간도 원래대로 따라온다.
+    // - 더한 EXP는 다음 Step에서 Level을 올리고, Level업의 성장 공급·성장 시간도 원래대로 따라온다(성장 공급은 GrowthPacer의 시간차대로).
     // - 더한 시간과 시간 고정은 판 통계의 더해진 시간(addedSeconds)에 세지 않는다.
     // 조작한 판은 테스트 도구가 테스트 표시를 붙인다(ContentTag).
     public static class BattleCheats
@@ -73,6 +73,7 @@ namespace BlackHole.Core
 
         // 판을 이 Level에서 시작한 것처럼 EXP를 채운다. 판 시작 직후에 부른다(시나리오).
         // 목표 Level 이상은 거부한다 — 첫 Step에서 바로 이정표로 끝나 버린다.
+        // 오르는 Level의 성장 공급은 시간차 없이 그 Step에 바로 나온다(시작 상태처럼). 그 뒤의 Level업은 원래대로 시간차를 둔다.
         public static void ReachLevel(GameSession session, int level)
         {
             Hq hq = session.World.Hq;
@@ -87,7 +88,11 @@ namespace BlackHole.Core
                 ?? throw new ArgumentOutOfRangeException(nameof(level), $"Level 사다리 밖이다: {level}.");
 
             hq.AddExp(Math.Max(0, target - hq.Exp));
+            session.World.FlushGrowthOnNextStep = true;
         }
+
+        // 예약된 성장 공급을 시간차 없이 지금 모두 낸다(게이지 연출도 끝낸다).
+        public static void FlushGrowth(GameSession session) => session.World.FlushGrowthNow();
 
         // 제한 시간에 더한다. 판 통계의 더해진 시간에는 세지 않는다.
         public static void AddTime(GameSession session, float seconds) => session.ExtendTimeUncounted(seconds);

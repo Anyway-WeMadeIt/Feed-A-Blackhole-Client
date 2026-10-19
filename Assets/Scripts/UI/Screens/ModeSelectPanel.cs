@@ -167,6 +167,11 @@ namespace BlackHole.Unity
         {
             bool any = _modes.Count > 0;
 
+            // 모드가 하나뿐이면 넘길 곳이 없으니 양쪽 화살표를 숨긴다. 모드가 늘면 다시 보인다.
+            bool paging = _modes.Count > 1;
+            SetShown(_prev, paging);
+            SetShown(_next, paging);
+
             SetOn(_prev, any && _selected > 0);
             SetOn(_next, any && _selected < _modes.Count - 1);
             SetOn(_continue, any && _modes[_selected].CanContinue);
@@ -284,6 +289,12 @@ namespace BlackHole.Unity
         {
             if (button != null)
                 button.interactable = on;
+        }
+
+        private static void SetShown(Button button, bool shown)
+        {
+            if (button != null && button.gameObject.activeSelf != shown)
+                button.gameObject.SetActive(shown);
         }
     }
 }

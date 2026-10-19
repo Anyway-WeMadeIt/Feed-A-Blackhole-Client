@@ -14,6 +14,7 @@ namespace BlackHole.Core
         TimeBonus = 9,
         Rain = 10,
         GoldenCrit = 11,
+        Tone = 12,
     }
 
     internal sealed class BattleRandom

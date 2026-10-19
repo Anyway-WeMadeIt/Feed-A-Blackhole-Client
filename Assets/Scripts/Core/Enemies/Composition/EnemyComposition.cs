@@ -266,6 +266,19 @@ namespace BlackHole.Core
                                 && branch == chain.BranchChance && crit == chain.CritChance && critMultiplier == chain.CritMultiplier;
                     return same ? null : new ChainLightningDefinition(damage, radius, maxTargets, branch, crit, critMultiplier);
                 }
+                case StarLightningDefinition star:
+                {
+                    float damage = Add(EnemyUpgradeStats.TraitDamage, star.Damage);
+                    float radius = Scale(EnemyUpgradeStats.TraitRadius, star.Radius);
+                    int maxTargets = Whole(Add(EnemyUpgradeStats.TraitMaxTargets, star.MaxTargets));
+                    float branch = Math.Min(1, AddPercent(EnemyUpgradeStats.TraitBranchChance, star.BranchChance));
+                    float crit = Math.Min(1, AddPercent(EnemyUpgradeStats.TraitCritChance, star.CritChance));
+                    float critMultiplier = AddPercent(EnemyUpgradeStats.TraitCritMultiplier, star.CritMultiplier);
+
+                    bool same = damage == star.Damage && radius == star.Radius && maxTargets == star.MaxTargets
+                                && branch == star.BranchChance && crit == star.CritChance && critMultiplier == star.CritMultiplier;
+                    return same ? null : new StarLightningDefinition(damage, radius, maxTargets, star.Branches, branch, crit, critMultiplier);
+                }
                 case LaserBurstDefinition laser:
                 {
                     float damage = Add(EnemyUpgradeStats.TraitDamage, laser.Damage);

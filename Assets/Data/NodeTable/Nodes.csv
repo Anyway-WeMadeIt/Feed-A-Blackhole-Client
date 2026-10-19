@@ -168,6 +168,7 @@ comet.spawnChance-02,1,펄서 · 초신성
 electricStar.damage-02,1,펄서 · 초신성
 laserStar.spawnChance-01,1,펄서 · 초신성
 laserStar.critChance-01,1,펄서 · 초신성
+star.massScale-05,1,펄서 · 초신성
 electricStar.critBonus-01,1,펄서 · 초신성
 laserStar.width-01,1,펄서 · 초신성
 laserStar.damage-01,1,펄서 · 초신성
@@ -186,13 +187,12 @@ supernovaStar.damage-01,1,초신성 잔해
 star.respawnChance-04,1,펄서 · 초신성
 laserStar.damage-02,1,펄서 · 초신성
 supernovaStar.spawnChance-01,1,펄서 · 초신성
-star.massScale-05,1,펄서 · 초신성
+star.massScale-06,1,펄서 · 초신성
 laserStar.critBonus-02,1,펄서 · 초신성
 supernovaStar.range-02,1,초신성 잔해
 comet.spawnChance-03,1,초신성 잔해
 supernovaStar.damage-02,1,초신성 잔해
 breaker.damage-27,1,초신성 잔해
-laserStar.width-03,1,펄서 · 초신성
 laserStar.damage-03,1,펄서 · 초신성
 laserStar.damage-04,1,펄서 · 초신성
 laserStar.width-04,1,펄서 · 초신성
@@ -218,11 +218,11 @@ supernovaStar.range-03,1,초신성 잔해
 breaker.damage-28,1,초신성 잔해
 laserStar.width-08,1,초신성 잔해
 supernovaStar.range-04,1,초신성 잔해
-supernovaStar.damage-04,1,초신성 잔해
+asteroid.toPlanet-06,1,초신성 잔해
 planet.toStar-05,1,초신성 잔해
-supernovaStar.damage-05,1,초신성 잔해
+planet.toStar-07,1,초신성 잔해
 supernovaStar.damage-06,1,초신성 잔해
-timer-04,1,초신성 잔해
+asteroid.count-05,1,초신성 잔해
 laserStar.width-09,1,초신성 잔해
 star.massScale-09,1,초신성 잔해
 star.toGalaxy-01,1,은하핵

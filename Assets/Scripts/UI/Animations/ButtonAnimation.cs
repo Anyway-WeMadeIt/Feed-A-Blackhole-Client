@@ -82,6 +82,14 @@ namespace BlackHole.Unity
             Play();
         }
 
+        // 한 번 튀어오른다(확정·완료 같은 순간). 스프링에 속도를 더해 커졌다가 제자리로 돌아온다. 막힌 버튼도 튄다.
+        public void Punch(float kick = 2.5f)
+        {
+            EnsureInitialized();
+            _velocity += kick;
+            Play();
+        }
+
         // 진행 중인 움직임을 멈추고, 원래 크기와 원래 색으로 되돌린 뒤 상태를 비운다.
         public void ResetAll()
         {

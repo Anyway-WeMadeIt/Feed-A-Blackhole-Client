@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace BlackHole.Unity
@@ -193,7 +194,14 @@ namespace BlackHole.Unity
         // 테마 색: 화면 바탕색과 구분선.
         private readonly ThemedImages _themed = new();
         private bool? _shownMilestone;
-        private (int Stage, int NextStage, int MaxStage)? _shownStage;
+        // 이정표 글자: 지금 자리 이름과 목표 이름("소행성대 → 행성계"). 목표가 없으면(마지막 뒤) 이름 하나. 닿았으면 "행성계 도달!".
+        private (string Current, string Goal, bool Reached)? _shownStage;
+        // 막대의 색: 프리팹 색(차오르는 동안), 못 닿았으면 회색, 닿았으면 금색.
+        private Image _stageFillImage;
+        private Color _stageFillColor = Color.white;
+        private bool _stageReached;
+        private static readonly Color StageShortColor = new(0.5f, 0.52f, 0.54f, 1);
+        private static readonly Color StageReachedColor = new(0.89f, 0.79f, 0.52f, 1);
         private bool? _shownReward;
         private int? _shownPurchasable;
 
@@ -233,7 +241,9 @@ namespace BlackHole.Unity
         private TMP_Text _scaleTarget;
         private float _scaleTimer;
 
-        private const float MatterStepCount = 5; // Matter 개수
+        // 물질 단계 수: 소행성·행성·별·총 골드(합계 단계는 뛰어넘는다 — 데이터는 두고 표시만 않는다). 막대는 앞의 셋이 올라가는 동안 찬다.
+        private const float MatterStepCount = 4;
+        private const float StageFillSteps = 3;
         private const float ScaleDuration = 0.15f;
         private const float HighlightScale = 1.2f;
         private bool _isScaleEffect;
@@ -245,6 +255,9 @@ namespace BlackHole.Unity
 
             _result = View.Text(Refs.Result_Text);
             _stageFill = View.Rect(Refs.StageFill_Image);
+            _stageFillImage = View.Image(Refs.StageFill_Image);
+            if (_stageFillImage != null)
+                _stageFillColor = _stageFillImage.color;
             _stageText = View.Text(Refs.Stage_Text);
             _totalLabel = View.Text(Refs.TotalLabel_Text);
             _earned = View.Text(Refs.EarnedGold_Text);
@@ -264,6 +277,9 @@ namespace BlackHole.Unity
             _styled.Add(View.Text(Refs.PlanetName_Text), UITextRole.Caption);
             _styled.Add(View.Text(Refs.StarName_Text), UITextRole.Caption);
             _styled.Add(View.Text(Refs.GoldCaption_Text), UITextRole.Caption);
+            // 골드 줄은 "$5,700" 숫자만 보인다. 캡션 "골드"와 그 아이콘은 프리팹에 두되 숨긴다.
+            View.Text(Refs.GoldCaption_Text)?.gameObject.SetActive(false);
+            View.Image(Refs.GoldIcon_Image)?.gameObject.SetActive(false);
             _styled.Add(View.Text(Refs.GrowthCaption_Text), UITextRole.Caption);
 
             _themed.AddColor(GetComponent<Image>(), UIColorRole.Backdrop);
@@ -422,43 +438,52 @@ namespace BlackHole.Unity
                 _result.text = Localized(milestone ? "settlement.result.milestone" : "settlement.result.over");
         }
 
-        // 블랙홀 성장도 막대: 결산 뒤 성장도 / 마지막 성장도. 이번 판에 올랐으면 "1 -> 2"로 보인다.
-        public void ShowStage(int stage, int nextStage, int maxStage)
+        // 이정표 막대: 이번 판에 시작 체크포인트에서 목표 이정표까지 얼마나 갔는가(levelFraction 0 ~ 1). 물질 집계가 올라가는 동안 차오르고,
+        // 다 찬 뒤 못 닿았으면 회색, 닿았으면 금색이 된다. current·goal: 이정표 이름(goal이 null이면 마지막 이정표 뒤).
+        public void ShowStage(string current, string goal, float levelFraction, bool reached)
         {
+            _stageReached = reached;
+
             if (_stageFill != null)
             {
-                float fill = maxStage > 0
-                    ? Mathf.Clamp01(nextStage / (float)maxStage)
-                    : 1f;
-
-                _stageFillTarget = fill;
+                _stageFillTarget = reached ? 1 : Mathf.Clamp01(levelFraction);
                 _stageFillTimer = 0f;
                 _isShowingStage = true;
+                _stageFill.anchorMax = new Vector2(0f, _stageFill.anchorMax.y);
 
-                // SoundManager인스턴스가 존재하면 Slider SFX 재생 길이를 반환
-                // Slider SFX 길이만큼 슬라이더가 올라가는 속도를 맞추기 위함
+                if (_stageFillImage != null)
+                    _stageFillImage.color = _stageFillColor;
+
+                // 슬라이더 SFX 길이에 맞춰 물질 단계 셋이 올라가는 동안 막대가 찬다.
                 float length = SoundManager.Instance != null ? SoundManager.Instance.SliderLength : 0f;
-                _stageFillDuration = length > 0f ? length : DefaultDuration;
-                _matterDuration = _stageFillDuration / MatterStepCount;
+                float total = length > 0f ? length : DefaultDuration;
+                _matterDuration = total / MatterStepCount;
+                _stageFillDuration = _matterDuration * StageFillSteps;
                 SoundManager.Instance?.PlaySlider();
-                //_stageFill.anchorMax = new Vector2(0f, _stageFill.anchorMax.y);
             }
 
-            _shownStage = (stage, nextStage, maxStage);
-            WriteStageText(stage, nextStage, maxStage);
+            _shownStage = (current, goal, reached);
+            WriteStageText(current, goal, reached);
         }
 
-        // 성장도 글자만 쓴다(막대 연출은 다시 시작하지 않는다).
-        private void WriteStageText(int stage, int nextStage, int maxStage)
+        private void WriteStageText(string current, string goal, bool reached)
         {
             if (_stageText == null)
                 return;
 
-            string reached = nextStage != stage
-                ? stage.ToString(CultureInfo.InvariantCulture) + " -> " + nextStage.ToString(CultureInfo.InvariantCulture)
-                : nextStage.ToString(CultureInfo.InvariantCulture);
+            if (reached && goal != null)
+                _stageText.text = Localized("settlement.milestone.reached", goal);
+            else if (goal != null)
+                _stageText.text = Localized("settlement.milestone", current, goal);
+            else
+                _stageText.text = Localized("settlement.milestone.last", current);
+        }
 
-            _stageText.text = Localized("settlement.stage", reached, maxStage.ToString(CultureInfo.InvariantCulture));
+        // 막대가 다 찼다: 결과 색으로.
+        private void FinishStageFill()
+        {
+            if (_stageFillImage != null)
+                _stageFillImage.color = _stageReached ? StageReachedColor : StageShortColor;
         }
 
         // 물질 행: 물질별 처치 수. 판 기록에 종류별 Gold가 생기면 Gold로 바꾼다.
@@ -493,11 +518,18 @@ namespace BlackHole.Unity
 
             _shownReward = milestone;
 
+            // 합계 줄은 데이터만 두고 보이지 않는다(값은 _earnedTarget·_totalBegin에 남아 총 골드 연출의 시작점이 된다).
             if (_totalLabel != null)
+            {
                 _totalLabel.text = Localized(milestone ? "settlement.reward" : "settlement.total");
+                _totalLabel.gameObject.SetActive(false);
+            }
 
             if (_earned != null)
-                _earned.text = Money(0);
+            {
+                _earned.text = Money(_earnedTarget);
+                _earned.gameObject.SetActive(false);
+            }
 
             if (_totalGold != null)
                 _totalGold.text = Money(_totalBegin);
@@ -578,8 +610,8 @@ namespace BlackHole.Unity
             if (_shownMilestone is bool milestone)
                 ShowResult(milestone);
 
-            if (_shownStage is (int stage, int nextStage, int maxStage))
-                WriteStageText(stage, nextStage, maxStage);
+            if (_shownStage is (string current, string goal, bool reached))
+                WriteStageText(current, goal, reached);
 
             if (_shownReward is bool reward && _totalLabel != null)
                 _totalLabel.text = Localized(reward ? "settlement.reward" : "settlement.total");
@@ -660,8 +692,18 @@ namespace BlackHole.Unity
             "$" + GoldText.Of(gold);
 
         // MonoBehavior
+        // 성장도 막대나 숫자가 아직 올라가는 중인가.
+        public bool IsAnimating => _isShowingStage || _isShowMatter;
+
         private void Update()
         {
+            // 연출 중에 화면 어디든 한 번 누르면(마우스·펜·터치) 바로 최종값으로 간다. 버튼·행 위를 눌러도 같다 — 자식이 사건을 먹어도 여기서는 입력 장치를 직접 본다.
+            if (IsAnimating && Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
+            {
+                SkipAnimation();
+                return;
+            }
+
             if (_isShowingStage)
                 ShowingStage();
 
@@ -669,6 +711,51 @@ namespace BlackHole.Unity
                 ShowMatter();
 
             UpdateScaleEffect();
+        }
+
+        // 연출을 끝까지 돌린 것과 같은 상태로 만든다: 막대·숫자 다 최종값, 타이머·확대 효과 꺼짐, 슬라이더 소리 멈추고 종료음.
+        // Update의 상태 머신만 쓰므로 코루틴·비동기와 겹칠 것이 없다. 연출 중이 아니면 아무것도 하지 않는다.
+        public void SkipAnimation()
+        {
+            if (!IsAnimating)
+                return;
+
+            _isShowingStage = false;
+            if (_stageFill != null)
+                _stageFill.anchorMax = new Vector2(_stageFillTarget, _stageFill.anchorMax.y);
+            FinishStageFill();
+
+            _isShowMatter = false;
+            _matterType = MatterType.Done;
+            _matterTimer = 0f;
+            WriteFinal(_asteroidText, _asteroidTarget);
+            WriteFinal(_planetText, _planetTarget);
+            WriteFinal(_starText, _starTarget);
+            WriteFinal(_earned, _earnedTarget);
+            WriteFinal(_totalGold, _totalTarget);
+
+            // 확대 중이던 글자를 원래 크기로 되돌린다.
+            if (_scaleTarget != null)
+                _scaleTarget.transform.localScale = Vector3.one;
+            _scaleTarget = null;
+            _isScaleEffect = false;
+
+            SoundManager.Instance?.StopSlider();
+            SoundManager.Instance?.PlayClosing();
+        }
+
+        private void WriteFinal(TMP_Text text, int target)
+        {
+            if (text == null) return;
+            text.text = Count(target);
+            _previousKills[text] = target;
+        }
+
+        private void WriteFinal(TMP_Text text, long target)
+        {
+            if (text == null) return;
+            text.text = Money(target);
+            _previousGolds[text] = target;
         }
 
         /// <summary>
@@ -696,6 +783,8 @@ namespace BlackHole.Unity
                 // 최종값 보정
                 if (_stageFill != null)
                     _stageFill.anchorMax = new Vector2(_stageFillTarget, _stageFill.anchorMax.y);
+
+                FinishStageFill();
             }
         }
         private void ShowMatter()
@@ -760,7 +849,8 @@ namespace BlackHole.Unity
                     case MatterType.Planet:
                         _matterType = MatterType.Star; break;
                     case MatterType.Star:
-                        _matterType = MatterType.Earned; break;
+                        // 합계(Earned) 단계는 뛰어넘는다 — 값은 _earnedTarget에 두고 표시만 않는다.
+                        _matterType = MatterType.Total; break;
                 }
             }
         }

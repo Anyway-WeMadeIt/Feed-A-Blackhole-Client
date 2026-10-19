@@ -8,7 +8,8 @@ namespace BlackHole.Unity
 {
     // 번개 줄기를 그리는 부품. 사망 효과 화면(DeathEffectView)이 번개 기록을 읽어 Play를 부른다.
     // 외형은 LightningLook이 가진다. 셰이더(BlackHole/Lightning Bolt)가 선 방향으로 돌린 사각형 하나에 꺾인 선을 수식으로 그린다.
-    // - Play: From에서 To까지 번개가 hop × HopDelay초 뒤에 나타나 깜빡이다가 옅어진다. hop은 연쇄에서 몇 번째 줄기인가(0부터).
+    // - Play: From에서 To까지 번개가 hop × DeathEffects.ChainHopSeconds초 뒤에 나타나 깜빡이다가 옅어진다. hop은 연쇄에서 몇 번째 줄기인가(0부터).
+    //   간격은 규칙(Core)의 값이다 — 그 홉이 죽인 특수 적의 효과가 같은 시각에 발동하므로 화면이 따로 정하지 않는다.
     // - Age: 시간을 흘린다. 부르지 않으면(일시정지) 깜빡임까지 멈춘 채 보이고, 다시 부르면 이어간다.
     // - 끝난 줄기는 숨겨 두었다가 다음 Play에 다시 쓴다. 동시에 보이는 수는 MaxBolts까지이고, 넘치면 가장 오래된 줄기를 다시 쓴다.
     // 만든 줄기는 모두 이 부품의 뿌리 아래에 있고 Reset이 모두 지운다. 규칙 평면은 장면의 z = 0이다.
@@ -65,7 +66,7 @@ namespace BlackHole.Unity
             float dx = to.X - from.X;
             float dy = to.Y - from.Y;
             bolt.Length = Mathf.Sqrt(dx * dx + dy * dy);
-            bolt.Elapsed = -Mathf.Max(hop, 0) * _look.HopDelay;
+            bolt.Elapsed = -Mathf.Max(hop, 0) * DeathEffects.ChainHopSeconds;
             bolt.Seed = _nextSeed++ % (int)SeedRange * 0.731f;
             bolt.Playing = true;
 

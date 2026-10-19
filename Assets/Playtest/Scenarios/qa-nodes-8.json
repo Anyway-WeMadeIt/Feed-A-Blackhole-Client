@@ -1,7 +1,7 @@
 {
   "name": "qa-nodes-8",
   "category": "QA/노드 단계",
-  "note": "노드 1~8단계를 모두 산 상태(구매 비용 합계 14,248,378,275,046,937 Gold). 성장 단계는 이 금액이 넘은 이정표 목표 잔액 수로 추정.",
+  "note": "노드 1~8구역(먼지 띠 ~ 초신성 잔해)을 모두 산 상태(노드 228개, Rank 228, 구매 비용 합계 17,611,378,162,546,937 Gold). 성장 단계는 이 구역을 플레이하는 단계(1~3구역 0, 4~5구역 1, 6~7구역 2, 8구역 4(Lv30~35는 3), 9구역 5, 블랙홀 6).",
   "expected": "8단계에서 새로 열리는 것: 슈퍼노바 범위·피해, 레이저 너비·피해 후반, 행성→별 변환 추가. 확정 정보의 수치와 실제 화면·피해·사운드가 맞는지 확인.",
   "growthStage": 4,
   "gold": 0,
@@ -132,6 +132,10 @@
     },
     {
       "nodeId": "breaker.critChance-03",
+      "rank": 1
+    },
+    {
+      "nodeId": "breaker.critChance-04",
       "rank": 1
     },
     {
@@ -284,10 +288,6 @@
     },
     {
       "nodeId": "breaker.radius-07",
-      "rank": 1
-    },
-    {
-      "nodeId": "breaker.critChance-04",
       "rank": 1
     },
     {
@@ -487,6 +487,14 @@
       "rank": 1
     },
     {
+      "nodeId": "galaxy.massScale-01",
+      "rank": 1
+    },
+    {
+      "nodeId": "galaxy.size-01",
+      "rank": 1
+    },
+    {
       "nodeId": "goldenAsteroid.critChance-01",
       "rank": 1
     },
@@ -587,6 +595,10 @@
       "rank": 1
     },
     {
+      "nodeId": "star.massScale-05",
+      "rank": 1
+    },
+    {
       "nodeId": "laserStar.damage-01",
       "rank": 1
     },
@@ -620,10 +632,6 @@
     },
     {
       "nodeId": "laserStar.width-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "laserStar.width-03",
       "rank": 1
     },
     {
@@ -811,7 +819,7 @@
       "rank": 1
     },
     {
-      "nodeId": "star.massScale-05",
+      "nodeId": "star.massScale-06",
       "rank": 1
     },
     {
@@ -863,11 +871,11 @@
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.damage-04",
+      "nodeId": "asteroid.toPlanet-06",
       "rank": 1
     },
     {
-      "nodeId": "supernovaStar.damage-05",
+      "nodeId": "planet.toStar-07",
       "rank": 1
     },
     {
@@ -907,7 +915,7 @@
       "rank": 1
     },
     {
-      "nodeId": "timer-04",
+      "nodeId": "asteroid.count-05",
       "rank": 1
     }
   ],

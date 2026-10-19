@@ -22,7 +22,6 @@ MonoBehaviour:
   _kinksPerUnit: 3
   _flickerRate: 12
   _duration: 0.45
-  _hopDelay: 0.04
   _fadeCurve:
     serializedVersion: 2
     m_Curve:

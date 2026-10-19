@@ -8,6 +8,7 @@
     "BlackHole.Core.Enemies",
     "BlackHole.Core.Battle",
     "BlackHole.Core.Nodes",
+    "BlackHole.Net",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

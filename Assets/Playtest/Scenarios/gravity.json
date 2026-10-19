@@ -4,7 +4,7 @@
     "category": "QA/은하",
     "expected": "은하 출현·별→은하 변환·중력장(반경·출현)·은하 보너스 피해가 확정 정보 수치대로 나오는지 확인.",
     "contentFingerprint": "",
-    "growthStage": 3,
+    "growthStage": 5,
     "gold": 0,
     "nodes": [
         {
@@ -20,7 +20,7 @@
             "rank": 1
         },
         {
-            "nodeId": "timer-04",
+            "nodeId": "asteroid.count-05",
             "rank": 1
         },
         {
@@ -740,6 +740,10 @@
             "rank": 1
         },
         {
+            "nodeId": "star.massScale-06",
+            "rank": 1
+        },
+        {
             "nodeId": "star.massScale-09",
             "rank": 1
         },
@@ -793,10 +797,6 @@
         },
         {
             "nodeId": "laserStar.width-02",
-            "rank": 1
-        },
-        {
-            "nodeId": "laserStar.width-03",
             "rank": 1
         },
         {
@@ -892,11 +892,11 @@
             "rank": 1
         },
         {
-            "nodeId": "supernovaStar.damage-04",
+            "nodeId": "asteroid.toPlanet-06",
             "rank": 1
         },
         {
-            "nodeId": "supernovaStar.damage-05",
+            "nodeId": "planet.toStar-07",
             "rank": 1
         },
         {
@@ -989,7 +989,7 @@
         }
     ],
     "autoBuyBudget": 0,
-    "startLevel": 30,
+    "startLevel": 40,
     "seed": 1,
     "freezeTime": false
 }

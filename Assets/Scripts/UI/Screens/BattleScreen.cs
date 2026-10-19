@@ -9,7 +9,7 @@ namespace BlackHole.Unity
 {
     // 전투 화면(전투 장면 위의 겹 화면). 전투 중에 필요한 정보만 보여 준다: 남은 시간, 다음 Level까지의 진행 막대, 일시정지·종료 버튼.
     // Level 숫자·목표·% 글자는 두지 않는다(막대와 겹친다). 번 Gold 칩은 프리팹에서 꺼 두었다(결산에서 본다) — 켜면 다시 보인다.
-    // 막대 아래의 마름모 10칸(MilestoneRow)은 이번 구간에서 오른 Level 수다. 이정표에 닿으면 달성 연출을 하고, 그동안 GameHost가 결산 전환을 미룬다.
+    // 막대 아래의 마름모 칸(MilestoneRow)은 이번 구간에서 오른 Level 수다. 칸 수는 구간의 Level 수(목표 − 시작, 최대 10). 이정표에 닿으면 달성 연출을 하고, 그동안 GameHost가 결산 전환을 미룬다.
     // 전투 Session을 모른다 — GameHost가 전투 Step 뒤 표시 값을 넘긴다. 진행 중인 판이 없으면 비어 있는 표시(ShowIdle)다.
     // 번 Gold는 이 판의 합계일 뿐이다. 진행 상태의 Gold는 판이 끝난 뒤 결산이 바꾼다.
     public sealed class BattleScreen : UIRoot<BattleScreen.Refs>, ILocalizedView, INumberFormatView
@@ -23,7 +23,7 @@ namespace BlackHole.Unity
             EarnedGold_Text,
             // 다음 Level까지의 몫만큼 늘어나는 막대. 폭은 anchorMax.x로 정한다.
             LevelFill_Image,
-            // 이정표 누적 칸 10개의 행과, 달성 때 퍼지는 파편(UIMilestoneBurst). 둘 다 터치를 받지 않는다.
+            // 이정표 누적 칸의 행(프리팹에 10칸, 구간 Level 수만큼 보임)과, 달성 때 퍼지는 파편(UIMilestoneBurst). 둘 다 터치를 받지 않는다.
             MilestoneRow,
             MilestoneBurst,
             PauseBtn_Button,
@@ -164,12 +164,14 @@ namespace BlackHole.Unity
 
         // 매 프레임 불러도 된다. 보이는 값이 바뀔 때만 글자를 고친다.
         // addedSeconds: 이 판에서 제한 시간에 더해진 초의 합(GameSession.AddedSeconds). 늘어난 만큼 "+0.3"을 띄운다.
-        // level·progress: 지금 Level과 다음 Level까지의 몫(0 ~ 1, 마지막 Level이면 1). 막대만 그린다 — Level이 오르면 막대가 한 바퀴 돈다.
+        // level·progress: 보여줄 Level과 다음 Level까지의 몫(0 ~ 1, 마지막 Level이면 1). 막대만 그린다 — Level이 오르면 막대가 한 바퀴 돈다.
+        // wheeling: progress가 성장 공급 바퀴(GrowthPacer)의 진행도라 막대를 그 값에 바로 맞춘다(보간 없음 — 규칙의 시각과 어긋나지 않게).
+        //   아니면 progress는 EXP 진행도라 부드럽게 따라간다.
         // startLevel·goalLevel: 이 판의 시작 Level(체크포인트)과 목표 Level(Hq.StartLevel·GoalLevel). 이정표 칸은 level - startLevel개를 채운다.
         //   목표가 없으면(마지막 이정표 뒤, goalLevel == 0) 칸 행을 숨긴다.
         public void Show(
             float remainingSeconds, float addedSeconds, long earnedGold, bool paused,
-            int level, float progress, int startLevel, int goalLevel)
+            int level, float progress, bool wheeling, int startLevel, int goalLevel)
         {
             _idle = false;
 
@@ -179,7 +181,10 @@ namespace BlackHole.Unity
                 _milestones.SetVisible(hasGoal);
 
                 if (hasGoal)
+                {
+                    _milestones.SetSlots(goalLevel - startLevel);
                     _milestones.Show(level - startLevel);
+                }
             }
 
             int tenths = Mathf.CeilToInt(remainingSeconds * 10);
@@ -203,7 +208,7 @@ namespace BlackHole.Unity
                 _earned.text = EarnedText(earnedGold);
             }
 
-            UpdateLevelFill(level, progress);
+            UpdateLevelFill(level, progress, wheeling);
 
             if (paused != _shownPaused && _pauseLabel != null)
             {
@@ -352,11 +357,11 @@ namespace BlackHole.Unity
             _levelFill.anchorMax = new Vector2(x, _levelFill.anchorMax.y);
         }
 
-        private void UpdateLevelFill(int level, float progress)
+        private void UpdateLevelFill(int level, float progress, bool snap)
         {
             float target = level + Mathf.Min(Mathf.Clamp01(progress), 0.9999f);
 
-            if (float.IsNaN(_fillValue) || target < _fillValue)
+            if (snap || float.IsNaN(_fillValue) || target < _fillValue)
             {
                 _fillValue = target;
             }

@@ -8,5 +8,7 @@ namespace BlackHole.Core
         ChainLightning,
         Explosion,
         LaserBurst,
+        // 전기 별의 번개(StarLightningDefinition). 전기 소행성의 ChainLightning과 따로 센다.
+        StarLightning,
     }
 }

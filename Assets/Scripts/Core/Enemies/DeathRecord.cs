@@ -10,8 +10,9 @@ namespace BlackHole.Core
         public EnemyType EnemyType { get; }
         // 붙어 있던 특수 성질. 없으면 null.
         public EnemyTraitType? TraitType { get; }
-        // 죽은 적의 색 등급과 크기(SizeRule). 파편 수 같은 연출이 쓴다. 픽업의 크기는 SizeRule.Base다.
+        // 죽은 적의 색 등급·톤(Enemy.Tone)과 크기(SizeRule). 파편의 색·수 같은 연출이 쓴다. 픽업의 크기는 SizeRule.Base다.
         public int Tier { get; }
+        public int Tone { get; }
         public int Size { get; }
         // 픽업(혜성)이 죽었는가. 화면은 픽업의 파편·Gold 텍스트를 내지 않는다.
         public bool IsPickup { get; }
@@ -29,6 +30,7 @@ namespace BlackHole.Core
             EnemyType = enemy.Definition.Type;
             TraitType = enemy.Trait?.Type;
             Tier = enemy.Tier;
+            Tone = enemy.Tone;
             Size = enemy.Size;
             IsPickup = enemy.Definition.IsPickup;
             Reward = reward;

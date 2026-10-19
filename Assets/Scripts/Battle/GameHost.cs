@@ -120,17 +120,27 @@ namespace BlackHole.Unity
 
             GameSession session = _battle.Session;
             if (session == null)
+            {
                 screen.ShowIdle();
-            else
-                screen.Show(
-                    session.Remaining,
-                    session.AddedSeconds,
-                    session.World.EarnedGold,
-                    _battle.IsPaused,
-                    session.World.Hq.Level,
-                    session.World.Hq.Progress,
-                    session.World.Hq.StartLevel,
-                    session.World.Hq.GoalLevel);
+                return;
+            }
+
+            // Level은 규칙(Hq)에서 먼저 오르고 화면은 성장 공급의 바퀴(GrowthPacer)를 따라 한 바퀴씩 뒤따른다:
+            // 보여줄 Level = Hq.Level − 아직 안 돈 바퀴 수, 바퀴가 도는 중이면 그 바퀴의 진행도, 아니면 EXP 진행도.
+            Hq hq = session.World.Hq;
+            GrowthPacer pacer = session.World.GrowthPacer;
+            bool wheeling = pacer.IsAnimating;
+
+            screen.Show(
+                session.Remaining,
+                session.AddedSeconds,
+                session.World.EarnedGold,
+                _battle.IsPaused,
+                hq.Level - pacer.PendingWheels,
+                wheeling ? pacer.WheelProgress : hq.Progress,
+                wheeling,
+                hq.StartLevel,
+                hq.GoalLevel);
         }
 
         public void Dispose()

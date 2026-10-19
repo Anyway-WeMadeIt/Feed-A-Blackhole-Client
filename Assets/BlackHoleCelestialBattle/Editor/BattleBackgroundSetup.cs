@@ -8,6 +8,11 @@ namespace BlackHole.CelestialBattle.Editor
     {
         private void OnPreprocessTexture()
         {
+            // 처음 임포트할 때만 설정한다(BlackHoleGUIImporter와 같다). 임포트마다 설정을 다시 쓰면 Unity가 .meta를 다시 저장하고,
+            // 그때 설치된 플랫폼(예: WebGL) 항목이 붙어 .meta가 계속 바뀐 것으로 뜬다. 이미 있는 텍스처는 EnsureAssets(메뉴)가 설정한다.
+            if (!assetImporter.importSettingsMissing)
+                return;
+
             if (assetPath.StartsWith(BattleBackgroundSetup.Root + "/Textures/"))
                 BattleBackgroundSetup.ConfigureTexture((TextureImporter)assetImporter, assetPath);
         }

@@ -14,7 +14,7 @@ namespace BlackHole.Unity
         [Tooltip("선 굵기(반지름 대비). 링 굵기 = 반지름 × 이 값이라 범위가 커지면 같이 굵어진다. 원작 점선은 링 지름의 약 7%(반지름의 0.15배).")]
         [Min(0.001f)]
         [SerializeField] private float _thicknessRatio = 0.15f;
-        [Tooltip("점선 개수. 반지름이 바뀌어도 그대로다.")]
+        [Tooltip("점선 개수. 반지름이 바뀌어도 그대로다. 대기·공격 링이 같다.")]
         [Min(1)]
         [SerializeField] private int _dashCount = 8;
         [Tooltip("한 칸에서 대시가 차지하는 비율(0 ~ 1). 나머지가 빈칸이다. 1이면 이어진 원이다.")]
@@ -88,7 +88,23 @@ namespace BlackHole.Unity
         [Min(0.01f)]
         [SerializeField] private float _holdFadeSeconds = 0.08f;
 
+        [Header("대기 링: 마우스·펜이 가리키는 자리에 누르면 칠 범위를 보이는 정적 링(BreakerView)")]
+        [Tooltip("대기 링의 색. 공격 중인 링(Color)보다 눌려 보이도록 차가운 회색·낮은 알파. 반지름은 공격 링과 같다.")]
+        [SerializeField] private Color _hoverColor = new(0.45f, 0.47f, 0.52f, 0.35f);
+        [Tooltip("대기 링의 선 굵기(반지름 대비). 공격 링(ThicknessRatio)보다 가늘게 둔다. 누르면 바깥 가장자리는 그대로 두고 이 굵기에서 공격 굵기로 안쪽으로 조여든다.")]
+        [Min(0.001f)]
+        [SerializeField] private float _hoverThicknessRatio = 0.07f;
+        [Tooltip("대기 링의 회전 속도(바퀴/초). 공격 링(RotationSpeed)보다 느리게 둔다.")]
+        [SerializeField] private float _hoverRotationSpeed = 0.015f;
+        [Tooltip("대기 → 공격 링으로 조여드는(또 풀리는) 데 걸리는 시간(초).")]
+        [Min(0)]
+        [SerializeField] private float _gripSeconds = 0.1f;
+
         public Material Material => _material;
+        public Color HoverColor => _hoverColor;
+        public float HoverThicknessRatio => _hoverThicknessRatio;
+        public float HoverRotationSpeed => _hoverRotationSpeed;
+        public float GripSeconds => _gripSeconds;
         public float ThicknessRatio => _thicknessRatio;
         public int DashCount => _dashCount;
         public float DashRatio => _dashRatio;

@@ -8,7 +8,8 @@ namespace BlackHole.Unity
 {
     // 폭발의 충격파 링을 그리는 부품. 사망 효과 화면(DeathEffectView)이 폭발 기록을 읽어 Play를 부른다.
     // 외형은 ExplosionLook이 가진다. 셰이더(BlackHole/Explosion Ring)가 사각형 하나에 링·번짐·섬광을 수식으로 그린다.
-    // - Play: 폭발 자리에서 링이 0부터 가장 큰 반지름(판정 반지름 × RadiusScale)까지 퍼지며 옅어진다. 처음에 안쪽이 번쩍인다.
+    // - Play: 폭발 자리에서 링이 0부터 판정 반지름까지 DeathEffects.ExplosionRingSeconds 동안 ExplosionRingReach의 식으로 퍼지며 옅어진다. 처음에 안쪽이 번쩍인다.
+    //   시간과 퍼짐 식은 규칙(Core)의 것이다 — 링이 적에 닿는 시각에 그 적의 효과가 발동하므로 화면이 따로 정하지 않는다.
     // - Age: 시간을 흘린다. 부르지 않으면(일시정지) 멈춘 채 보이고, 다시 부르면 이어간다.
     // - 끝난 링은 숨겨 두었다가 다음 Play에 다시 쓴다. 동시에 보이는 수는 MaxBlasts까지이고, 넘치면 가장 오래된 링을 다시 쓴다.
     // 만든 링은 모두 이 부품의 뿌리 아래에 있고 Reset이 모두 지운다. 규칙 평면은 장면의 z = 0이다.
@@ -38,7 +39,7 @@ namespace BlackHole.Unity
         private sealed class Blast
         {
             public MeshRenderer Renderer;
-            // 가장 크게 퍼졌을 때의 반지름(화면).
+            // 가장 크게 퍼졌을 때의 반지름(= 판정 반지름).
             public float Radius;
             public float Elapsed;
             public bool Playing;
@@ -56,7 +57,7 @@ namespace BlackHole.Unity
         public void Play(Point2 center, float radius)
         {
             Blast blast = Take();
-            blast.Radius = radius * _look.RadiusScale;
+            blast.Radius = radius;
             blast.Elapsed = 0;
             blast.Playing = true;
 
@@ -83,7 +84,7 @@ namespace BlackHole.Unity
 
                 blast.Elapsed += delta;
 
-                if (blast.Elapsed >= _look.Duration)
+                if (blast.Elapsed >= DeathEffects.ExplosionRingSeconds)
                 {
                     blast.Playing = false;
                     blast.Renderer.enabled = false;
@@ -137,10 +138,10 @@ namespace BlackHole.Unity
 
         private void Apply(Blast blast)
         {
-            float progress = Mathf.Clamp01(blast.Elapsed / _look.Duration);
+            float progress = Mathf.Clamp01(blast.Elapsed / DeathEffects.ExplosionRingSeconds);
 
             blast.Renderer.GetPropertyBlock(_properties);
-            _properties.SetFloat(_radiusId, blast.Radius * _look.Expand(progress));
+            _properties.SetFloat(_radiusId, blast.Radius * DeathEffects.ExplosionRingReach(progress));
             _properties.SetFloat(_thicknessId, _look.Thickness);
             _properties.SetColor(_colorId, _look.Color);
             _properties.SetFloat(_glowWidthId, _look.GlowWidth);

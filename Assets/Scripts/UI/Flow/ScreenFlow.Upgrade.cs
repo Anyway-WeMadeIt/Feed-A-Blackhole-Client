@@ -28,6 +28,10 @@ namespace BlackHole.Unity
             AddBinding(root,
                 r => r.StartBattleClicked += HandleUpgradeStartBattleClicked,
                 r => r.StartBattleClicked -= HandleUpgradeStartBattleClicked);
+
+            AddBinding(root,
+                r => r.BuyConfirmed += HandleUpgradeBuyConfirmed,
+                r => r.BuyConfirmed -= HandleUpgradeBuyConfirmed);
         }
 
         private void HandleUpgradeStartBattleClicked() => RequestStart();

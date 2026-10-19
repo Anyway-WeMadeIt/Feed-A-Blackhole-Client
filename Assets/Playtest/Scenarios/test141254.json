@@ -740,15 +740,11 @@
             "rank": 1
         },
         {
-            "nodeId": "star.massScale-05",
+            "nodeId": "star.massScale-06",
             "rank": 1
         },
         {
             "nodeId": "laserStar.critBonus-02",
-            "rank": 1
-        },
-        {
-            "nodeId": "laserStar.width-03",
             "rank": 1
         },
         {

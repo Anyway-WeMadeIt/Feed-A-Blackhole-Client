@@ -16,7 +16,7 @@ namespace BlackHole.Unity
     //   placement/<minDistance|maxDistance>           적 출현 띠(HQ로부터 거리, 전장 배율 1 기준)
     //   enemy/<종류>/<moveSpeed|radius|radiusStep|spawnPeriod|rainCount|killTimeBonus|respawnDecay|rainCooldown|rainDelay>
     //   enemy/<종류>/tier/<색 등급, 1부터>/<hp|gold|exp>
-    //   enemy/<종류>/trait/<성질>/<multiplier|critRewardScale|damage|radius|maxTargets|branchChance|critChance|critMultiplier|width|force|duration|maxActive>
+    //   enemy/<종류>/trait/<성질>/<multiplier|critRewardScale|damage|radius|maxTargets|branches|branchChance|critChance|critMultiplier|width|force|duration|maxActive>
     //   supply/<종류>/count                       시작 공급에 없는 종류면 더한다(없는 종류의 지금 값은 0)
     //   growth/levelExp/<Level, 1부터>             그 Level에 닿는 누적 EXP
     //   growth/milestone/<번호, 1부터>/<level|targetGold|fieldScale>
@@ -45,7 +45,7 @@ namespace BlackHole.Unity
         private static readonly Dictionary<EnemyTraitType, string[]> TraitFields = new Dictionary<EnemyTraitType, string[]>
         {
             { EnemyTraitType.Golden, new[] { "multiplier", "critChance", "critRewardScale" } },
-            { EnemyTraitType.Electric, new[] { "damage", "radius", "maxTargets", "branchChance", "critChance", "critMultiplier" } },
+            { EnemyTraitType.Electric, new[] { "damage", "radius", "maxTargets", "branches", "branchChance", "critChance", "critMultiplier" } },
             { EnemyTraitType.Supernova, new[] { "damage", "radius" } },
             { EnemyTraitType.Laser, new[] { "damage", "width", "critChance", "critMultiplier" } },
             { EnemyTraitType.Moon, Array.Empty<string>() },
@@ -393,6 +393,7 @@ namespace BlackHole.Unity
                     case "damage": return Real(() => effect.Damage, v => effect.Damage = v, out error);
                     case "radius": return Real(() => effect.Radius, v => effect.Radius = v, out error);
                     case "maxTargets": return Int(() => effect.MaxTargets, v => effect.MaxTargets = v, out error);
+                    case "branches": return Int(() => effect.Branches, v => effect.Branches = v, out error);
                     case "branchChance": return Real(() => effect.BranchChance, v => effect.BranchChance = v, out error);
                     case "critChance": return Real(() => effect.CritChance, v => effect.CritChance = v, out error);
                     case "critMultiplier": return Real(() => effect.CritMultiplier, v => effect.CritMultiplier = v, out error);

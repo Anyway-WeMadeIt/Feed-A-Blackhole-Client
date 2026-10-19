@@ -23,9 +23,20 @@ namespace BlackHole.Unity
     //   선 색은 Rank를 하나라도 산 노드를 산 것으로 본다(이웃이 드러나는 기준과 같다).
     // 조작: 빈 곳이나 노드 위를 끌면 이동. 휠(커서 중심)이나 두 손가락 벌리기·오므리기(손가락 사이 가운데 중심)로 확대·축소.
     // 열 때: 전체 대신 지금 살 수 있는 노드 쪽을 읽기 좋은 배율로 확대해 둔다(FrameFocus).
-    // 올림: 포인터 아래의 노드가 바뀌면 NodeHovered·NodeLeft로 알린다(툴팁은 호스트가 띄운다).
+    // 올림: 포인터 아래의 노드가 바뀌면 NodeHovered·NodeLeft로 알린다(툴팁은 호스트가 띄운다). 터치는 올림이 없다.
     //   노드마다 입력 컴포넌트를 붙이지 않고 트리 영역이 포인터 이동을 받아 찾는다 — UI_EventHandler를 노드에 붙이면
     //   노드 위에서 시작한 끌기를 그것이 가져가 트리가 움직이지 않는다. 끌기·휠이 시작되면 올림을 푼다.
+    // 누름: 노드에는 Button을 두지 않고 트리 영역이 클릭을 받는다(노드 칸에서 눌러 같은 칸에서 뗀 것만). 입력 장치로 가른다.
+    //   - 마우스·펜: 살 수 있는 노드면 NodeClicked(호스트가 바로 산다). PC는 올림 툴팁으로 읽고 클릭으로 산다.
+    //   - 터치: 먼 노드가 아니면 누르고 SelectDelaySeconds 뒤에 고르고 NodeTapped. 호스트가 패널을 고정한다 — 읽으려고 누른 손가락이 사지 않게.
+    //     짧은 지연은 노드 위에서 시작한 끌기에 패널이 잠깐 떴다 닫히지 않게 한다(그 안에 끌기가 되면 띄우지 않는다).
+    //     떼면(클릭) 한 번 더 NodeTapped해 산 뒤의 내용으로 갱신한다. 끌기로 바뀌면 선택이 풀리고 패널이 닫힌다(ViewMoved).
+    //     선택한 노드는 올린 것처럼 칠한다(SetSelected). 빈 곳을 누르면 EmptyTapped(호스트가 선택을 푼다).
+    //   - 터치로 꾹: 살 수 있는 노드를 HoldSeconds 이상 누르고(끌지 않고) 같은 칸에서 떼면 NodeHeld(호스트가 산다).
+    //     시간이 차면 NodeHoldArmed로 먼저 알린다. 떼거나 끌면 NodeHoldReleased.
+    //   - 연출(터치): 고른 노드는 그림은 평소대로 두고 흰 링만 두른다(아직 사지 않았으니 초록 강조 없음). 살 수 있는 노드를 누르면
+    //     살짝 부풀고 흰 링 위로 초록 링이 시계 방향으로 차오른다. 꽉 찬 뒤 떼면 스프링으로 쫄깃하게 돌아오며 산다(초록 링은 잠깐 머물다 사라짐).
+    //     중간에 떼면 초록 링이 비워지고 크기도 돌아온다. 그림은 Show가 산 상태로 칠한다.
     //
     // 업그레이드 화면(UpgradeScreen)을 호스트로 두는 페이지(UIPage)다.
     // ScreenFlow가 업그레이드 화면을 연 뒤 SwitchPage로 염.
@@ -33,7 +44,7 @@ namespace BlackHole.Unity
     //
     // 영역은 가운데 기준(pivot 0.5)이어야 확대 계산이 맞음.
     public sealed class NodeTreeView : UIPage<NodeTreeView.Refs>, IStyleView, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler,
-        IPointerMoveHandler, IPointerExitHandler
+        IPointerMoveHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
     {
         public enum Refs { }
 
@@ -50,7 +61,40 @@ namespace BlackHole.Unity
         private const float RankPadding = 12;
         // 일부만 산 노드에 산 색을 섞는 비율.
         private const float PartialMix = 0.35f;
-        private const float MinZoom = 0.3f;
+        // 터치로 노드를 꾹 눌러 사는 데 필요한 시간(초).
+        private const float HoldSeconds = 0.3f;
+        // 고른 노드의 링: 노드보다 이만큼 크다(지름). 살 수 있는 노드(초록)와 고른 노드를 가르는 표시.
+        private const float SelectRingExtra = 18;
+        private const int RingTextureSize = 64;
+        private const float RingThickness = 3;
+        // 링: 고른 노드는 흰 링. 살 수 있는 노드를 꾹 누르면 그 위에 초록 링이 시계 방향으로 차오른다(HoldSeconds에 꽉 참 = 살 준비).
+        // 떼서 사면 초록 링이 잠깐 머물다 사라진다. 중간에 떼면 비워진다.
+        private static readonly Color SelectRingColor = new Color(1, 1, 1, 0.85f);
+        private static readonly Color FillRingColor = new Color(0.55f, 0.85f, 0.6f, 1);
+        private const float FillDrainSeconds = 0.12f;
+        private const float FillFadeSeconds = 0.35f;
+        // 크기: 살 수 있는 노드를 누르면 살짝 부풀고(PuffScale), 떼서 사면 스프링으로 쫄깃하게 돌아온다. 다른 노드는 살짝 눌린다(PressScale).
+        private const float PuffScale = 1.08f;
+        private const float PressScale = 0.94f;
+        private const float PressSeconds = 0.07f;
+        // 스프링: 한 번 살짝 지나쳤다 바로 멈춘다(길게 떨지 않게 감쇠를 높게).
+        private const float SpringStiffness = 1100;
+        private const float SpringDamping = 24;
+        private const float SpringRest = 0.002f;
+        // 사며 뗄 때: 아주 잠깐 더 부풀었다가(예비 동작) 고무줄처럼 찰싹 돌아온다. 찰싹은 스프링에 안쪽 속도를 준다.
+        private const float AnticipateScale = 1.14f;
+        private const float AnticipateSeconds = 0.06f;
+        private const float SnapKick = 2.2f;
+        // 게이지가 꽉 찬 순간: 아주 잠깐 한 번 더 부풀고(ArmedBump), 그림이 초록 쪽으로 살짝 물든다(ArmedTint).
+        private const float ArmedBumpScale = 1.13f;
+        private const float ArmedBumpSeconds = 0.09f;
+        private const float ArmedTint = 0.3f;
+        // 터치로 누른 뒤 패널을 띄우기까지의 지연(초). 끌기가 이 안에 시작되면 띄우지 않는다.
+        private const float SelectDelaySeconds = 0.06f;
+        // 축소 하한: 지도 전체가 창에 들어가는 배율(_fitZoom, 트리를 만들 때와 창 크기가 바뀔 때 다시 잰다)과 예전 하한(0.3) 중 작은 쪽.
+        // 그보다 더 작게는 MinZoomFloor가 바닥이다.
+        private const float MinZoomDefault = 0.3f;
+        private const float MinZoomFloor = 0.08f;
         private const float MaxZoom = 2.5f;
         private const float FitZoomLimit = 1.5f;
         // 열 때의 배율: 노드가 화면에서 이만큼(mm)은 되게 한다. 큰 화면(PC)에서는 FocusMinZoom 아래로 내리지 않는다. [임시]
@@ -156,10 +200,29 @@ namespace BlackHole.Unity
         private Canvas _canvas;
         private float _zoom = 1;
         private bool _framePending;
+        // 지도 전체(모든 노드 + 여백)가 창에 꼭 맞는 배율. 축소의 하한이다. 노드가 없거나 창 크기가 0이면 1.
+        private float _fitZoom = 1;
+        private float MinZoom => Mathf.Max(MinZoomFloor, Mathf.Min(MinZoomDefault, _fitZoom));
         // 끄는 중인 포인터(손가락)와 화면 위치. 둘 이상이면 앞의 둘로 핀치한다.
         private readonly List<(int Id, Vector2 Position)> _drags = new List<(int Id, Vector2 Position)>(2);
 
+        // 마우스·펜으로 살 수 있는 노드를 눌렀다(노드 ID).
         public event Action<string> NodeClicked;
+        // 터치로 노드를 눌렀다(노드 ID, 노드 칸): 누르는 순간과 떼는 순간에 한 번씩. 먼 노드는 알리지 않는다. 선택은 이미 바뀐 뒤다.
+        public event Action<string, RectTransform> NodeTapped;
+        // 노드가 아닌 빈 곳을 눌렀다(어느 장치든).
+        public event Action EmptyTapped;
+        // 보는 곳을 옮기기 시작했다(끌기·휠·핀치). 선택은 이미 풀린 뒤다 — 고정 툴팁이 옛 자리에 남지 않게 호스트가 닫는다.
+        public event Action ViewMoved;
+        // 터치로 살 수 있는 노드를 꾹 눌러 시간이 찼다(노드 ID). 아직 사지 않았다 — 떼면 산다.
+        public event Action<string> NodeHoldArmed;
+        // 꾹 누름이 끝났다(노드 ID): 뗐거나 끌기로 바뀌었거나 페이지가 닫혔다. 산 경우에도 NodeHeld 앞에 온다.
+        public event Action<string> NodeHoldReleased;
+        // 터치로 꾹 눌렀다가 같은 칸에서 뗐다(노드 ID). 호스트가 산다.
+        public event Action<string> NodeHeld;
+        // 터치로 Gold가 모자란 노드(Revealed)를 HoldSeconds 이상 눌렀다(노드 ID) — 사려 했지만 못 산다. 호스트가 골드·구매 탭을 붉게 한다.
+        // 떼면 NodeHoldReleased가 온다. 정보만 보려는 짧은 누름에는 아무것도 알리지 않는다.
+        public event Action<string> NodeHoldShort;
 
         // 보이는 창의 가운데가 든 구역이 바뀜(구역 열쇠, 구역이 없으면 null). 이동·확대·처음 맞춤 뒤에 알린다.
         public event Action<string> RegionViewed;
@@ -169,6 +232,49 @@ namespace BlackHole.Unity
         public event Action<string> NodeLeft;
 
         private NodeVisual _hovered;
+        // 터치로 누르고 있는 노드(꾹 누름 판정). 끌기가 시작되면 버린다.
+        private NodeVisual _pressed;
+        private int _pressedPointer;
+        private float _pressedAt;
+        private bool _holdArmed;
+        // 크기 연출 중인 노드. 한 번에 하나다. 닿아 있으면 목표(PuffScale/PressScale)로 곧장 가고, 떼면 스프링으로 1로 돌아온다.
+        private NodeVisual _downNode;
+        private int _downPointer;
+        private bool _downHeld;
+        private float _downScale = 1;
+        private float _downVelocity;
+        // 사며 뗀 뒤의 예비 동작이 끝나는 시각. 그 전에는 AnticipateScale로 부풀고, 끝나면 찰싹 돌아온다.
+        private float _anticipateUntil;
+        private bool _snapPending;
+        // 게이지가 꽉 찬 순간의 작은 부풂이 끝나는 시각.
+        private float _armedBumpUntil;
+        // 초록 링이 사라지는 중인 노드(산 직후). 비우면 fillAmount 0.
+        private NodeVisual _fading;
+        private float _fadeElapsed;
+        // 지연 뒤에 고를 노드(터치로 누른 직후). 끌기·뗌이 먼저 오면 버린다.
+        private NodeVisual _pendingSelect;
+        private float _pendingAt;
+        // 터치로 고른 노드. 올린 것과 같은 그림·색으로 칠한다. 호스트가 SetSelected·ClearSelection으로 바꾼다.
+        private NodeVisual _selected;
+
+        // 터치로 고른 노드의 ID. 없으면 null.
+        public string SelectedId => _selected?.Id;
+
+        // 노드 칸(툴팁을 붙일 자리). 없으면 null.
+        public RectTransform RectOf(string id) =>
+            id != null && _nodes.TryGetValue(id, out NodeVisual node) ? (RectTransform)node.Root.transform : null;
+
+        // 노드에 지금 그려진 그림(상태·테마 반영). 없으면 null. 호스트가 고정 패널의 제목 옆에 같은 그림을 보인다.
+        public Sprite IconOf(string id) =>
+            id != null && _nodes.TryGetValue(id, out NodeVisual node) ? node.Image.sprite : null;
+
+        public void SetSelected(string id)
+        {
+            NodeVisual node = id != null && _nodes.TryGetValue(id, out NodeVisual found) ? found : null;
+            SetSelected(node);
+        }
+
+        public void ClearSelection() => SetSelected((NodeVisual)null);
 
         protected override void OnInitialize()
         {
@@ -227,6 +333,47 @@ namespace BlackHole.Unity
 
             _viewedRegion = null;
             _framePending = true;
+            UpdateFitZoom();
+        }
+
+        // 창 크기가 바뀌면(회전·창 크기 조절) 전체가 들어가는 배율도 바뀐다. 지금 배율이 새 하한 아래면 끌어올린다.
+        private void OnRectTransformDimensionsChange()
+        {
+            if (_viewport == null || _content == null)
+                return;
+
+            UpdateFitZoom();
+
+            if (_zoom < MinZoom)
+                SetZoom(MinZoom);
+        }
+
+        // 모든 노드(숨은 노드 포함)의 범위에 노드 크기와 칸 하나의 여백을 더해 창에 맞는 배율을 잰다.
+        private void UpdateFitZoom()
+        {
+            Rect view = _viewport.rect;
+
+            if (_nodes.Count == 0 || view.width <= 0 || view.height <= 0)
+            {
+                _fitZoom = 1;
+                return;
+            }
+
+            Bounds(out Vector2 min, out Vector2 max);
+            Vector2 size = max - min + new Vector2(NodeSize + CellSize, NodeSize + CellSize);
+            _fitZoom = Mathf.Min(view.width / size.x, view.height / size.y);
+        }
+
+        private void Bounds(out Vector2 min, out Vector2 max)
+        {
+            min = new Vector2(float.MaxValue, float.MaxValue);
+            max = new Vector2(float.MinValue, float.MinValue);
+
+            foreach (NodeVisual node in _nodes.Values)
+            {
+                min = Vector2.Min(min, node.Position);
+                max = Vector2.Max(max, node.Position);
+            }
         }
 
         // 보이는 창의 가운데(트리 공간)에서 가장 가까운 노드의 구역을 찾아 바뀌었으면 알린다. 이동·확대 뒤 LateUpdate가 부른다.
@@ -304,13 +451,15 @@ namespace BlackHole.Unity
                 if (!visible)
                     continue;
 
-                node.Button.interactable = node.State == NodeState.Purchasable;
                 Paint(node);
             }
 
-            // 올라가 있던 노드가 숨거나 먼 노드가 되면 올림을 푼다(먼 노드는 툴팁을 띄우지 않는다).
+            // 올라가 있던(고른) 노드가 숨거나 먼 노드가 되면 올림(선택)을 푼다(먼 노드는 툴팁을 띄우지 않는다).
             if (_hovered != null && (!_hovered.Root.activeSelf || _hovered.Far))
                 SetHovered(null);
+
+            if (_selected != null && (!_selected.Root.activeSelf || _selected.Far))
+                SetSelected((NodeVisual)null);
 
             PaintLinks();
         }
@@ -379,17 +528,9 @@ namespace BlackHole.Unity
                 return;
             }
 
-            Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
-            Vector2 max = new Vector2(float.MinValue, float.MinValue);
-
-            foreach (NodeVisual node in _nodes.Values)
-            {
-                min = Vector2.Min(min, node.Position);
-                max = Vector2.Max(max, node.Position);
-            }
-
-            Vector2 size = max - min + new Vector2(NodeSize + CellSize, NodeSize + CellSize);
-            SetZoom(Mathf.Clamp(Mathf.Min(view.width / size.x, view.height / size.y), MinZoom, FitZoomLimit));
+            UpdateFitZoom();
+            Bounds(out Vector2 min, out Vector2 max);
+            SetZoom(Mathf.Clamp(_fitZoom, MinZoom, FitZoomLimit));
             _content.anchoredPosition = -(min + max) * 0.5f * _zoom;
         }
 
@@ -470,6 +611,7 @@ namespace BlackHole.Unity
             if (_framePending && _viewport.rect.width > 0)
             {
                 _framePending = false;
+                UpdateFitZoom();
                 FrameFocus();
             }
 
@@ -479,6 +621,10 @@ namespace BlackHole.Unity
         public void OnBeginDrag(PointerEventData eventData)
         {
             SetHovered(null);
+            DropSelectionForMove();
+            ReleasePress();
+            _downHeld = false;
+            _pendingSelect = null;
             RemoveDrag(eventData.pointerId);
             _drags.Add((eventData.pointerId, eventData.position));
         }
@@ -514,6 +660,7 @@ namespace BlackHole.Unity
         public void OnScroll(PointerEventData eventData)
         {
             SetHovered(null);
+            DropSelectionForMove();
 
             if (Mathf.Approximately(eventData.scrollDelta.y, 0))
                 return;
@@ -570,7 +717,8 @@ namespace BlackHole.Unity
         // 포인터 아래의 노드(레이캐스트를 받는 것은 노드 칸뿐이다). 끄는 중에는 바꾸지 않는다.
         public void OnPointerMove(PointerEventData eventData)
         {
-            if (eventData.dragging)
+            // 터치는 올림이 없다(손가락이 닿은 채 움직이는 것은 끌기의 시작이지 올림이 아니다).
+            if (eventData.dragging || IsTouch(eventData))
                 return;
 
             GameObject target = eventData.pointerCurrentRaycast.gameObject;
@@ -585,11 +733,341 @@ namespace BlackHole.Unity
                 SetHovered(null);
         }
 
-        // 페이지가 닫히면(비활성) 올림과 끄는 손가락을 푼다. 다시 열 때 남아 있지 않게 한다.
+        // 터치로 노드를 누르기 시작했다. 눌림(크기)은 누를 수 있는 노드 전부, 꾹 누름(초록 링 차오름)은 살 수 있는 노드만.
+        // 시간은 Update가 센다. 다른 손가락이 이미 누르고 있으면 무시한다.
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (_pressed != null || !IsTouch(eventData))
+                return;
+
+            GameObject target = eventData.pointerPressRaycast.gameObject;
+
+            if (target == null || !_nodesByObject.TryGetValue(target, out NodeVisual node) || node.Far)
+                return;
+
+            if (!_downHeld)
+            {
+                if (_downNode != null && _downNode != node)
+                    ApplyScale(_downNode, 1);
+
+                _downNode = node;
+                _downPointer = eventData.pointerId;
+                _downHeld = true;
+                _downVelocity = 0;
+                _anticipateUntil = 0;
+                _snapPending = false;
+            }
+
+            // 잠깐 뒤에 고르고 설명을 띄운다(Update). 그 안에 끌기가 시작되면 OnBeginDrag가 버린다.
+            _pendingSelect = node;
+            _pendingAt = Time.unscaledTime;
+
+            // 꾹 누름 판정은 살 수 있는 노드와 Gold가 모자란 노드(사려는 시도) 둘 다. 잠긴·최대 노드는 정보만.
+            if (node.State != NodeState.Purchasable && node.State != NodeState.Revealed)
+                return;
+
+            _pressed = node;
+            _pressedPointer = eventData.pointerId;
+            _pressedAt = Time.unscaledTime;
+            _holdArmed = false;
+            StopFade(node);
+            RefreshRing(node);
+        }
+
+        // 손을 뗐다. 초록 링이 꽉 찬 채 같은 칸에서 뗐으면 산다 — 크기는 스프링으로 돌아오고 초록 링은 잠깐 머물다 사라진다.
+        // 클릭(NodeTapped)은 이 뒤에 따로 와서 패널을 다시 고정한다.
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            if (_downHeld && eventData.pointerId == _downPointer)
+                _downHeld = false;
+
+            if (_pressed == null || eventData.pointerId != _pressedPointer)
+                return;
+
+            NodeVisual node = _pressed;
+            bool buy = _holdArmed && node.State == NodeState.Purchasable && eventData.pointerCurrentRaycast.gameObject == node.Root;
+
+            if (buy)
+            {
+                // 산 경우: 초록 링은 꽉 찬 채로 두고 사라지게 한다. ReleasePress가 비우지 않도록 먼저 건다.
+                _fading = node;
+                _fadeElapsed = 0;
+
+                // 예비 동작 → 찰싹. 눌림 연출이 이 노드를 잡고 있을 때만(보통 그렇다).
+                if (_downNode == node)
+                {
+                    _anticipateUntil = Time.unscaledTime + AnticipateSeconds;
+                    _snapPending = true;
+                }
+            }
+
+            ReleasePress();
+
+            if (buy)
+                NodeHeld?.Invoke(node.Id);
+        }
+
+        private void Update()
+        {
+            AdvanceAnimation();
+
+            if (_pendingSelect != null && Time.unscaledTime - _pendingAt >= SelectDelaySeconds)
+            {
+                NodeVisual node = _pendingSelect;
+                _pendingSelect = null;
+                SetSelected(node);
+                NodeTapped?.Invoke(node.Id, (RectTransform)node.Root.transform);
+            }
+
+            if (_pressed == null)
+                return;
+
+            // 살 수 있는 노드: 초록 링이 차오른다. 꽉 차면 살 준비. Gold가 모자란 노드: 링 없이 시간만 재고, 차면 "못 산다"를 알린다.
+            bool affordable = _pressed.State == NodeState.Purchasable;
+            float progress = Mathf.Clamp01((Time.unscaledTime - _pressedAt) / HoldSeconds);
+
+            if (affordable)
+                SetFill(_pressed, progress);
+
+            if (_holdArmed || progress < 1)
+                return;
+
+            _holdArmed = true;
+
+            if (!affordable)
+            {
+                NodeHoldShort?.Invoke(_pressed.Id);
+                return;
+            }
+
+            _armedBumpUntil = Time.unscaledTime + ArmedBumpSeconds;
+            Paint(_pressed);
+            NodeHoldArmed?.Invoke(_pressed.Id);
+        }
+
+        // 크기: 닿아 있으면 목표로 곧장(PressSeconds), 떼면 스프링(살짝 지나쳤다 돌아온다). 산 직후의 초록 링은 서서히 사라진다.
+        private void AdvanceAnimation()
+        {
+            float delta = Time.unscaledDeltaTime;
+
+            if (_downNode != null)
+            {
+                if (_downHeld)
+                {
+                    // 살 수 있는 노드를 누르면 부풀고, 그 밖(정보만·Gold 부족)은 살짝 눌린다.
+                    float target = _downNode == _pressed && _pressed.State == NodeState.Purchasable ? PuffScale : PressScale;
+
+                    // 게이지가 꽉 찬 순간: 잠깐 더 부풀었다가 누름 크기로 돌아온다.
+                    if (_downNode == _pressed && Time.unscaledTime < _armedBumpUntil)
+                        target = ArmedBumpScale;
+
+                    float speed = Mathf.Max(Mathf.Abs(target - 1), ArmedBumpScale - PuffScale) / PressSeconds;
+                    _downScale = Mathf.MoveTowards(_downScale, target, delta * speed);
+                    _downVelocity = 0;
+                }
+                else if (Time.unscaledTime < _anticipateUntil)
+                {
+                    // 예비 동작: 아주 잠깐 더 부푼다.
+                    _downScale = Mathf.MoveTowards(_downScale, AnticipateScale, delta * (AnticipateScale - PuffScale) / AnticipateSeconds);
+                    _downVelocity = 0;
+                }
+                else
+                {
+                    if (_snapPending)
+                    {
+                        // 찰싹: 안쪽으로 속도를 줘 고무줄처럼 돌아온다.
+                        _downVelocity = -SnapKick;
+                        _snapPending = false;
+                    }
+
+                    float step = Mathf.Min(delta, 1f / 30);
+                    _downVelocity += (1 - _downScale) * SpringStiffness * step;
+                    _downVelocity *= Mathf.Exp(-SpringDamping * step);
+                    _downScale += _downVelocity * step;
+                }
+
+                ApplyScale(_downNode, _downScale);
+
+                if (!_downHeld && Time.unscaledTime >= _anticipateUntil && Mathf.Abs(_downScale - 1) < SpringRest && Mathf.Abs(_downVelocity) < SpringRest)
+                {
+                    ApplyScale(_downNode, 1);
+                    _downNode = null;
+                    _downScale = 1;
+                    _downVelocity = 0;
+                    _snapPending = false;
+                }
+            }
+
+            if (_fading != null)
+            {
+                _fadeElapsed += delta;
+                float t = Mathf.Clamp01(_fadeElapsed / FillFadeSeconds);
+                Color color = FillRingColor;
+                color.a = 1 - t;
+                SetFill(_fading, 1, color);
+
+                if (t >= 1)
+                    StopFade(_fading);
+            }
+        }
+
+        private static void ApplyScale(NodeVisual node, float scale) =>
+            node.Root.transform.localScale = new Vector3(scale, scale, 1);
+
+        // 초록 링의 채움(0 ~ 1)과 색. 0이면 끈다.
+        private static void SetFill(NodeVisual node, float amount, Color? color = null)
+        {
+            if (node.FillRing == null)
+                return;
+
+            bool on = amount > 0;
+
+            if (node.FillRing.gameObject.activeSelf != on)
+                node.FillRing.gameObject.SetActive(on);
+
+            if (!on)
+                return;
+
+            node.FillRing.fillAmount = amount;
+            node.FillRing.color = color ?? FillRingColor;
+        }
+
+        private void StopFade(NodeVisual node)
+        {
+            if (_fading != node)
+                return;
+
+            _fading = null;
+            SetFill(node, 0);
+        }
+
+        // 흰 링의 켜짐: 고른 노드이거나 꾹 누르는 중인 노드.
+        private void RefreshRing(NodeVisual node)
+        {
+            if (node.SelectRing == null)
+                return;
+
+            bool on = node == _selected || node == _pressed;
+
+            if (node.SelectRing.gameObject.activeSelf != on)
+                node.SelectRing.gameObject.SetActive(on);
+
+            if (on)
+                node.SelectRing.color = SelectRingColor;
+        }
+
+        private void ReleasePress()
+        {
+            if (_pressed == null)
+                return;
+
+            NodeVisual node = _pressed;
+            _pressed = null;
+            _holdArmed = false;
+
+            // 사지 않고 끝났으면(끌기·밖에서 뗌·시간 전에 뗌) 초록 링을 비운다. 산 경우는 _fading이 맡는다.
+            if (_fading != node)
+                SetFill(node, 0);
+
+            _armedBumpUntil = 0;
+            // 살 준비 색을 되돌린다(산 경우는 Show가 다시 칠하지만, 취소면 여기서). Paint가 흰 링도 다시 맞춘다.
+            Paint(node);
+            NodeHoldReleased?.Invoke(node.Id);
+        }
+
+        // 노드 칸에서 눌러 같은 칸에서 뗀 것만 누름으로 본다(노드에 클릭 핸들러가 없어 눌림·뗌이 모두 이 영역으로 올라온다).
+        // 끌기가 시작됐으면 EventSystem이 클릭을 주지 않는다.
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.dragging)
+                return;
+
+            GameObject pressed = eventData.pointerPressRaycast.gameObject;
+            GameObject released = eventData.pointerCurrentRaycast.gameObject;
+
+            if (pressed == null || pressed != released)
+                return;
+
+            if (_nodesByObject.TryGetValue(pressed, out NodeVisual node))
+            {
+                if (node.Far)
+                    return;
+
+                if (IsTouch(eventData))
+                {
+                    SetSelected(node);
+                    NodeTapped?.Invoke(node.Id, (RectTransform)node.Root.transform);
+                }
+                else if (node.State == NodeState.Purchasable)
+                {
+                    NodeClicked?.Invoke(node.Id);
+                }
+
+                return;
+            }
+
+            if (pressed == gameObject)
+                EmptyTapped?.Invoke();
+        }
+
+        // 입력 장치가 터치스크린인가. Input System의 UI 모듈이 주는 포인터 종류로 가른다(Android 여부가 아니라 — 폰 웹·터치 노트북도 맞게).
+        private static bool IsTouch(PointerEventData eventData) =>
+            eventData is UnityEngine.InputSystem.UI.ExtendedPointerEventData extended
+                ? extended.pointerType == UnityEngine.InputSystem.UI.UIPointerType.Touch
+                : eventData.pointerId >= 0;
+
+        // 페이지가 닫히면(비활성) 올림·선택과 끄는 손가락을 푼다. 다시 열 때 남아 있지 않게 한다.
         private void OnDisable()
         {
             SetHovered(null);
+            SetSelected((NodeVisual)null);
+            ReleasePress();
+            StopAnimation();
+            _pendingSelect = null;
             _drags.Clear();
+        }
+
+        private void StopAnimation()
+        {
+            if (_downNode != null)
+            {
+                ApplyScale(_downNode, 1);
+                _downNode = null;
+            }
+
+            _downHeld = false;
+            _downScale = 1;
+            _downVelocity = 0;
+            _anticipateUntil = 0;
+            _snapPending = false;
+
+            if (_fading != null)
+                StopFade(_fading);
+        }
+
+        // 보는 곳이 움직이면 선택을 풀고 알린다. 고정 툴팁은 노드 자리에 붙어 있어 따라오지 않으므로 닫는 쪽이 맞다.
+        private void DropSelectionForMove()
+        {
+            if (_selected == null)
+                return;
+
+            SetSelected((NodeVisual)null);
+            ViewMoved?.Invoke();
+        }
+
+        private void SetSelected(NodeVisual node)
+        {
+            if (node == _selected)
+                return;
+
+            NodeVisual before = _selected;
+            _selected = node;
+
+            if (before != null)
+                Paint(before);
+
+            if (node != null)
+                Paint(node);
         }
 
         private void SetHovered(NodeVisual node)
@@ -633,13 +1111,15 @@ namespace BlackHole.Unity
         // 노드 하나를 지금 상태(와 올림)대로 칠한다. 가격은 마지막 Rank까지 사지 않은 노드에만 쓴다.
         private void Paint(NodeVisual node)
         {
+            RefreshRing(node);
+
             if (node.State == NodeState.Hidden)
             {
                 // 안개 속: 가격·Rank 딱지는 숨긴다. 열린 구역이면 흐린 자물쇠, 먼 노드면 작고 흐린 점(레이캐스트를 받지 않아 올림·누름이 없다).
                 if (_look != null)
                 {
                     node.Image.sprite = _style.SpriteFor(node.Far ? _look.FarSprite : _look.SpriteOf(node.Stat, node.State, false));
-                    node.Image.color = node.Far ? _look.FarTint : _look.TintOf(node.State, false);
+                    node.Image.color = node.Far ? _look.FarTint : TintOf(node, false);
                     SetSize(node, node.Far ? NodeSize * _look.FarScale : NodeSize);
                     node.Image.raycastTarget = !node.Far;
                 }
@@ -675,8 +1155,10 @@ namespace BlackHole.Unity
                 return;
             }
 
-            node.Image.sprite = _style.SpriteFor(_look.SpriteOf(node.Stat, node.State, node == _hovered));
-            Color tint = _look.TintOf(node.State, node == _hovered);
+            // 고른 노드는 그림(초록 강조)은 바꾸지 않고 — 아직 산 게 아니다 — 색만 온전한 밝기로 올린다. 링이 고름을 보인다. 올림(마우스)은 그림도 밝힌다.
+            bool lit = node == _hovered;
+            node.Image.sprite = _style.SpriteFor(_look.SpriteOf(node.Stat, node.State, lit));
+            Color tint = TintOf(node, lit);
             node.Image.color = partial ? Color.Lerp(tint, OwnedColor, PartialMix) : tint;
 
             bool showPrice = node.State != NodeState.Owned;
@@ -694,6 +1176,16 @@ namespace BlackHole.Unity
 
             if (node.Badge != null)
                 node.Badge.sizeDelta = new Vector2(node.Label.GetPreferredValues(price).x + PricePadding, PriceHeight);
+        }
+
+        // 노드 색: 고른 노드(설명이 떠 있는 노드)는 상태와 무관하게 온전한 흰색(가장 밝고 불투명). 아니면 Look의 상태별 색.
+        // 꾹 눌러 게이지가 꽉 찬 노드는 초록 쪽으로 살짝 물든다(살 준비).
+        private Color TintOf(NodeVisual node, bool lit)
+        {
+            if (node == _pressed && _holdArmed && node.State == NodeState.Purchasable)
+                return Color.Lerp(Color.white, FillRingColor, ArmedTint);
+
+            return node == _selected ? Color.white : _look.TintOf(node.State, lit);
         }
 
         // 노드 칸 크기(먼 노드는 점으로 줄인다). 바뀔 때만 쓴다.
@@ -724,14 +1216,36 @@ namespace BlackHole.Unity
             var position = new Vector2(item.X * CellSize, item.Y * CellSize);
             rect.anchoredPosition = position;
 
+            // 누름은 트리 영역(OnPointerClick)이 받는다. 노드에 Button을 두면 클릭을 가져가 입력 장치를 가를 수 없다.
             var image = rect.gameObject.AddComponent<Image>();
             image.preserveAspect = true;
-            var button = rect.gameObject.AddComponent<Button>();
-            button.targetGraphic = image;
-            // 색은 상태로 칠한다. 버튼의 눌림·꺼짐 색이 덮지 않게 한다.
-            button.transition = Selectable.Transition.None;
-            string id = item.Id;
-            button.onClick.AddListener(() => NodeClicked?.Invoke(id));
+
+            // 고른 노드의 링: 노드 위에 그리는 얇은 흰 고리(가운데는 비어 노드가 보인다). 고를 때만 켠다.
+            RectTransform ringRect = Child(rect, "Select");
+            ringRect.anchorMin = new Vector2(0.5f, 0.5f);
+            ringRect.anchorMax = new Vector2(0.5f, 0.5f);
+            ringRect.sizeDelta = new Vector2(NodeSize + SelectRingExtra, NodeSize + SelectRingExtra);
+            var ringImage = ringRect.gameObject.AddComponent<Image>();
+            ringImage.sprite = RingSprite();
+            ringImage.color = SelectRingColor;
+            ringImage.raycastTarget = false;
+            ringRect.gameObject.SetActive(false);
+
+            // 초록 링: 흰 링과 같은 자리·같은 그림. 위에서 시작해 시계 방향으로 차오른다(Filled Radial360).
+            RectTransform fillRect = Child(rect, "Fill");
+            fillRect.anchorMin = new Vector2(0.5f, 0.5f);
+            fillRect.anchorMax = new Vector2(0.5f, 0.5f);
+            fillRect.sizeDelta = ringRect.sizeDelta;
+            var fillImage = fillRect.gameObject.AddComponent<Image>();
+            fillImage.sprite = RingSprite();
+            fillImage.color = FillRingColor;
+            fillImage.type = Image.Type.Filled;
+            fillImage.fillMethod = Image.FillMethod.Radial360;
+            fillImage.fillOrigin = (int)Image.Origin360.Top;
+            fillImage.fillClockwise = true;
+            fillImage.fillAmount = 0;
+            fillImage.raycastTarget = false;
+            fillRect.gameObject.SetActive(false);
 
             RectTransform badge = null;
             RectTransform labelRect;
@@ -782,7 +1296,37 @@ namespace BlackHole.Unity
             label.overflowMode = TextOverflowModes.Ellipsis;
             label.raycastTarget = false;
 
-            return new NodeVisual(item.Id, item.Stat, item.Price, item.MaxRank, item.Start, position, rect.gameObject, image, button, label, badge, rankLabel);
+            return new NodeVisual(item.Id, item.Stat, item.Price, item.MaxRank, item.Start, position, rect.gameObject, image, label, badge, rankLabel,
+                ringImage, fillImage);
+        }
+
+        private static Sprite _ringSprite;
+
+        // 흰 고리 그림을 한 번 만든다(프로젝트에 고리 스프라이트가 없다). 가장자리는 1px 부드럽게.
+        private static Sprite RingSprite()
+        {
+            if (_ringSprite != null)
+                return _ringSprite;
+
+            int size = RingTextureSize;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+            float center = (size - 1) * 0.5f;
+            float outer = center - 1;
+            float inner = outer - RingThickness;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float distance = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    float alpha = Mathf.Clamp01(outer + 0.5f - distance) * Mathf.Clamp01(distance - inner + 0.5f);
+                    texture.SetPixel(x, y, new Color(1, 1, 1, alpha));
+                }
+            }
+
+            texture.Apply();
+            _ringSprite = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100);
+            return _ringSprite;
         }
 
         // Rank 딱지: 노드 오른쪽 위 모서리에 걸친다. 글자는 칠할 때 쓴다("3/10").
@@ -830,6 +1374,16 @@ namespace BlackHole.Unity
         private void Clear()
         {
             SetHovered(null);
+            _selected = null;
+            _pressed = null;
+            _downNode = null;
+            _downHeld = false;
+            _downScale = 1;
+            _downVelocity = 0;
+            _anticipateUntil = 0;
+            _snapPending = false;
+            _fading = null;
+            _pendingSelect = null;
 
             foreach (NodeVisual node in _nodes.Values)
                 Destroy(node.Root);
@@ -886,16 +1440,18 @@ namespace BlackHole.Unity
             public readonly Vector2 Position;
             public readonly GameObject Root;
             public readonly Image Image;
-            public readonly Button Button;
             public readonly TMP_Text Label;
             // 가격 딱지(Look이 있을 때만). 샀으면 숨긴다.
             public readonly RectTransform Badge;
             // Rank 딱지의 글자(Rank가 둘 이상인 노드만).
             public readonly TMP_Text RankLabel;
+            // 흰 링(고름·꾹 누름)과 그 위에 차오르는 초록 링(꾹 누름 진행 → 살 준비 → 산 뒤 사라짐).
+            public readonly Image SelectRing;
+            public readonly Image FillRing;
             public NodeState State = NodeState.Hidden;
 
             public NodeVisual(string id, string stat, long price, int maxRank, bool start, Vector2 position, GameObject root, Image image,
-                Button button, TMP_Text label, RectTransform badge, TMP_Text rankLabel)
+                TMP_Text label, RectTransform badge, TMP_Text rankLabel, Image selectRing, Image fillRing)
             {
                 Id = id;
                 Stat = stat;
@@ -906,8 +1462,9 @@ namespace BlackHole.Unity
                 Position = position;
                 Root = root;
                 Image = image;
-                Button = button;
                 Label = label;
+                SelectRing = selectRing;
+                FillRing = fillRing;
                 Badge = badge;
             }
         }

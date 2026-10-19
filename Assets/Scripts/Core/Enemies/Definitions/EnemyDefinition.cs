@@ -38,7 +38,8 @@ namespace BlackHole.Core
         // 주기 출현 종류는 적 공급·성장 공급·변환과 무관하다: 주기마다 등장 확률(판 구성의 SpawnChance)로 하나가 나온다.
         public float SpawnPeriod { get; }
 
-        // 픽업(혜성): 브레이커로 쳐서 획득하는 것이며, 사망 효과의 피해를 받지 않는다(성질이 언제나 붙으므로). 질량·크기가 없다.
+        // 픽업(혜성): 브레이커로 쳐서 획득하는 것이며, 사망 효과의 피해를 받지 않는다(DeathEffects.CanBeStruck — 달과 함께 특수 적 중 예외). 질량·크기가 없다.
+        // 브레이커에 붙잡히지도 않는다(BreakerSkill.IsHolding) — 공전을 멈추지 않고 지나간다.
         // 지금은 주기 출현 종류만 픽업이다.
         public bool IsPickup => SpawnPeriod > 0;
 
@@ -50,6 +51,9 @@ namespace BlackHole.Core
 
         // 재생성 세대 감쇠(0~1). n세대(재생성으로 n번 거쳐 나온) 적의 재생성 확률 = RespawnChance × RespawnDecay^n. 0이면 1세대까지만, 1이면 감쇠 없음.
         public float RespawnDecay { get; }
+
+        // 이정표 단계(성장도)별 재생성 규칙(단계 오름차순, 단계 유일). 비어 있으면 모든 단계에서 RespawnDecay를 쓴다. 판에서 쓰는 규칙은 RespawnRuleAt.
+        public IReadOnlyList<RespawnRule> RespawnStages { get; }
 
         // 혜성 비 쿨타임(초): 혜성 비가 내린 뒤 이 시간 동안은 혜성 비 판정을 건너뛴다(하나씩은 나온다). 0이면 없음.
         public float RainCooldown { get; }
@@ -70,7 +74,8 @@ namespace BlackHole.Core
             float killTimeBonus = 0,
             float respawnDecay = 0,
             float rainCooldown = 0,
-            float rainDelay = 0)
+            float rainDelay = 0,
+            IReadOnlyList<RespawnRule> respawnStages = null)
         {
             if (!Enum.IsDefined(typeof(EnemyType), type))
                 throw new ArgumentOutOfRangeException(nameof(type), $"알 수 없는 적 종류 {(int)type}.");
@@ -133,6 +138,20 @@ namespace BlackHole.Core
 
             RespawnDecay = respawnDecay;
 
+            var stages = new List<RespawnRule>();
+            var seenStages = new HashSet<int>();
+
+            for (int i = 0; respawnStages != null && i < respawnStages.Count; i++)
+            {
+                if (!seenStages.Add(respawnStages[i].Stage))
+                    throw new ArgumentException($"재생성 규칙의 단계 {respawnStages[i].Stage}가 중복됐다.", nameof(respawnStages));
+
+                stages.Add(respawnStages[i]);
+            }
+
+            stages.Sort((a, b) => a.Stage.CompareTo(b.Stage));
+            RespawnStages = stages.AsReadOnly();
+
             if (float.IsNaN(rainCooldown) || float.IsInfinity(rainCooldown) || rainCooldown < 0)
                 throw new ArgumentOutOfRangeException(nameof(rainCooldown), "0 이상의 유한한 값이 필요하다.");
 
@@ -141,6 +160,20 @@ namespace BlackHole.Core
 
             RainCooldown = rainCooldown;
             RainDelay = rainDelay;
+        }
+
+        // 성장도 stage의 판에서 쓰는 재생성 규칙: 단계별 규칙 중 Stage ≤ stage인 가장 높은 줄. 없으면 기본(RespawnDecay, 최대 세대 제한 없음).
+        public RespawnRule RespawnRuleAt(int stage)
+        {
+            RespawnRule rule = new RespawnRule(0, RespawnDecay, 0);
+
+            foreach (RespawnRule candidate in RespawnStages)
+            {
+                if (candidate.Stage <= stage)
+                    rule = candidate;
+            }
+
+            return rule;
         }
 
         // 판 구성 composition에서 색 등급 tier·크기 size(1부터)·성질 trait(없으면 null)의 실행 수치.
@@ -178,7 +211,8 @@ namespace BlackHole.Core
                 Multiply(row.Exp, scale));
         }
 
-        private static long Multiply(long value, double multiplier) =>
+        // Gold·EXP에 배율을 곱한다(크기 배율, 황금 배율). 서버용 기대값 표(W4-1a)가 이 식을 그대로 부른다.
+        internal static long Multiply(long value, double multiplier) =>
             checked((long)Math.Round(value * multiplier, MidpointRounding.AwayFromZero));
 
         private static T[] Copy<T>(IReadOnlyList<T> source)
@@ -189,6 +223,31 @@ namespace BlackHole.Core
                 copy[i] = source[i];
 
             return copy;
+        }
+    }
+
+    // 이정표 단계별 재생성 규칙: 성장도 Stage부터 재생성 감쇠와 최대 세대를 바꾼다.
+    // n세대(재생성으로 n번 거쳐 나온) 적의 재생성 확률 = 노드 RespawnChance × Decay^n. MaxGeneration 세대에 이르면 더는 재생성하지 않는다(0이면 제한 없음).
+    public readonly struct RespawnRule
+    {
+        public int Stage { get; }
+        public float Decay { get; }
+        public int MaxGeneration { get; }
+
+        public RespawnRule(int stage, float decay, int maxGeneration)
+        {
+            if (stage < 0)
+                throw new ArgumentOutOfRangeException(nameof(stage), "0 이상이어야 한다.");
+
+            if (float.IsNaN(decay) || decay < 0 || decay > 1)
+                throw new ArgumentOutOfRangeException(nameof(decay), "0 이상 1 이하가 필요하다(0 = 1세대까지만).");
+
+            if (maxGeneration < 0)
+                throw new ArgumentOutOfRangeException(nameof(maxGeneration), "0 이상이어야 한다(0 = 제한 없음).");
+
+            Stage = stage;
+            Decay = decay;
+            MaxGeneration = maxGeneration;
         }
     }
 }

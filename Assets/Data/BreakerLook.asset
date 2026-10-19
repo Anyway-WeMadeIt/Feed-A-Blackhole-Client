@@ -16,7 +16,7 @@ MonoBehaviour:
   _thicknessRatio: 0.15
   _dashCount: 8
   _dashRatio: 0.6
-  _color: {r: 0.33962262, g: 0.33962262, b: 0.33962262, a: 0.9}
+  _color: {r: 0.6, g: 0.6, b: 0.66, a: 0.92}
   _rotationSpeed: 0.05
   _punchDuration: 0.14
   _punchCurve:

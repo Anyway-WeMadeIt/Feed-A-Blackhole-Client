@@ -45,16 +45,18 @@ confirm.newGame.confirm,START,시작
 confirm.cancel,CANCEL,취소
 # 업그레이드 화면
 UpgradeScreen.StartBattleBtn_Text,Start Battle,전투 시작
-UpgradeScreen.Hint_Text,Tap a lit node to buy it  ·  drag to move  ·  scroll to zoom,밝은 노드를 눌러 구매  ·  끌어서 이동  ·  스크롤로 확대·축소
+UpgradeScreen.Hint_Text,Tap a node for details  ·  hold a lit node to buy  ·  drag to move  ·  scroll to zoom,노드를 눌러 설명  ·  밝은 노드를 길게 눌러 구매  ·  끌어서 이동  ·  스크롤로 확대·축소
 upgrade.gold,Gold {0},골드 {0}
-upgrade.hq.goal,Black hole  Stage {0}  (goal Lv {1}),블랙홀  {0}단계  (목표 Lv {1})
-upgrade.hq.last,Black hole  Stage {0}  (last stage),블랙홀  {0}단계  (마지막 단계)
+upgrade.hq.goal,{0}  →  {1}  (goal Lv {2}),{0}  →  {1}  (목표 Lv {2})
+upgrade.hq.last,{0}  (last milestone),{0}  (마지막 이정표)
 # 노드 툴팁 (효과 이름은 아직 수치 ID를 그대로 보인다)
 node.rank,Rank {0}/{1},랭크 {0}/{1}
 node.now,now {0},현재 {0}
 node.maxed,Maxed,최대
 node.cost,Cost {0},비용 {0}
 node.short,Need {0} more Gold,골드 {0} 부족
+node.buy,Buy,구매
+node.locked,Locked,잠김
 # 전투 화면
 BattleScreen.EndBtn_Text,End,종료
 battle.pause,Pause,일시 정지
@@ -66,18 +68,30 @@ SettlementScreen.AsteroidName_Text,ASTEROID,소행성
 SettlementScreen.PlanetName_Text,PLANET,행성
 SettlementScreen.StarName_Text,STAR,별
 SettlementScreen.GoldCaption_Text,GOLD,골드
-SettlementScreen.GrowthCaption_Text,GROWTH,성장
+SettlementScreen.GrowthCaption_Text,MILESTONE,이정표
 SettlementScreen.ContinueBtn_Text,Continue,계속
 settlement.result.milestone,Milestone reached,이정표 도달
 settlement.result.over,Battle over,전투 종료
 settlement.stage,Stage {0} / {1},단계 {0} / {1}
+# 이정표 이름: 0은 시작 자리, 1~6은 Lv 10/20/30/35/40/50 이정표. 전투 HUD·결산·업그레이드가 같은 키를 쓴다.
+milestone.0.name,Asteroid Belt,소행성대
+milestone.1.name,Planetary System,행성계
+milestone.2.name,Stellar Cradle,항성 요람
+milestone.3.name,Supernova,초신성
+milestone.4.name,Supernova Remnant,초신성 잔해
+milestone.5.name,Galactic Core,은하핵
+milestone.6.name,Black Hole,블랙홀
+settlement.milestone,{0}  →  {1},{0}  →  {1}
+settlement.milestone.last,{0},{0}
+settlement.milestone.reached,{0} reached!,{0} 도달!
+settlement.milestone.short,{0} to {1},{1}까지 {0} 남음
 settlement.total,TOTAL,합계
 settlement.reward,REWARD,보상
 settlement.upgrade,Upgrade,업그레이드
 settlement.upgrade.count,Upgrade ({0}),업그레이드 ({0})
-settlement.row.asteroid,Asteroid,소행성
-settlement.row.planet,Planet,행성
-settlement.row.star,Star,별
+settlement.row.asteroid,Asteroid Matter,소행성 물질
+settlement.row.planet,Planet Fragments,행성 파편
+settlement.row.star,Star Plasma,별 플라즈마
 # 결산 통계 칸 툴팁
 settlement.stat.electricStarDamage,Electric Star Damage,전기 별 피해
 settlement.stat.laserDamage,Laser Damage,레이저 피해

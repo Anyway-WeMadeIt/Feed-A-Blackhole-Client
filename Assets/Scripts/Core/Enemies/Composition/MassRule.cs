@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BlackHole.Core
 {
@@ -16,6 +17,34 @@ namespace BlackHole.Core
         public const float Base = 100;
 
         private const float Window = 2;
+
+        // 동시에 나오는 색의 최대 수(구간 길이 2 → 3).
+        public const int MaxConcurrentTiers = 3;
+
+        // 비율에서 지금 나오는 색의 수(0보다 큰 칸).
+        public static int ActiveTiers(IReadOnlyList<float> ratios)
+        {
+            if (ratios == null) throw new ArgumentNullException(nameof(ratios));
+
+            int active = 0;
+
+            for (int i = 0; i < ratios.Count; i++)
+            {
+                if (ratios[i] > 0)
+                    active++;
+            }
+
+            return active;
+        }
+
+        // 마지막 색의 톤 수(1 이상, 1이면 톤 없음): 화면에 나오는 색(visibleColors)이 MaxConcurrentTiers보다 적은 만큼.
+        // 질량이 올라 파:보, 보라만 남으면(600%·700%+) 마지막 색을 톤으로 나눠 나오는 색의 수를 유지한다 — 후반이 한 색으로 단조로워지지 않게.
+        // visibleColors는 이 종류의 색에 상위 종류(변환 사슬에서 다음 종류들, 이 판에 공급되는 것)의 색을 더한 수다(EnemySupply) —
+        // 상위 종류가 나오기 시작하면 그 색이 새 주목점이고 마지막 색은 배경이 되므로 톤을 줄여 상위 색을 돋보이게 한다.
+        // 톤은 색만 다르고 수치는 같다(EnemyStatTable·결산 장부는 톤을 모른다). 어느 톤이 붙는지는 출현 때 같은 몫으로 정해진다(EnemySupply).
+        // 색이 MaxConcurrentTiers보다 적은 종류(픽업)는 나눌 것이 없다.
+        public static int LastTierTones(int visibleColors, int tierCount) =>
+            Math.Max(1, Math.Min(MaxConcurrentTiers, tierCount) - visibleColors);
 
         // 질량 mass(%)에서 색 tierCount개의 비율(합 1).
         public static float[] TierRatios(float mass, int tierCount)

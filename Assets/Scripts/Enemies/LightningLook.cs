@@ -40,9 +40,6 @@ namespace BlackHole.Unity
         [Tooltip("번개 한 줄기가 보이는 시간(초).")]
         [Min(0.01f)]
         [SerializeField] private float _duration = 0.45f;
-        [Tooltip("연쇄에서 다음 줄기가 늦게 나타나는 시간(초). 번개가 옮겨 가는 것처럼 보인다.")]
-        [Min(0)]
-        [SerializeField] private float _hopDelay = 0.04f;
         [Tooltip("전체 세기(0 ~ 1). 끝에서 0이어야 한다.")]
         [SerializeField]
         private AnimationCurve _fadeCurve = new AnimationCurve(
@@ -63,7 +60,6 @@ namespace BlackHole.Unity
         public float KinksPerUnit => _kinksPerUnit;
         public float FlickerRate => _flickerRate;
         public float Duration => _duration;
-        public float HopDelay => _hopDelay;
         public int MaxBolts => _maxBolts;
 
         // 진행(0 ~ 1)에서의 세기. 곡선이 없으면 일정하게 줄어든다.

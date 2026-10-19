@@ -6,7 +6,8 @@
     "BlackHole.Core.Hq",
     "BlackHole.Core.Enemies",
     "BlackHole.Core.Battle",
-    "BlackHole.Core.Nodes"
+    "BlackHole.Core.Nodes",
+    "BlackHole.Net"
   ],
   "noEngineReferences": true
 }

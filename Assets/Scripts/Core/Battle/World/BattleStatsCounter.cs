@@ -52,12 +52,12 @@ namespace BlackHole.Core
                     if (hit.IsCritical)
                         _breakerCriticalDamage += hit.Amount;
                     break;
-                // 전기 성질은 소행성과 별에 붙는다(EnemyUpgradeStats.TraitChance).
-                case DamageSource.ChainLightning when hit.SourceEnemyType == EnemyType.Star:
-                    _electricStarDamage += hit.Amount;
-                    break;
+                // 전기 성질은 소행성(연쇄 번개)과 별(전기 별 번개)에 붙고 효과가 따로다.
                 case DamageSource.ChainLightning:
                     _electricAsteroidDamage += hit.Amount;
+                    break;
+                case DamageSource.StarLightning:
+                    _electricStarDamage += hit.Amount;
                     break;
                 case DamageSource.LaserBurst:
                     _laserDamage += hit.Amount;

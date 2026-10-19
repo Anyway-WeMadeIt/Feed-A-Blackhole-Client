@@ -9,8 +9,9 @@ namespace BlackHole.Core
         public long Sequence { get; }
         public EnemyId EnemyId { get; }
         public EnemyType EnemyType { get; }
-        // 맞은 적의 색 등급. 피격 파편의 색이 쓴다.
+        // 맞은 적의 색 등급과 톤(Enemy.Tone). 피격 파편의 색이 쓴다.
         public int Tier { get; }
+        public int Tone { get; }
         // 픽업(혜성)이 맞았는가. 화면은 픽업의 피격 연출을 하지 않는다.
         public bool IsPickup { get; }
         public Point2 Position { get; }
@@ -28,6 +29,7 @@ namespace BlackHole.Core
             EnemyId = enemy.Id;
             EnemyType = enemy.Definition.Type;
             Tier = enemy.Tier;
+            Tone = enemy.Tone;
             IsPickup = enemy.Definition.IsPickup;
             Position = enemy.Position;
             Radius = enemy.Stats.Radius;

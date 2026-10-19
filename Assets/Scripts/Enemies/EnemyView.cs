@@ -281,7 +281,7 @@ namespace BlackHole.Unity
                     visual.Hit.Play();
 
                 if (particles)
-                    _hitParticles.EmitHit(new Vector3(hit.Position.X, hit.Position.Y, 0), _looks.ColorOf(hit.EnemyType, hit.Tier), hit.Radius);
+                    _hitParticles.EmitHit(new Vector3(hit.Position.X, hit.Position.Y, 0), _looks.ColorOf(hit.EnemyType, hit.Tier, hit.Tone), hit.Radius);
 
                 if (damageText)
                     _damageText.Show(hit);
@@ -311,7 +311,7 @@ namespace BlackHole.Unity
                 if (particles)
                 {
                     _hitParticles.EmitDeath(new Vector3(death.Position.X, death.Position.Y, 0),
-                        _looks.ColorOf(death.EnemyType, death.Tier), death.EnemyType, death.Tier, death.Size, death.Radius);
+                        _looks.ColorOf(death.EnemyType, death.Tier, death.Tone), death.EnemyType, death.Tier, death.Size, death.Radius);
                 }
 
                 if (goldText)
@@ -406,7 +406,7 @@ namespace BlackHole.Unity
             var renderer = view.AddComponent<SpriteRenderer>();
             // 은하의 부모 스프라이트는 크기와 성질 표식의 기준이다. 실제 몸체는 자식의 완성 실루엣으로 그린다.
             renderer.sprite = kind == EnemyType.Galaxy ? _looks.GalaxyCore : _looks.SpriteOf(kind, enemy.Id.Value);
-            renderer.color = _looks.ColorOf(kind, enemy.Tier);
+            renderer.color = _looks.ColorOf(kind, enemy.Tier, enemy.Tone);
             renderer.enabled = kind != EnemyType.Galaxy;
 
             // 크기는 규칙 수치(반지름)를 그대로 쓴다: 스프라이트의 긴 변이 지름이 되게 맞춘다.

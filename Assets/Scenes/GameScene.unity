@@ -1761,6 +1761,8 @@ MonoBehaviour:
   _breakerLook: {fileID: 11400000, guid: 268024120f990294aa0012c4df22b246, type: 2}
   _explosionLook: {fileID: 11400000, guid: 6e2d9e09239144f7a488e776ef97fac6, type: 2}
   _lightningLook: {fileID: 11400000, guid: e181953d102745b387176d400f5ea790, type: 2}
+  _starLightningLook: {fileID: 11400000, guid: 5decacbc03d84cb683ec2262714fc8a8, type: 2}
+  _laserLook: {fileID: 11400000, guid: 32a1337bdde84db4a41284691967baf1, type: 2}
   _cometLook: {fileID: 11400000, guid: 3d1f6b7a8c2e4a5f9b0c1d2e3f405162, type: 2}
   _blackHole: {fileID: 1528454173}
   _battleBackground: {fileID: 465615260}

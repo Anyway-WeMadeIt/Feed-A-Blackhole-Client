@@ -103,7 +103,7 @@ namespace BlackHole.EditorTools.SyncFixtures
             return "시작했다. 끝나면 BackgroundReport에 보고서가 담긴다.";
         }
 
-        private static LoadedContent LoadContent(out string error)
+        internal static LoadedContent LoadContent(out string error)
         {
             error = null;
             GameContentSetup setup = FindAsset<GameContentSetup>();

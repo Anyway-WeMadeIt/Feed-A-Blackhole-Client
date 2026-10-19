@@ -10,5 +10,7 @@ namespace BlackHole.Core
         MoonBuff,
         CometBuff,
         GravityField,
+        // 전기 별 전용 번개. 지금은 연쇄 번개와 같은 규칙이지만 정의·기록·피해 출처·화면이 따로다(앞으로 따로 바뀐다).
+        StarLightning,
     }
 }

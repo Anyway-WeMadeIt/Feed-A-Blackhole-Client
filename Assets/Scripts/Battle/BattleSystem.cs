@@ -29,6 +29,9 @@ namespace BlackHole.Unity
         private readonly ProgressState _progress;
         private readonly EnemyView _enemyView;
         private readonly BreakerView _breakerView;
+
+        // 마우스·펜이 가리키는 자리(AimInput이 매 프레임 넣는다). 화면(BreakerView 대기 링)만 읽고 판·Core에는 들어가지 않는다.
+        public Point2? HoverPoint { get; set; }
         private readonly DeathEffectView _deathEffectView;
         private readonly HqView _hqView;
         private readonly BattleCameraFit _cameraFit;
@@ -121,7 +124,7 @@ namespace BlackHole.Unity
                 result = Session.Advance(delta);
 
             _enemyView.Synchronize(Session.World, paused, delta);
-            _breakerView.Synchronize(Session.World, paused, delta);
+            _breakerView.Synchronize(Session.World, HoverPoint, paused, delta);
             _deathEffectView.Synchronize(Session.World, paused, delta);
             _hqView.Synchronize(Session.World, delta);
 

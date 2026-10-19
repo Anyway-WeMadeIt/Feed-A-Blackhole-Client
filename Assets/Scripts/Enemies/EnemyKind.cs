@@ -18,7 +18,7 @@ namespace BlackHole.Unity
     //   (노드 asteroid.size 등, SizeRule)가 정한다. 둘 다 종류마다 따로이고 이 에셋에는 칸이 없다.
     // - 특수 성질: 황금·전기·달·레이저·슈퍼노바·중력장은 종류가 아니라 출현 때 한 마리에 붙는 성질이다(최대 하나, 배타).
     //   성질 종류(EnemyTraitType)가 사망 효과를 정하고, 성질마다 효과 수치와 표식 색이 있다. 붙는 확률은 노드(electricAsteroid.spawnChance 등)가 정하고 기본 0%다.
-    //   성질이 붙은 적(특수 적)은 사망 효과의 피해를 받지 않는다.
+    //   성질이 붙은 적(특수 적)도 사망 효과의 피해를 받는다(달·픽업 제외). 효과가 특수 적을 죽이면 연쇄한다(DeathEffects).
     // - 출현 주기: 0보다 크면 공급되지 않는 픽업(혜성)이다. 주기마다 등장 확률(노드 comet.spawnChance)로 나오고, 성질 하나가 언제나 붙는다.
     [CreateAssetMenu(fileName = "EnemyKind", menuName = "BlackHole/Enemy Kind")]
     public sealed class EnemyKind : ScriptableObject
@@ -40,6 +40,8 @@ namespace BlackHole.Unity
             public float radius;
             [Tooltip("Electric: 한 줄기가 옮겨 가는 최대 횟수.")]
             public int maxTargets;
+            [Tooltip("Electric(별만): 확률과 무관하게 늘 나가는 줄기의 수(1 이상). 소행성은 늘 1이라 읽지 않는다.")]
+            public int branches;
             [Tooltip("Electric: 줄기가 하나 더 나갈 확률(0 ~ 1).")]
             public float branchChance;
             [Tooltip("Electric·Laser·Golden: 치명타 확률(0 ~ 1).")]
@@ -54,6 +56,20 @@ namespace BlackHole.Unity
             public float force;
             [Tooltip("Gravity: 중력장 지속 시간(초). 끝나면 끌려간 자리에서 다시 공전한다.")]
             public float duration;
+        }
+
+        [Serializable]
+        public struct RespawnStage
+        {
+            [Tooltip("이 이정표 단계(성장도)부터 적용한다. 0 = 처음부터, 2 = Lv20 이정표를 넘은 뒤의 판, 3 = Lv30 뒤.")]
+            [Min(0)]
+            public int stage;
+            [Tooltip("이 단계부터의 재생성 세대 감쇠(0~1). n세대 적의 재생성 확률 = 노드 respawnChance × decay^n. 0이면 1세대까지만.")]
+            [Range(0, 1)]
+            public float decay;
+            [Tooltip("최대 세대. 이 세대까지 나오고 더는 재생성하지 않는다. 0이면 제한 없음(감쇠만).")]
+            [Min(0)]
+            public int maxGeneration;
         }
 
         [Serializable]
@@ -93,6 +109,8 @@ namespace BlackHole.Unity
         [Tooltip("재생성 세대 감쇠(0~1). 재생성으로 나온 적이 죽을 때 재생성 확률(노드 respawnChance)에 세대마다 이 값을 곱한다. 0이면 1세대까지만(사슬 금지), 1이면 감쇠 없음.")]
         [Range(0, 1)]
         [SerializeField] private float respawnDecay;
+        [Tooltip("이정표 단계별 재생성 규칙. 판을 시작할 때 성장도 이하에서 가장 높은 단계의 줄을 쓴다. 맞는 줄이 없으면 위의 respawnDecay(최대 세대 제한 없음). 단계는 겹치면 안 된다.")]
+        [SerializeField] private List<RespawnStage> respawnStages = new List<RespawnStage>();
         [Tooltip("픽업: 혜성 비가 한 번 내린 뒤 다시 내릴 수 있을 때까지의 쿨타임(초). 그동안은 하나씩만 나온다. 0이면 없음.")]
         [Min(0)]
         [SerializeField] private float rainCooldown;
@@ -114,6 +132,34 @@ namespace BlackHole.Unity
 
         // 색 등급의 색. 없는 번호는 흰색이다.
         public Color ColorOf(int tier) => tier >= 0 && tier < tiers.Count ? tiers[tier].color : Color.white;
+
+        // 색 등급과 톤(Enemy.Tone)의 색. 톤 0은 색 등급 색 그대로. 톤 1부터는 그 색 등급 색에서 색상·채도·밝기만 정해진 폭으로 옮긴 톤온톤이다 —
+        // 질량이 올라 나오는 색이 3개 아래로 줄면(파·보 → 보라만) 규칙이 마지막 색 등급을 톤으로 나눈다(MassRule.LastTierTones, Enemy.Tone).
+        // 톤 1 = 조금 푸른 쪽, 톤 2 = 조금 붉은 쪽, 그 뒤는 번갈아 더 벌린다. 밝기는 바꾸지 않는다 — 피해 음영(UpdateShade)이 밝기로 드러나므로
+        // 밝기가 다른 톤은 맞은 적처럼 보인다. 알파는 색 등급 색의 것. 에셋에 따로 넣는 값은 없다.
+        public Color ColorOf(int tier, int tone)
+        {
+            Color baseColor = ColorOf(tier);
+
+            if (tone <= 0)
+                return baseColor;
+
+            Color.RGBToHSV(baseColor, out float hue, out float saturation, out float value);
+            int step = (tone + 1) / 2;
+            float sign = tone % 2 == 1 ? -1f : 1f;
+
+            Color color = Color.HSVToRGB(
+                Mathf.Repeat(hue + sign * ToneHueStep * step / 360f, 1f),
+                Mathf.Clamp01(saturation + sign * ToneSaturationStep * step),
+                value);
+            color.a = baseColor.a;
+            return color;
+        }
+
+        // 톤 한 단계가 색 등급 색에서 옮기는 폭: 색상(도)과 채도. 같은 색으로 읽히되 나란히 놓으면 구분되는 정도 —
+        // 마지막 색은 배경이고 새로 나오는 상위 종류의 색이 주목점이라 폭을 작게 둔다. 밝기는 피해 음영의 몫이라 건드리지 않는다.
+        private const float ToneHueStep = 8f;
+        private const float ToneSaturationStep = 0.04f;
 
         // 성질의 표식 색. 없는 성질은 투명이다.
         public Color TraitColorOf(EnemyTraitType trait)
@@ -157,6 +203,7 @@ namespace BlackHole.Unity
                         Damage = trait.damage,
                         Radius = trait.radius,
                         MaxTargets = trait.maxTargets,
+                        Branches = trait.branches,
                         BranchChance = trait.branchChance,
                         CritChance = trait.critChance,
                         CritMultiplier = trait.critMultiplier,
@@ -166,6 +213,9 @@ namespace BlackHole.Unity
                     },
                 });
             }
+
+            foreach (RespawnStage stage in respawnStages)
+                data.RespawnStages.Add(new RespawnStageData { Stage = stage.stage, Decay = stage.decay, MaxGeneration = stage.maxGeneration });
 
             foreach (Tier tier in tiers)
                 data.Tiers.Add(new EnemyTierData { MaxHealth = tier.maxHealth, Gold = tier.gold, Exp = tier.exp });

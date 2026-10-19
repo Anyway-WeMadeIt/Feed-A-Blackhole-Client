@@ -5,7 +5,9 @@ using UnityEngine;
 namespace BlackHole.Unity
 {
     // 블랙홀(HQ)의 화면. 판 동안 씬의 블랙홀 오브젝트(검은 중심 원·배경 소용돌이)를 켜고 판의 Level에 맞춰 키운다. 게임 상태를 바꾸지 않는다.
-    // 크기는 판 Level이 정하고, Level이 오른 순간 커지며 바깥으로 한 번 번쩍인다. 그림일 뿐이다 — 출현 띠·공전·Breaker와 무관하다(GAME_RULES 3.1).
+    // 크기는 판 Level이 정한다. Level이 오르면 성장 공급의 바퀴(GrowthPacer)를 따라 한 바퀴(LevelGaugeSeconds)마다 다음 Level의 크기로 커지고,
+    // 바퀴가 끝나는 순간(보여줄 Level이 오르는 순간) 바깥으로 한 번 번쩍인다. 그림일 뿐이다 — 출현 띠·공전·Breaker와 무관하다(GAME_RULES 3.1).
+    // 보여줄 Level = Hq.Level − 아직 안 돈 바퀴 수. 이정표에 닿아 바퀴가 없으면 바로 그 Level로 간다.
     // 크기는 원작 실측(검은 중심의 C0 화면 지름)을 Level에 맞춘 것이다: Level 0 → 12px, 10 → 47px, 20 → 86px, 30 → 158px, 35 → 232px,
     // 40 → 약 292px(그 구간 카메라 배율이 추정값이라 오차 약 ±12%).
     // 1 unit = C0 54px(카메라 크기 10)로 바꾼 반지름을 Level 사이에서 직선으로 잇고, 마지막 점 뒤는 그대로 둔다.
@@ -20,8 +22,8 @@ namespace BlackHole.Unity
             (10, 0.435f),
             (20, 0.796f),
             (30, 1.463f),
-            (35, 2.148f),
-            (40, 2.704f),
+            (40, 2.148f),
+            (50, 2.704f),
         };
 
         // 블랙홀 오브젝트의 검은 중심 원을 찾지 못했을 때 쓰는 처음 크기의 반지름(Circle 스프라이트 지름 1 × 0.8 ÷ 2).
@@ -40,6 +42,8 @@ namespace BlackHole.Unity
         private readonly Vector3 _blackHoleScale;
         private readonly float _blackHoleCoreRadius;
         private int _shownLevel = -1;
+        // 마지막으로 적용한 크기의 Level(바퀴 진행도를 더한 값). 바뀔 때만 크기를 고친다.
+        private float _shownLevelF = -1;
 
         //public HqView(Transform parent) => _strokes = new LineStrokes(parent, "Hq View");
         public HqView(Transform parent, GameObject blackHole, Camera camera, GameSettings settings)
@@ -63,12 +67,14 @@ namespace BlackHole.Unity
             if (!_blackHole.activeSelf)
                 _blackHole.SetActive(true);
 
-            int level = world.Hq.Level;
+            GrowthPacer pacer = world.GrowthPacer;
+            int level = world.Hq.Level - pacer.PendingWheels;
+            float levelF = pacer.IsAnimating ? level + pacer.WheelProgress : level;
 
-            if (level == _shownLevel)
+            if (levelF == _shownLevelF)
                 return;
 
-            float radius = RadiusOf(level);
+            float radius = RadiusOf(levelF);
             _blackHole.transform.localScale = _blackHoleScale * (radius / _blackHoleCoreRadius);
 
             if (_shownLevel >= 0 && level > _shownLevel && _settings.IsOn(GameSettings.BlackHolePulse))
@@ -79,8 +85,9 @@ namespace BlackHole.Unity
                 _shockwaves.Spawn(center, strength: 1f, seconds: 1.2f);
                 _shockwaves.Spawn(center, strength: 0.45f, seconds: 1.4f, delay: 0.14f);
             }
-               
+
             _shownLevel = level;
+            _shownLevelF = levelF;
         }
 
         // 판이 바뀌거나 판을 정리할 때 지운다. 다음 판의 블랙홀은 Level 0에서 다시 그린다.
@@ -89,6 +96,7 @@ namespace BlackHole.Unity
             _strokes.Reset();
             _shockwaves.Reset();
             _shownLevel = -1;
+            _shownLevelF = -1;
             _blackHole.SetActive(false);
         }
 
@@ -119,8 +127,8 @@ namespace BlackHole.Unity
             return radius > 0 ? radius : DefaultCoreRadius;
         }
 
-        // Level의 반지름: 실측점 사이는 직선, 첫 점 앞·마지막 점 뒤는 끝 점의 값.
-        private static float RadiusOf(int level)
+        // Level의 반지름: 실측점 사이는 직선, 첫 점 앞·마지막 점 뒤는 끝 점의 값. 소수 Level(바퀴 진행 중)도 같은 직선 위다.
+        private static float RadiusOf(float level)
         {
             if (level <= _radiusPoints[0].Level)
                 return _radiusPoints[0].Radius;

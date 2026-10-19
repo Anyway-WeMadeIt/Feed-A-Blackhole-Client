@@ -7,6 +7,7 @@ namespace BlackHole.Core
     // 누르고 있는 동안(조준점이 있는 동안)만 친다. 조준점이 생기는 Step에 곧바로 한 번 치고, 그 뒤 주기마다 친다.
     // 조준점이 없으면 치지 않고 주기도 흐르지 않는다 — 다음에 누르면 또 곧바로 친다. 빈 Tick(조준점 없음)은 없다.
     // 누르고 있는 동안 공격 원 안의 적은 거의 멈춘다(Definition.HoldSlow, World.MoveEnemies). 손가락이 링을 가리는 터치에서 적을 붙잡아 두는 방식이다.
+    //   픽업(혜성)은 붙잡지 않는다 — 공전하다가 링 안에서 멈추면 어색하고, 어차피 치는 대로 바로 얻는 것이라 붙잡아 둘 이유가 없다. 피해는 그대로 받는다.
     // 처치 버프(달·혜성)는 받은 것마다 중첩으로 따로 보관하고 따로 끝난다. 중첩당 수치는 이 Breaker의 정의(판마다 고정)가 정하고,
     // 같은 버프의 중첩은 합연산한다(보너스 합 = 중첩 수 × 중첩당 보너스, 달 속도는 체감 적용). 범위·치명타는 노드가 반영된 수치에 (1 + 합)으로 곱하고,
     // 공격 속도는 노드 배율에 더한다.
@@ -165,9 +166,9 @@ namespace BlackHole.Core
             AgeBuffs(delta);
         }
 
-        // 조준점이 있고 이 적이 공격 원 안에 있는가(붙잡혀 거의 멈추는 적).
+        // 조준점이 있고 이 적이 공격 원 안에 있는가(붙잡혀 거의 멈추는 적). 픽업(혜성)은 붙잡지 않는다 — 머리말 참고.
         internal bool IsHolding(World world, Enemy enemy) =>
-            world.AimPoint is Point2 center && enemy.IsWithin(center, CurrentRadius);
+            !enemy.Definition.IsPickup && world.AimPoint is Point2 center && enemy.IsWithin(center, CurrentRadius);
 
         // 새 중첩을 더한다. 이미 있는 중첩의 시간은 바꾸지 않는다. 중첩의 시간은 이 Breaker의 정의(이 판의 고정값)가 정한다.
         internal void GrantMoon() => _moon.Add(new BreakerBuff(++_buffCount, Definition.MoonDuration));

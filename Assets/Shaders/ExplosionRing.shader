@@ -4,17 +4,17 @@
 // - Flash: 링 안쪽을 채우는 빛. 중심이 가장 밝고 링에 가까울수록 옅어진다.
 // 모든 길이 파라미터는 월드 단위다. 그래서 반지름이 커져도 선 굵기는 그대로다.
 // 사각형 메시(quad)에 그린다. 메시는 가장 큰 반지름 + 굵기 + 번짐이 들어갈 만큼 커야 한다(ExplosionRings가 맞춘다).
-// 알파 혼합: 링을 섬광 위에 덮어(over) 화면 위에 그린다. 밝은 배경에서도 색이 그대로 보인다(Breaker 셰이더와 같은 혼합).
-// 알파(_Fade)는 전체 세기로 쓴다.
+// 가산 혼합: 화면 색에 더한다 — 링과 섬광이 빛처럼 밝게 빛나고, 겹친 폭발은 더 밝아진다. 알파(_Fade)는 전체 세기로 쓴다.
+// (한때 알파 덮기로 바꿨다가 폭발이 탁해져 되돌렸다. 배경은 어두운 우주라 가산이 맞는다.)
 Shader "BlackHole/Explosion Ring"
 {
     Properties
     {
         _Radius ("Radius", Float) = 1
-        _Thickness ("Thickness", Float) = 0.2
+        _Thickness ("Thickness", Float) = 0.15
         _Color ("Color", Color) = (1, 0.55, 0.2, 1)
         _GlowWidth ("Glow Width", Float) = 0.3
-        _GlowStrength ("Glow Strength", Range(0, 1)) = 0.3
+        _GlowStrength ("Glow Strength", Range(0, 1)) = 0.5
         _FlashColor ("Flash Color", Color) = (1, 0.95, 0.8, 1)
         _Flash ("Flash", Range(0, 1)) = 0
         _Fade ("Fade", Range(0, 1)) = 1
@@ -30,7 +30,7 @@ Shader "BlackHole/Explosion Ring"
             "IgnoreProjector" = "True"
         }
 
-        Blend SrcAlpha OneMinusSrcAlpha
+        Blend SrcAlpha One
         ZWrite Off
         Cull Off
 
@@ -98,12 +98,10 @@ Shader "BlackHole/Explosion Ring"
 
                 half ringAmount = saturate(ring + glow) * _Color.a;
                 half flashAmount = flash * _FlashColor.a;
-                // 링을 섬광 위에 덮는다(over). 색은 덮은 양으로 나눠 알파와 따로 둔다.
-                half alpha = ringAmount + flashAmount * (1 - ringAmount);
-                half3 color = (_Color.rgb * ringAmount + _FlashColor.rgb * flashAmount * (1 - ringAmount)) / max(alpha, 1e-4);
+                half3 color = _Color.rgb * ringAmount + _FlashColor.rgb * flashAmount;
 
-                // Blend SrcAlpha OneMinusSrcAlpha: 화면 = lerp(화면, color, alpha × _Fade).
-                return half4(color, alpha * _Fade);
+                // Blend SrcAlpha One: 화면 += color × _Fade.
+                return half4(color, _Fade);
             }
             ENDHLSL
         }

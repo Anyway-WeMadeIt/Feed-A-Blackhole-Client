@@ -210,6 +210,15 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 결산 연출을 건너뛸 때 슬라이더 사운드를 멈춘다. SFX 소스를 통째로 멈추지만 결산 중에 재생 중인 SFX는 슬라이더뿐이다.
+    /// </summary>
+    public void StopSlider()
+    {
+        if (_sfxSource != null && _sfxSource.isPlaying)
+            _sfxSource.Stop();
+    }
+
+    /// <summary>
     /// 결산 완료되었을 때 사운드 재생
     /// </summary>
     public void PlayClosing()

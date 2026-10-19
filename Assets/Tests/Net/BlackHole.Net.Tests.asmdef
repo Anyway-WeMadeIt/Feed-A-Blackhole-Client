@@ -1,26 +1,32 @@
 {
-  "name": "BlackHole.Net.Tests",
-  "rootNamespace": "BlackHole.Net.Tests",
-  "references": [
-    "BlackHole.Net",
-    "BlackHole.Net.Unity",
-    "BlackHole.Sync",
-    "BlackHole.Core.Common",
-    "BlackHole.Core.Enemies",
-    "BlackHole.Core.Battle",
-    "BlackHole.Core.Hq",
-    "UnityEngine.TestRunner",
-    "UnityEditor.TestRunner"
-  ],
-  "includePlatforms": [
-    "Editor"
-  ],
-  "overrideReferences": true,
-  "precompiledReferences": [
-    "nunit.framework.dll"
-  ],
-  "autoReferenced": false,
-  "defineConstraints": [
-    "UNITY_INCLUDE_TESTS"
-  ]
+    "name": "BlackHole.Net.Tests",
+    "rootNamespace": "BlackHole.Net.Tests",
+    "references": [
+        "BlackHole.Net",
+        "BlackHole.Net.Unity",
+        "BlackHole.Sync",
+        "BlackHole.Core.Common",
+        "BlackHole.Core.Enemies",
+        "BlackHole.Core.Battle",
+        "BlackHole.Core.Hq",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "BlackHole.Core.Nodes",
+        "BlackHole.Save"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

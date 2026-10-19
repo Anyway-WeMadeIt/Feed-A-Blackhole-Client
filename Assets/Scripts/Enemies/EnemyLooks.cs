@@ -95,6 +95,10 @@ namespace BlackHole.Unity
         public Color ColorOf(EnemyType type, int tier) =>
             _kinds.TryGetValue(type, out EnemyKind kind) ? kind.ColorOf(tier) : Color.white;
 
+        // 색 등급과 톤(Enemy.Tone)의 색. 몸체·피격·사망 연출이 기록의 (Tier, Tone)으로 불러 같은 색을 쓴다.
+        public Color ColorOf(EnemyType type, int tier, int tone) =>
+            _kinds.TryGetValue(type, out EnemyKind kind) ? kind.ColorOf(tier, tone) : Color.white;
+
         // 성질의 표식 색. 없는 종류·성질은 투명이다(표식을 그리지 않는다).
         public Color TraitColorOf(EnemyType type, EnemyTraitType? trait) =>
             trait.HasValue && _kinds.TryGetValue(type, out EnemyKind kind) ? kind.TraitColorOf(trait.Value) : Color.clear;
