@@ -5,6 +5,9 @@ PausePanel.ResumeBtn_Text,RESUME,계속하기
 PausePanel.SettingsBtn_Text,SETTINGS,설정
 PausePanel.MainMenuBtn_Text,MAIN MENU,메인 메뉴
 PausePanel.QuitBtn_Text,QUIT,게임 종료
+# 웹 빌드: 종료 버튼 자리의 전체 화면 버튼. 글자는 코드(WebFullscreen)가 상태에 맞춰 둘 중 하나를 쓴다
+web.fullscreen.enter,FULLSCREEN,전체 화면
+web.fullscreen.exit,WINDOWED,창 모드
 # 설정 창
 SettingsPanel.Title_Text,SETTINGS,설정
 # 설정 이름 (setting.{설정 ID})

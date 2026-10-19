@@ -41,6 +41,10 @@ namespace BlackHole.Unity
             AddBinding(panel,
                 p => p.QuitClicked += HandlePauseQuitClicked,
                 p => p.QuitClicked -= HandlePauseQuitClicked);
+
+            AddBinding(panel,
+                p => p.FullscreenClicked += HandleFullscreenClicked,
+                p => p.FullscreenClicked -= HandleFullscreenClicked);
         }
 
         private void HandlePauseResumeClicked()

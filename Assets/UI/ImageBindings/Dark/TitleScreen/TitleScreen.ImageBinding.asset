@@ -42,6 +42,13 @@ MonoBehaviour:
     pressedSprite: {fileID: 21300000, guid: da4768d15d144dfb98aeed9ffc5e82ff, type: 3}
     disabledSprite: {fileID: 21300000, guid: 1f4dcc46671e4b93b43f260f412bd149, type: 3}
     stale: 0
+  - refId: FullscreenBtn_Image
+    baseSprite: {fileID: 21300000, guid: bf5f9dc1077546f08ac60104e0dd7769, type: 3}
+    sprite: {fileID: 21300000, guid: 143df87d00fe4629b760058fe7c791a6, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: 4c145529f4bc4e80bec9ea6a888d4321, type: 3}
+    pressedSprite: {fileID: 21300000, guid: 29eb03c0b4e2424b8fb8500eb072ef55, type: 3}
+    disabledSprite: {fileID: 21300000, guid: 380d8ee44b4d4356b6e8ab11ecd12ec5, type: 3}
+    stale: 0
   - refId: Background_Image
     baseSprite: {fileID: 21300000, guid: bc5ffc9d1623acb7a5c175792218bfba, type: 3}
     sprite: {fileID: 21300000, guid: 3b303324c237479cad803cc2ae501f33, type: 3}

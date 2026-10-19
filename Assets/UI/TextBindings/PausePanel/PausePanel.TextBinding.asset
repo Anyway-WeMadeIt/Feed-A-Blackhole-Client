@@ -29,3 +29,6 @@ MonoBehaviour:
   - refId: QuitBtn_Text
     role: 2
     stale: 0
+  - refId: FullscreenBtn_Text
+    role: 2
+    stale: 0

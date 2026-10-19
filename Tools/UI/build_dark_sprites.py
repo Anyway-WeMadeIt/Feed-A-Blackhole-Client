@@ -17,7 +17,7 @@ SOURCES = [
     'BlackHoleGUI/PNG/Buttons/rect_normal', 'BlackHoleGUI/PNG/Buttons/rect_hover', 'BlackHoleGUI/PNG/Buttons/rect_pressed', 'BlackHoleGUI/PNG/Buttons/rect_disabled',
     'BlackHoleGUI/PNG/Buttons/square_normal', 'BlackHoleGUI/PNG/Buttons/square_hover', 'BlackHoleGUI/PNG/Buttons/square_pressed', 'BlackHoleGUI/PNG/Buttons/square_disabled',
     'BlackHoleGUI/PNG/Buttons/hexagon_normal', 'BlackHoleGUI/PNG/Buttons/hexagon_hover', 'BlackHoleGUI/PNG/Buttons/hexagon_pressed', 'BlackHoleGUI/PNG/Buttons/hexagon_disabled',
-] + [f'BlackHoleGUI/PNG/Buttons/Ready/{n}_{s}' for n in ('back','exit','home','play','restart','settings','upgrade_tree') for s in ('normal','hover','pressed','disabled')] + [
+] + [f'BlackHoleGUI/PNG/Buttons/Ready/{n}_{s}' for n in ('back','exit','fullscreen','home','play','restart','settings','upgrade_tree') for s in ('normal','hover','pressed','disabled')] + [
     'BlackHoleGUI/PNG/Controls/panel', 'BlackHoleGUI/PNG/Controls/tooltip',
     'BlackHoleGUI/PNG/Controls/slider_track', 'BlackHoleGUI/PNG/Controls/slider_knob', 'BlackHoleGUI/PNG/Controls/slider_fill',
     'BlackHoleGUI/PNG/Controls/toggle_off', 'BlackHoleGUI/PNG/Controls/toggle_on', 'BlackHoleGUI/PNG/Controls/checkbox_off', 'BlackHoleGUI/PNG/Controls/checkbox_on',

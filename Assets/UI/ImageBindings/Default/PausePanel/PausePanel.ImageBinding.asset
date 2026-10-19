@@ -34,3 +34,7 @@ MonoBehaviour:
     baseSprite: {fileID: 21300000, guid: c04179f561daf996f69985448c7dee5b, type: 3}
     sprite: {fileID: 21300000, guid: c04179f561daf996f69985448c7dee5b, type: 3}
     stale: 0
+  - refId: FullscreenBtn_Image
+    baseSprite: {fileID: 21300000, guid: bf5f9dc1077546f08ac60104e0dd7769, type: 3}
+    sprite: {fileID: 21300000, guid: bf5f9dc1077546f08ac60104e0dd7769, type: 3}
+    stale: 0
