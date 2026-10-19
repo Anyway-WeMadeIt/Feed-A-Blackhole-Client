@@ -69,6 +69,9 @@ namespace BlackHole.Unity
 #endif
 
         // 호출되지 않는다. Unity가 이 참조를 보고 Android 빌드에 VIBRATE 권한을 자동으로 넣게 하려는 것이다.
+        // Handheld는 Android·iOS 빌드 대상에만 있다(웹 빌드에서는 컴파일 오류).
+#if UNITY_ANDROID || UNITY_IOS
         private static void KeepVibratePermission() => Handheld.Vibrate();
+#endif
     }
 }
