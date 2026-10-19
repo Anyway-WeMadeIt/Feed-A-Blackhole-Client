@@ -68,11 +68,11 @@ namespace BlackHole.Unity
             EnterMode();
         }
 
-        // 진행 상태를 처음으로 되돌리고 새 게임 로그와 함께 바로 저장한 뒤 들어간다.
+        // 진행 상태를 처음으로 되돌리고 새 게임 로그와 함께 바로 저장한 뒤 튜토리얼 판으로 들어간다.
         private void StartNewGame()
         {
             _progressStore.StartNew(_progress, seq => _syncLogs.Reset(seq));
-            EnterMode();
+            _transition.Play(StartTutorialFromModeSelect);
         }
 
         private void HandleModeSelectBackClicked() => _ui.PopPanel(Unbind);
@@ -85,6 +85,12 @@ namespace BlackHole.Unity
         {
             _ui.PopAllPanels(Unbind);
             StartBattle();
+        }
+
+        private void StartTutorialFromModeSelect()
+        {
+            _ui.PopAllPanels(Unbind);
+            StartTutorial();
         }
     }
 }

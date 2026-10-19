@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace BlackHole.Unity
 {
@@ -30,14 +31,23 @@ namespace BlackHole.Unity
         }
 
         private readonly Camera _camera;
+        private readonly ScriptableRendererFeature _feature;
         private readonly List<Wave> _waves = new List<Wave>(MaxWaves);
         private readonly Vector4[] _waveData = new Vector4[MaxWaves];
         private readonly float[] _widthData = new float[MaxWaves];
+        private bool _cleared;
 
-        public Shockwaves(Camera camera)
+        public Shockwaves(Camera camera, ScriptableRendererFeature feature = null)
         {
             _camera = camera != null ? camera : throw new ArgumentNullException(nameof(camera));
+            _feature = feature;
+
+            Shader.SetGlobalFloat(AmpId, Amplitude);
+            Shader.SetGlobalFloat(GlowId, Glow);
+            Shader.SetGlobalFloat(ChromaId, Chroma);
+
             Apply();
+            //Debug.Log(_feature != null ? "[물결] Feature 연결됨" : "[물결] Feature 연결 안 됨");
         }
 
         public void Spawn(Vector3 worldPosition, float strength = 1f, float seconds = 1.2f, float width = 0.08f, float delay = 0f, float maxRadius = 1.3f)
@@ -54,10 +64,16 @@ namespace BlackHole.Unity
                 Width = width,
                 MaxRadius = maxRadius,
             });
+
+            _cleared = false;
+            SetFeatureActive(true);
         }
 
         public void Age(float delta)
         {
+            if (_waves.Count == 0 && _cleared)
+                return;
+            
             for (int i = _waves.Count - 1; i >= 0; i--)
             {
                 _waves[i].Age += delta;
@@ -67,6 +83,8 @@ namespace BlackHole.Unity
 
             Apply();
         }
+
+        public bool IsClear => _waves.Count == 0;
 
         public void Reset()
         {
@@ -104,9 +122,21 @@ namespace BlackHole.Unity
 
             Shader.SetGlobalVectorArray(WavesId, _waveData);
             Shader.SetGlobalFloatArray(WidthsId, _widthData);
-            Shader.SetGlobalFloat(AmpId, Amplitude);
-            Shader.SetGlobalFloat(GlowId, Glow);
-            Shader.SetGlobalFloat(ChromaId, Chroma);
+            // Shader.SetGlobalFloat(AmpId, Amplitude);
+            // Shader.SetGlobalFloat(GlowId, Glow);
+            // Shader.SetGlobalFloat(ChromaId, Chroma);
+
+            _cleared = _waves.Count == 0;
+            SetFeatureActive(!_cleared);
+        }
+
+        private void SetFeatureActive(bool active)
+        {
+            if (_feature != null && _feature.isActive != active)
+            {
+                _feature.SetActive(active);
+                //Debug.Log($"[물결] Full Screen Pass {(active ? "켜짐" : "꺼짐")}");
+            }
         }
     }
 }

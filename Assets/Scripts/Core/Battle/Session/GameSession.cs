@@ -28,7 +28,12 @@ namespace BlackHole.Core
 
         public bool IsEnded => _ended;
         public float Elapsed { get; private set; }
-        public float Remaining => _timeLimit.Remaining(Elapsed);
+
+        // 시간 제한이 없는 판인가(BeginStaged로 시작한 판). 이 판은 이정표에 닿거나 End를 불러야 끝난다.
+        public bool IsTimeless { get; private set; }
+
+        // 남은 시간(초). 시간 제한이 없는 판은 무한대다.
+        public float Remaining => IsTimeless ? float.PositiveInfinity : _timeLimit.Remaining(Elapsed);
         // 이 판에서 제한 시간에 더해진 초의 합(블랙홀 성장 + 파괴 때 시간 추가). 테스트 도구로 더한 시간은 들지 않는다.
         // 화면은 프레임 사이의 차이로 "방금 늘어난 시간"을 알린다.
         public float AddedSeconds => _timeLimit.ExtendedSeconds;
@@ -69,6 +74,28 @@ namespace BlackHole.Core
             World.SpawnStartPickups();
         }
 
+        // 정해 둔 적만 놓고 시간 제한 없이 시작한다(Begin 대신). 튜토리얼 판이 쓴다.
+        // - 시작 공급·시작 픽업은 내지 않는다. 그 밖의 규칙(재생성·주기 출현·Level업 성장 공급)은 판 구성대로다.
+        // - 시간이 줄지 않고, 블랙홀 성장·파괴로 시간을 더하지도 않는다.
+        public void BeginStaged(IReadOnlyList<StagedEnemy> enemies)
+        {
+            IsTimeless = true;
+            Stage(enemies);
+        }
+
+        // 판 중에 정한 자리에 적을 더 놓는다(튜토리얼의 다음 무리). 끝난 판에는 놓지 않는다.
+        public void Stage(IReadOnlyList<StagedEnemy> enemies)
+        {
+            if (enemies == null)
+                throw new ArgumentNullException(nameof(enemies));
+
+            if (_ended)
+                return;
+
+            foreach (StagedEnemy enemy in enemies)
+                World.SpawnAt(enemy.Kind, enemy.Tier, enemy.Size, enemy.Position);
+        }
+
         public AdvanceResult Advance(float delta)
         {
             DefinitionGuard.Delta(delta);
@@ -76,7 +103,8 @@ namespace BlackHole.Core
             if (_ended || delta == 0)
                 return default;
 
-            float step = _timeLimit.LimitStep(Elapsed, delta);
+            // 시간 제한이 없는 판은 남은 시간으로 Step을 자르지 않는다.
+            float step = IsTimeless ? delta : _timeLimit.LimitStep(Elapsed, delta);
             int raised = World.Step(step);
             Elapsed += step;
 
@@ -89,6 +117,10 @@ namespace BlackHole.Core
                 End();
                 return new AdvanceResult(0, true);
             }
+
+            // 시간 제한이 없는 판은 시간을 더하지도, 시간으로 끝나지도 않는다.
+            if (IsTimeless)
+                return new AdvanceResult(raised, false);
 
             ExtendTimeLimit(raised);
 

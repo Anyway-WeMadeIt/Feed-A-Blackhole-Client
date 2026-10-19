@@ -12,14 +12,20 @@ namespace BlackHole.Core
 
         public float Damage { get; }
         public float Radius { get; }
+        public float GalaxyBonusDamage { get; } // 은하에 닿을 때 더하는 피해. 0이면 없다.
 
-        public ExplosionDefinition(float damage, float radius)
+        public ExplosionDefinition(float damage, float radius, float galaxyBonusDamage = 0)
         {
             Damage = DefinitionGuard.Positive(damage, nameof(damage));
             Radius = DefinitionGuard.Positive(radius, nameof(radius));
+
+            if (float.IsNaN(galaxyBonusDamage) || float.IsInfinity(galaxyBonusDamage) || galaxyBonusDamage < 0)
+                throw new ArgumentOutOfRangeException(nameof(galaxyBonusDamage), "0 이상의 유한한 값이 필요하다.");
+
+            GalaxyBonusDamage = galaxyBonusDamage;
         }
 
-        // 대상 하나가 받는 피해. 대상과 상관없이 같다.
-        internal float DamageTo(Enemy target) => Damage;
+        // 대상 하나가 받는 피해. 은하면 보너스를 더한다.
+        internal float DamageTo(Enemy target) => target.Definition.Type == EnemyType.Galaxy ? Damage + GalaxyBonusDamage : Damage;
     }
 }

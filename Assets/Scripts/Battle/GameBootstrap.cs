@@ -7,6 +7,7 @@ using BlackHole.Net;
 using BlackHole.Net.Unity;
 using BlackHole.Sync;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace BlackHole.Unity
 {
@@ -60,6 +61,10 @@ namespace BlackHole.Unity
         [Header("Localization")]
         [SerializeField] private TextAsset _texts;
 
+        //파동
+        [Header("BlackHole")]
+        [SerializeField] private ScriptableRendererData _rendererData;
+
         // 테스트 도구(개발 패널)의 밸런스 프로필·시나리오 목록. 에디터와 개발 빌드만 쓴다. 비워 두면 기기 폴더의 파일만 읽는다.
         // 장면 직렬화가 빌드마다 같도록 #if로 감싸지 않는다. 릴리스 빌드는 읽지 않는다(CS0169).
         [Header("Playtest")]
@@ -90,6 +95,7 @@ namespace BlackHole.Unity
         private IAuthSession _auth;
         // 서버를 쓰지 않는 실행(Offline(Disabled))이면 null이다.
         private SyncSender _syncSender;
+        private TutorialHintView _tutorialHint;
         // 로그인·시작 동기화가 끝나기 전에는 화면이 없으므로 호스트를 돌리지 않는다.
         private bool _loggingIn;
 
@@ -135,7 +141,7 @@ namespace BlackHole.Unity
             EnemyView enemyView = new(transform, enemyLooks, _breakerLook, _cometLook, _settings);
             BreakerView breakerView = new(transform, _breakerLook);
             DeathEffectView deathEffectView = new(transform, _lightningLook, _starLightningLook, _explosionLook, _laserLook);
-            HqView hqView = new(transform, _blackHole, battleCamera, _settings);
+            HqView hqView = new(transform, _blackHole, battleCamera, _settings, FindShockwaveFeature());
 
             _progress = new ProgressState();
             _progressStore = ProgressStore.Load(
@@ -152,6 +158,7 @@ namespace BlackHole.Unity
             // 서버 동기화 로그를 만든다. 로그는 빌드 버전과 이 콘텐츠의 서버 콘텐츠 버전을 싣는다.
             SyncLogFactory syncLogs = new(new UnityJsonSerializer(), Application.version, loaded.ServerContentVersion, () => DateTime.UtcNow);
             Localizer localizer = Localizer.Create(_texts, _settings);
+            _tutorialHint = new TutorialHintView(transform, localizer);
 
             BattleSystem battle = new(
                 loaded.Content,
@@ -160,6 +167,7 @@ namespace BlackHole.Unity
                 breakerView,
                 deathEffectView,
                 hqView,
+                _tutorialHint,
                 cameraFit);
             AimInput aim = new(battle);
 
@@ -183,6 +191,7 @@ namespace BlackHole.Unity
                 loaded.Content.Growth,
                 _settings,
                 localizer,
+                _fonts,
                 transition,
                 keyInput,
                 syncLogs);
@@ -278,6 +287,7 @@ namespace BlackHole.Unity
             _uiSettings?.Dispose();
             _host?.Dispose();
             _syncSender?.Dispose();
+            _tutorialHint?.Dispose();
         }
 
         // 설정이 없거나 꺼져 있거나 프로필을 적용했으면 요청 없이 오프라인(Disabled)이고 전송기를 만들지 않는다.
@@ -493,6 +503,20 @@ namespace BlackHole.Unity
             }
 
             return configured;
+        }
+
+        private ScriptableRendererFeature FindShockwaveFeature()
+        {
+            if (_rendererData == null)
+                return null;
+            
+            foreach (ScriptableRendererFeature feature in _rendererData.rendererFeatures)
+            {
+                if (feature is FullScreenPassRendererFeature)
+                    return feature;
+            }
+
+            return null;
         }
     }
 }

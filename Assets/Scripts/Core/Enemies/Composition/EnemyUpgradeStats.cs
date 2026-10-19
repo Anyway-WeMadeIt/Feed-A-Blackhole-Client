@@ -130,6 +130,15 @@ namespace BlackHole.Core
             _ => null,
         };
 
+        // 은하에 대한 보너스 피해(전기 별 번개·레이저·슈퍼노바). 은하를 맞힐 때만 피해에 더한다.
+        public static UpgradeStat? TraitGalaxyBonusDamage(EnemyType kind, EnemyTraitType trait) => (kind, trait) switch
+        {
+            (EnemyType.Star, EnemyTraitType.Laser) => UpgradeStat.LaserStarGalaxyBonusDamage,
+            (EnemyType.Star, EnemyTraitType.Supernova) => UpgradeStat.SupernovaStarGalaxyBonusDamage,
+            (EnemyType.Star, EnemyTraitType.Electric) => UpgradeStat.ElectricStarGalaxyBonusDamage,
+            _ => null,
+        };
+
         // 치명타 확률(황금·번개·레이저, 0 ~ 1, 1을 넘지 않는다). %p ÷ 100을 더한다.
         public static UpgradeStat? TraitCritChance(EnemyType kind, EnemyTraitType trait) => (kind, trait) switch
         {

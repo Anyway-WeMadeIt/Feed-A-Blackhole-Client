@@ -12,7 +12,8 @@ namespace BlackHole.Unity
     // 막대 아래의 마름모 칸(MilestoneRow)은 이번 구간에서 오른 Level 수다. 칸 수는 구간의 Level 수(목표 − 시작, 최대 10). 이정표에 닿으면 달성 연출을 하고, 그동안 GameHost가 결산 전환을 미룬다.
     // 전투 Session을 모른다 — GameHost가 전투 Step 뒤 표시 값을 넘긴다. 진행 중인 판이 없으면 비어 있는 표시(ShowIdle)다.
     // 번 Gold는 이 판의 합계일 뿐이다. 진행 상태의 Gold는 판이 끝난 뒤 결산이 바꾼다.
-    public sealed class BattleScreen : UIRoot<BattleScreen.Refs>, ILocalizedView, INumberFormatView
+    // 은하가 나오는 판(블랙홀 구역)에서는 화면 아래 가운데에 은하 체력바(GalaxyHealthBar)를 보인다. GameHost가 ShowGalaxy로 상태를 넘긴다.
+    public sealed class BattleScreen : UIRoot<BattleScreen.Refs>, ILocalizedView, INumberFormatView, IStyleView
     {
         public enum Refs
         {
@@ -54,6 +55,11 @@ namespace BlackHole.Unity
         private RectTransform _levelFill;
         private TMP_Text _pauseLabel;
         private MilestoneRow _milestones;
+        // 은하 체력바(코드로 만든다). 글자·바탕은 아래 두 묶음이 테마에 맞춘다.
+        private GalaxyHealthBar _galaxyBar;
+        private readonly StyledTexts _styledTexts = new();
+        private readonly ThemedImages _themedImages = new();
+        private int _galaxyTier = -1;
         private int _shownTenths = -1;
         private long _shownEarned = -1;
         private bool _idle;
@@ -98,6 +104,15 @@ namespace BlackHole.Unity
                 burstRect != null ? burstRect.GetComponent<UIMilestoneBurst>() : null);
             _milestones.Reset();
 
+            // 은하 체력바의 기준 글꼴은 일시정지 글자의 것(한글이 있는 글꼴). 테마가 바뀌면 StyledTexts가 언어·역할에 맞는 글꼴로 바꾼다.
+            RectTransform safeArea = View.Rect(Refs.SafeAreaRoot);
+
+            if (safeArea != null)
+            {
+                _galaxyBar = new GalaxyHealthBar(safeArea, _pauseLabel != null ? _pauseLabel.font : null, _styledTexts, _themedImages);
+                _galaxyBar.ApplyStyle(_styledTexts.Style);
+            }
+
             BindEvent(View.Button(Refs.PauseBtn_Button), HandlePauseClicked);
             BindEvent(View.Button(Refs.EndBtn_Button), HandleEndClicked);
         }
@@ -107,10 +122,38 @@ namespace BlackHole.Unity
         {
             ResetGain();
             _milestones?.Reset();
+            _galaxyBar?.Hide();
         }
 
-        // 이정표 칸의 연출은 실제 시간으로 흐른다(정지 중·판이 끝난 뒤에도).
-        private void Update() => _milestones?.Tick(Time.unscaledDeltaTime);
+        // 이정표 칸·은하 체력바의 연출은 실제 시간으로 흐른다(정지 중·판이 끝난 뒤에도).
+        private void Update()
+        {
+            _milestones?.Tick(Time.unscaledDeltaTime);
+            _galaxyBar?.Tick(Time.unscaledDeltaTime);
+        }
+
+        public void ApplyStyle(in UIStyle style)
+        {
+            _styledTexts.SetStyle(style);
+            _themedImages.SetStyle(style);
+            _galaxyBar?.ApplyStyle(style);
+        }
+
+        // 이 판의 은하 상태(GameHost가 매 프레임). 은하가 없는 판이면 null — 막대를 숨긴다.
+        internal void ShowGalaxy(GalaxyHealthState? galaxy)
+        {
+            if (_galaxyBar == null)
+                return;
+
+            if (galaxy is GalaxyHealthState state)
+                _galaxyTier = state.Tier;
+
+            _galaxyBar.Show(galaxy, galaxy.HasValue ? GalaxyName(_galaxyTier) : null);
+        }
+
+        // 은하 이름(색): battle.galaxy.<색 등급>. 번역표에 없으면 battle.galaxy.
+        private string GalaxyName(int tier) =>
+            _localizer != null && _localizer.TryGet($"battle.galaxy.{tier}", out string name) ? name : Localized("battle.galaxy");
 
         // 이정표 달성 연출 중인가. 끝날 때까지 GameHost가 결산 전환을 미루고, 이 화면은 버튼을 받지 않는다.
         public bool IsCelebratingMilestone => _milestones != null && _milestones.IsCelebrating;
@@ -153,6 +196,7 @@ namespace BlackHole.Unity
                 ResetGain();
                 _milestones?.Reset();
                 _milestones?.SetVisible(false);
+                _galaxyBar?.Hide();
             }
 
             if (_shownPaused != false && _pauseLabel != null)
@@ -187,7 +231,13 @@ namespace BlackHole.Unity
                 }
             }
 
-            int tenths = Mathf.CeilToInt(remainingSeconds * 10);
+            // 시간 제한이 없는 판(튜토리얼, remainingSeconds가 무한대)은 남은 시간을 숨기고 숫자를 고치지 않는다.
+            bool timed = !float.IsPositiveInfinity(remainingSeconds);
+
+            if (_remaining != null && _remaining.gameObject.activeSelf != timed)
+                _remaining.gameObject.SetActive(timed);
+
+            int tenths = timed ? Mathf.CeilToInt(remainingSeconds * 10) : _shownTenths;
             bool remainingChanged = false;
 
             if (tenths != _shownTenths && _remaining != null)
@@ -227,6 +277,9 @@ namespace BlackHole.Unity
 
             if (_pauseLabel != null && _shownPaused is bool paused)
                 _pauseLabel.text = PauseLabel(paused);
+
+            if (_galaxyTier >= 0)
+                _galaxyBar?.Rename(GalaxyName(_galaxyTier));
         }
 
         // Gold 표기 설정이 바뀌었다. 보이는 번 Gold를 다시 쓴다.

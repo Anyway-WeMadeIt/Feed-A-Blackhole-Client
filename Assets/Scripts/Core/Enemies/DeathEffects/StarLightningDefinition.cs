@@ -28,7 +28,11 @@ namespace BlackHole.Core
         public float CritChance { get; }
         public float CritMultiplier { get; }
 
-        public StarLightningDefinition(float damage, float radius, int maxTargets, int branches = 1, float branchChance = 0, float critChance = 0, float critMultiplier = 1)
+        // 은하를 맞힐 때 더하는 피해(치명타 배율도 함께 받는다). 0이면 없다.
+        public float GalaxyBonusDamage { get; }
+
+        public StarLightningDefinition(float damage, float radius, int maxTargets, int branches = 1, float branchChance = 0, float critChance = 0, float critMultiplier = 1,
+            float galaxyBonusDamage = 0)
         {
             Damage = DefinitionGuard.Positive(damage, nameof(damage));
             Radius = DefinitionGuard.Positive(radius, nameof(radius));
@@ -44,6 +48,18 @@ namespace BlackHole.Core
             BranchChance = Chance(branchChance, nameof(branchChance));
             CritChance = Chance(critChance, nameof(critChance));
             CritMultiplier = DefinitionGuard.Positive(critMultiplier, nameof(critMultiplier));
+
+            if (float.IsNaN(galaxyBonusDamage) || float.IsInfinity(galaxyBonusDamage) || galaxyBonusDamage < 0)
+                throw new ArgumentOutOfRangeException(nameof(galaxyBonusDamage), "0 이상의 유한한 값이 필요하다.");
+
+            GalaxyBonusDamage = galaxyBonusDamage;
+        }
+
+        // 대상 하나가 받는 피해. 은하면 보너스를 더한 뒤 치명타 배율을 곱한다.
+        internal float DamageTo(Enemy target, bool critical)
+        {
+            float amount = target.Definition.Type == EnemyType.Galaxy ? Damage + GalaxyBonusDamage : Damage;
+            return critical ? amount * CritMultiplier : amount;
         }
 
         private static float Chance(float value, string name)

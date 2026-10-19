@@ -19,13 +19,11 @@ namespace BlackHole.Unity
         {
             [Tooltip("스탯 키. 예: breaker.damage")]
             public string stat;
-            [Tooltip("살 수 있음.")]
+            [Tooltip("살 수 있음. 손을 올려도(PC) 이 그림이고, 둘레에 링이 생긴다(NodeTreeView).")]
             public Sprite available;
-            [Tooltip("손을 올림(PC).")]
-            public Sprite hover;
             [Tooltip("샀음.")]
             public Sprite purchased;
-            [Tooltip("잠김: 내용 대신 자물쇠.")]
+            [Tooltip("잠김: 내용 대신 자물쇠. 모든 노드가 공용 자물쇠 그림 하나를 쓴다.")]
             public Sprite locked;
         }
 
@@ -91,8 +89,8 @@ namespace BlackHole.Unity
         // 보이는 노드에서 선으로 이 칸 수 안의 닿지 않은 노드는 자물쇠(구역과 상관없이).
         public int LockAhead => _lockAhead;
 
-        // 노드 그림. hovered는 손을 올린 노드(샀으면 무시한다).
-        public Sprite SpriteOf(string stat, NodeState state, bool hovered)
+        // 노드 그림. 손을 올린 노드도 그림은 같다 — 올림은 링과 밝기로 보인다(NodeTreeView).
+        public Sprite SpriteOf(string stat, NodeState state)
         {
             NodeSprites sprites = Find(stat);
 
@@ -104,9 +102,7 @@ namespace BlackHole.Unity
                 case NodeState.Revealed when _revealedAsLocked:
                     return Pick(sprites?.locked, _fallback.locked);
                 default:
-                    return hovered
-                        ? Pick(sprites?.hover, _fallback.hover)
-                        : Pick(sprites?.available, _fallback.available);
+                    return Pick(sprites?.available, _fallback.available);
             }
         }
 

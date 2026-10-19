@@ -12,8 +12,9 @@ namespace BlackHole.Core
         public float Width { get; } // 레이저의 너비(경로 양쪽 거리의 합).
         public float CritChance { get; }
         public float CritMultiplier { get; } // 치명타일 때 피해에 곱하는 값.
+        public float GalaxyBonusDamage { get; } // 은하를 맞힐 때 더하는 피해(치명타 배율도 함께 받는다). 0이면 없다.
 
-        public LaserBurstDefinition(float damage, float width, float critChance, float critMultiplier)
+        public LaserBurstDefinition(float damage, float width, float critChance, float critMultiplier, float galaxyBonusDamage = 0)
         {
             Damage = DefinitionGuard.Positive(damage, nameof(damage));
             Width = DefinitionGuard.Positive(width, nameof(width));
@@ -23,6 +24,18 @@ namespace BlackHole.Core
 
             CritChance = critChance;
             CritMultiplier = DefinitionGuard.Positive(critMultiplier, nameof(critMultiplier));
+
+            if (float.IsNaN(galaxyBonusDamage) || float.IsInfinity(galaxyBonusDamage) || galaxyBonusDamage < 0)
+                throw new ArgumentOutOfRangeException(nameof(galaxyBonusDamage), "0 이상의 유한한 값이 필요하다.");
+
+            GalaxyBonusDamage = galaxyBonusDamage;
+        }
+
+        // 대상 하나가 받는 피해. 은하면 보너스를 더한 뒤 치명타 배율을 곱한다.
+        internal float DamageTo(Enemy target, bool critical)
+        {
+            float amount = target.Definition.Type == EnemyType.Galaxy ? Damage + GalaxyBonusDamage : Damage;
+            return critical ? amount * CritMultiplier : amount;
         }
     }
 }

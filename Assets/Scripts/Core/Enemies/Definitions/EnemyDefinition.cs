@@ -197,7 +197,8 @@ namespace BlackHole.Core
                     nameof(size), $"이 판 구성에서 '{Type}'의 크기는 {SizeRule.Base}부터 {composition.Size}까지다. 받은 값: {size}.");
 
             EnemyTier row = Tiers[tier];
-            float scale = SizeRule.StatMultiplier(size);
+            // 은하(판마다 하나뿐인 보스)는 크기가 반지름만 키운다 — HP·Gold·EXP는 색의 값 그대로다. galaxy.size 노드가 보스를 단단하게 만들지 않게 [사용자].
+            float scale = Type == EnemyType.Galaxy ? 1f : SizeRule.StatMultiplier(size);
             long gold = Multiply(row.Gold, scale);
 
             if (trait?.Effect is GoldenDefinition golden)

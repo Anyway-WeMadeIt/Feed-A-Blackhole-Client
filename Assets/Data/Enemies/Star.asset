@@ -28,6 +28,9 @@ MonoBehaviour:
   - stage: 5
     decay: 0.96
     maxGeneration: 0
+  - stage: 6
+    decay: 1
+    maxGeneration: 0
   rainCooldown: 0
   rainDelay: 0
   tiers:
@@ -90,8 +93,8 @@ MonoBehaviour:
     color: {r: 1, g: 0.55, b: 0.2, a: 1}
     multiplier: 1
     critRewardScale: 0
-    damage: 12000
-    radius: 8.8
+    damage: 10000
+    radius: 8
     maxTargets: 0
     branches: 0
     branchChance: 0

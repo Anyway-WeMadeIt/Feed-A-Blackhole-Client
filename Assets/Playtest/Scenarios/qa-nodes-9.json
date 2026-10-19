@@ -247,18 +247,6 @@
       "rank": 1
     },
     {
-      "nodeId": "breaker.galaxyBonusDamage-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "breaker.galaxyBonusDamage-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "breaker.galaxyBonusDamage-03",
-      "rank": 1
-    },
-    {
       "nodeId": "breaker.planetBonusDamage-01",
       "rank": 1
     },
@@ -499,46 +487,6 @@
       "rank": 1
     },
     {
-      "nodeId": "galaxy.massScale-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.massScale-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.massScale-03",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.massScale-04",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.respawnChance-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.respawnChance-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.size-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.size-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.size-03",
-      "rank": 1
-    },
-    {
-      "nodeId": "galaxy.timeChance-01",
-      "rank": 1
-    },
-    {
       "nodeId": "goldenAsteroid.critChance-01",
       "rank": 1
     },
@@ -591,50 +539,6 @@
       "rank": 1
     },
     {
-      "nodeId": "gravityGalaxy.duration-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.duration-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.duration-03",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.force-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.force-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.radius-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.radius-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.radius-03",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.spawnChance-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.spawnChance-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "gravityGalaxy.spawnChance-03",
-      "rank": 1
-    },
-    {
       "nodeId": "growth.asteroids-01",
       "rank": 1
     },
@@ -648,14 +552,6 @@
     },
     {
       "nodeId": "growth.asteroids-04",
-      "rank": 1
-    },
-    {
-      "nodeId": "growth.galaxies-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "growth.galaxies-02",
       "rank": 1
     },
     {
@@ -952,18 +848,6 @@
     },
     {
       "nodeId": "star.timeChance-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "star.toGalaxy-01",
-      "rank": 1
-    },
-    {
-      "nodeId": "star.toGalaxy-02",
-      "rank": 1
-    },
-    {
-      "nodeId": "star.toGalaxy-03",
       "rank": 1
     },
     {

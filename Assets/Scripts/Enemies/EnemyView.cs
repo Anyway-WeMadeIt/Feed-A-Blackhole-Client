@@ -17,6 +17,8 @@ namespace BlackHole.Unity
     // 판 시작 연출 동안에는 원점에서 RevealRadius 안의 적만 화면을 만든다. 반경이 넓어지면 바깥 적이 그때 출현 연출과 함께 나타난다(BattleSystem).
     // 픽업(혜성)은 CometView가 통째로 맡는다(스프라이트가 아니라 셰이더). 사망 파편·골드·피해량 텍스트도 없다 — 한 방에 부서지는 버프 아이템이라 필요 없다.
     // 목록에서 빠진 적(사망)의 스프라이트는 바로 지운다.
+    // 붕괴(엔딩, Collapse > 0): 판이 끝나 멈춘 적들이 소용돌이치며 원점(블랙홀)으로 빨려 들어가고, 가까워질수록 작아져 사라진다.
+    //   가까운 적이 먼저, 먼 적은 늦게 출발해 같은 시간 안에 모두 닿는다. 혜성은 곧바로 지운다. 화면만이다(BattleSystem이 0 → 1로 흘린다).
     // 체력 음영: 몸체(와 성질 속 채움)는 '남은 체력 비율'만큼의 면적에 음영(검정 α ShadeStrength를 덮은 색)이 씌워져 있고,
     //   피해를 입은 만큼 몸체의 한쪽(로컬 위)부터 기본색이 드러나며, 경계선은 자전과 함께 돈다(BlackHole/Enemy Shade 셰이더, UpdateShade). 체력 50%면 절반은 기본색, 절반은 음영.
     // 피격·사망 연출(흔들림·파편·피해량·Gold 텍스트·파괴음)은 Step이 끝난 뒤 판의 피격 기록(World.Hits)과 사망 기록(World.Deaths)을 읽어 낸다.
@@ -133,6 +135,12 @@ namespace BlackHole.Unity
         private readonly HashSet<EnemyId> _collapsing = new HashSet<EnemyId>();
         private readonly GalaxyCollapses _collapses = new GalaxyCollapses();
 
+        // 붕괴 연출 [임시]: 가장 먼 적이 출발하는 시점(전체 0 ~ 1 중), 끝까지 감기는 각도(라디안, 먼 적일수록 더 감긴다).
+        private const float CollapseStagger = 0.45f;
+        private const float CollapseSwirl = 3.2f;
+        // 붕괴를 시작할 때 원점에서 가장 먼 적까지의 거리(시작 순서의 기준). 0이면 아직 재지 않았다.
+        private float _collapseReach;
+
         // 마지막으로 연출을 낸 피격·사망 기록의 번호.
         private long _lastHitSequence;
         private long _lastDeathSequence;
@@ -140,6 +148,9 @@ namespace BlackHole.Unity
         // 원점(HQ)에서 적 중심까지 이 거리보다 먼 적은 아직 화면을 만들지 않는다(월드 단위, 기본은 무한 = 모두 보임).
         // 판 시작 연출이 0에서 넓힌다(BattleSystem). 한 번 보인 적은 다시 숨기지 않는다. 연출 동안 판이 멈춰 있어 숨은 적의 피격·사망은 없다.
         public float RevealRadius { get; set; } = float.PositiveInfinity;
+
+        // 붕괴(엔딩) 진행도. 0이면 없음(평소), 1이면 모든 적이 블랙홀에 닿아 보이지 않는다. Reset이 0으로 되돌린다.
+        public float Collapse { get; set; }
 
         // breakerLook: 달의 외형(머티리얼·색·간격·기본 공전 속도)을 Breaker 달과 같게 맞추려고 받는다.
         // cometLook: 혜성(픽업)의 외형. 혜성의 화면은 CometView가 맡는다.
@@ -177,20 +188,31 @@ namespace BlackHole.Unity
                 _holdTime += delta;
 
             float holdStep = paused ? 0 : delta / _breakerLook.HoldFadeSeconds;
+            bool collapsing = Collapse > 0;
+
+            if (collapsing && _collapseReach <= 0)
+                _collapseReach = FarthestOf(enemies);
 
             // 매 프레임 경로: IReadOnlyList를 인덱스로 돈다(인터페이스 foreach는 열거자를 할당한다).
             for (int i = 0; i < enemies.Count; i++)
             {
                 Enemy enemy = enemies[i];
-                _seen.Add(enemy.Id);
 
                 if (enemy.Definition.IsPickup)
                 {
+                    // 붕괴 중에는 혜성을 보이지 않는다 — 보인 목록에 넣지 않으면 아래 Retain이 지운다.
+                    if (collapsing)
+                        continue;
+
+                    _seen.Add(enemy.Id);
+
                     if (IsRevealed(enemy))
                         _comets.Show(enemy, paused, delta);
 
                     continue;
                 }
+
+                _seen.Add(enemy.Id);
 
                 if (!_visuals.TryGetValue(enemy.Id, out EnemyVisual visual))
                 {
@@ -199,6 +221,17 @@ namespace BlackHole.Unity
 
                     visual = Create(enemy);
                     _visuals.Add(enemy.Id, visual);
+                }
+
+                if (collapsing)
+                {
+                    ApplyCollapse(visual, enemy);
+
+                    if (visual.SpinSpeed != 0 && !paused)
+                        visual.Container.Rotate(0, 0, visual.SpinSpeed * delta);
+
+                    UpdateShade(visual, enemy);
+                    continue;
                 }
 
                 AdvanceHold(visual, world.IsHeld(enemy), holdStep);
@@ -339,6 +372,8 @@ namespace BlackHole.Unity
             _goldText.Reset();
             _damageText.Reset();
             RevealRadius = float.PositiveInfinity;
+            Collapse = 0;
+            _collapseReach = 0;
 
             // 새 판의 기록 번호는 1부터 다시 시작하므로 함께 되돌린다. 빠뜨리면 다음 판에서 연출이 나지 않는다.
             _lastHitSequence = 0;
@@ -361,6 +396,55 @@ namespace BlackHole.Unity
             float x = enemy.Position.X;
             float y = enemy.Position.Y;
             return x * x + y * y <= RevealRadius * RevealRadius;
+        }
+
+        // 붕괴 중인 적 하나의 화면 자리·크기. 진행도 u(그 적의 출발 뒤)가 갈수록 빨라지며(u²) 반지름이 0으로, 각도는 공전 방향으로 감긴다.
+        // 크기는 남은 반지름 비율만큼 줄고, 닿으면 숨긴다. 출현 연출 중이었으면 끝낸 것으로 본다. 달도 같은 자리·비율을 따른다.
+        private void ApplyCollapse(EnemyVisual visual, Enemy enemy)
+        {
+            float x = enemy.Position.X;
+            float y = enemy.Position.Y;
+            float start = Mathf.Sqrt(x * x + y * y);
+            float order = _collapseReach > 0 ? Mathf.Clamp01(start / _collapseReach) : 0;
+            float u = Mathf.Clamp01((Collapse - CollapseStagger * order) / (1 - CollapseStagger));
+            float pulled = u * u;
+            float radius = start * (1 - pulled);
+            float angle = Mathf.Atan2(y, x) + CollapseSwirl * (0.5f + order) * pulled;
+            var position = new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
+            float scale = 1 - pulled;
+            bool visible = pulled < 1;
+
+            visual.SpawnElapsed = SpawnSeconds;
+            visual.Container.localPosition = position;
+            visual.Container.localScale = visual.BaseScale * scale;
+
+            if (visual.Container.gameObject.activeSelf != visible)
+                visual.Container.gameObject.SetActive(visible);
+
+            if (visual.Moon != null)
+            {
+                Vector3 moon = visual.MoonBaseScale;
+                visual.Moon.transform.localPosition = position;
+                visual.Moon.transform.localScale = new Vector3(moon.x * scale, moon.y * scale, moon.z);
+                visual.Moon.enabled = visible;
+            }
+        }
+
+        // 원점에서 가장 먼 일반 적(픽업 제외) 중심까지의 거리. 없으면 0.
+        private static float FarthestOf(IReadOnlyList<Enemy> enemies)
+        {
+            float farthest = 0;
+
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                if (enemies[i].Definition.IsPickup)
+                    continue;
+
+                Point2 position = enemies[i].Position;
+                farthest = Mathf.Max(farthest, position.X * position.X + position.Y * position.Y);
+            }
+
+            return Mathf.Sqrt(farthest);
         }
 
         // 스프라이트·달을 지운다. _visuals에서 빼는 것은 호출자가 한다.

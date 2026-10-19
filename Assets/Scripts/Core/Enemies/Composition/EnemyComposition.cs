@@ -23,7 +23,7 @@ namespace BlackHole.Core
         // 색 등급마다 나오는 비율(종류의 색 등급 표 순서, 합 1). 질량으로 정해진다.
         public IReadOnlyList<float> TierRatios { get; }
 
-        // 크기(기본 1). 크기 1부터 이 값까지가 같은 몫으로 섞여 나온다(SizeRule).
+        // 크기(기본 1). 크기 1부터 이 값까지가 같은 몫으로 섞여 나온다(별은 큰 쪽 3개만, SizeRule.MinSize).
         public int Size { get; }
 
         // 콘텐츠의 전투 시작 공급에 더해 이 종류를 몇 마리 더 공급하는가.
@@ -274,10 +274,12 @@ namespace BlackHole.Core
                     float branch = Math.Min(1, AddPercent(EnemyUpgradeStats.TraitBranchChance, star.BranchChance));
                     float crit = Math.Min(1, AddPercent(EnemyUpgradeStats.TraitCritChance, star.CritChance));
                     float critMultiplier = AddPercent(EnemyUpgradeStats.TraitCritMultiplier, star.CritMultiplier);
+                    float galaxyBonus = Add(EnemyUpgradeStats.TraitGalaxyBonusDamage, star.GalaxyBonusDamage);
 
                     bool same = damage == star.Damage && radius == star.Radius && maxTargets == star.MaxTargets
-                                && branch == star.BranchChance && crit == star.CritChance && critMultiplier == star.CritMultiplier;
-                    return same ? null : new StarLightningDefinition(damage, radius, maxTargets, star.Branches, branch, crit, critMultiplier);
+                                && branch == star.BranchChance && crit == star.CritChance && critMultiplier == star.CritMultiplier
+                                && galaxyBonus == star.GalaxyBonusDamage;
+                    return same ? null : new StarLightningDefinition(damage, radius, maxTargets, star.Branches, branch, crit, critMultiplier, galaxyBonus);
                 }
                 case LaserBurstDefinition laser:
                 {
@@ -285,17 +287,20 @@ namespace BlackHole.Core
                     float width = Scale(EnemyUpgradeStats.TraitWidth, laser.Width);
                     float crit = Math.Min(1, AddPercent(EnemyUpgradeStats.TraitCritChance, laser.CritChance));
                     float critMultiplier = AddPercent(EnemyUpgradeStats.TraitCritMultiplier, laser.CritMultiplier);
+                    float galaxyBonus = Add(EnemyUpgradeStats.TraitGalaxyBonusDamage, laser.GalaxyBonusDamage);
 
-                    bool same = damage == laser.Damage && width == laser.Width && crit == laser.CritChance && critMultiplier == laser.CritMultiplier;
-                    return same ? null : new LaserBurstDefinition(damage, width, crit, critMultiplier);
+                    bool same = damage == laser.Damage && width == laser.Width && crit == laser.CritChance && critMultiplier == laser.CritMultiplier
+                                && galaxyBonus == laser.GalaxyBonusDamage;
+                    return same ? null : new LaserBurstDefinition(damage, width, crit, critMultiplier, galaxyBonus);
                 }
                 case ExplosionDefinition explosion:
                 {
                     float damage = Add(EnemyUpgradeStats.TraitDamage, explosion.Damage);
                     float radius = Scale(EnemyUpgradeStats.TraitRadius, explosion.Radius);
+                    float galaxyBonus = Add(EnemyUpgradeStats.TraitGalaxyBonusDamage, explosion.GalaxyBonusDamage);
 
-                    bool same = damage == explosion.Damage && radius == explosion.Radius;
-                    return same ? null : new ExplosionDefinition(damage, radius);
+                    bool same = damage == explosion.Damage && radius == explosion.Radius && galaxyBonus == explosion.GalaxyBonusDamage;
+                    return same ? null : new ExplosionDefinition(damage, radius, galaxyBonus);
                 }
                 case GravityFieldDefinition gravity:
                 {

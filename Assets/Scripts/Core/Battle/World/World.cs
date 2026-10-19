@@ -31,6 +31,9 @@ namespace BlackHole.Core
         // 블랙홀.
         public Hq Hq { get; }
 
+        // 공전의 바닥 반지름: 출현 띠의 안쪽 반지름(전장 배율 반영). 공전 모양의 안쪽 끌림(OrbitShape.Inward)이 이보다 안으로는 끌지 않는다.
+        private readonly float _orbitFloor;
+
         // 이 판이 번 Gold(처치 보상 합계). 진행 상태에는 판이 끝난 뒤 결산(GameSession.Settle)이 더한다.
         public long EarnedGold => _enemies.KillGold;
 
@@ -62,6 +65,7 @@ namespace BlackHole.Core
             _enemies = new EnemyRoster(deathRewards);
             Stats = stats;
             Hq = hq;
+            _orbitFloor = placement.MinDistance;
             DeathEffects = new DeathEffects(seed);
             GrowthPacer = new GrowthPacer(growthSupply);
 
@@ -75,7 +79,8 @@ namespace BlackHole.Core
                 placement,
                 periodicSpawnPlacement,
                 startSupply,
-                CountActive);
+                CountActive,
+                hq.GalaxyTier);
 
             _deathBonuses = new DeathBonuses(seed, stats, _supply, killTimeBonus, killTimeCooldown, hq.Stage);
         }
@@ -125,6 +130,10 @@ namespace BlackHole.Core
 
         // 테스트 도구(BattleCheats)가 부른다. 살아 있는 적만 치운다. 처치가 아니다(사망 기록·처치 수·Gold 없음).
         internal void ClearAliveEnemies() => _enemies.ClearAlive();
+
+        // 정한 자리에 한 마리를 만든다(성질 없음). GameSession.BeginStaged가 판의 처음 모습을 놓을 때 쓴다.
+        internal void SpawnAt(EnemyDefinition kind, int tier, int size, Point2 position) =>
+            _supply.SpawnAt(kind, tier, size, position);
 
         // 테스트 도구(BattleCheats)가 부른다. 예약된 성장 공급을 지금 모두 만든다.
         internal void FlushGrowthNow()
@@ -197,6 +206,7 @@ namespace BlackHole.Core
         // 적 이동: 중력장 범위 안의 적은 그 중력장에 끌리고(DeathEffects.Pull), 끌린 정도의 나머지만큼 공전한다.
         // 중력장이 켜지고 꺼지는 순간과 범위 가장자리에서는 둘이 섞여 움직임이 끊기지 않는다.
         // 누르고 있는 동안(조준점) Breaker 공격 원 안의 적은 공전이 HoldSlow 배로 느려진다(붙잡힘, 픽업 제외 — Breaker.IsHolding). 중력장 끌림은 그대로다.
+        // 공전 모양은 판의 성장도가 정한다(Hq.Orbit, EnemyBehaviors.NextPosition).
         private void MoveEnemies(float delta)
         {
             bool fields = DeathEffects.HasGravityFields;
@@ -205,7 +215,7 @@ namespace BlackHole.Core
             if (!fields && !holding)
             {
                 if (OrbitEnabled)
-                    _enemies.Move(delta);
+                    _enemies.Move(delta, Hq.Orbit, _orbitFloor);
 
                 return;
             }
@@ -227,7 +237,7 @@ namespace BlackHole.Core
                 if (holding && Breaker.IsHolding(this, enemies[i]))
                     orbit *= Breaker.Definition.HoldSlow;
 
-                enemies[i].Move(orbit);
+                enemies[i].Move(orbit, Hq.Orbit, _orbitFloor);
             }
         }
 

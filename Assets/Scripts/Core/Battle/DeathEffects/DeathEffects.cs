@@ -391,8 +391,8 @@ namespace BlackHole.Core
                 if (nearest == null)
                     break;
 
-                float amount = critical ? star.Damage * star.CritMultiplier : star.Damage;
-                Damage damage = new(amount, DamageSource.StarLightning, critical, pending.EnemyType);
+                // 은하에는 보너스가 더해진다(StarLightningDefinition.DamageTo).
+                Damage damage = new(star.DamageTo(nearest, critical), DamageSource.StarLightning, critical, pending.EnemyType);
 
                 _struck.Add(nearest);
                 _starLightningHits.Add(new StarLightningHit(_nextSequence++, origin, nearest.Position, critical));
@@ -494,11 +494,9 @@ namespace BlackHole.Core
             bool critical = laser.CritChance > 0
                             && _random.NextFloat() < laser.CritChance;
 
-            float amount = critical ? laser.Damage * laser.CritMultiplier : laser.Damage;
-            Damage damage = new(amount, DamageSource.LaserBurst, critical, charging.SourceEnemyType);
-
+            // 대상마다 피해를 계산한다 — 은하에는 보너스가 더해진다(LaserBurstDefinition.DamageTo).
             foreach (Enemy target in _targets)
-                world.DealDamage(target, damage);
+                world.DealDamage(target, new Damage(laser.DamageTo(target, critical), DamageSource.LaserBurst, critical, charging.SourceEnemyType));
 
             _laserBursts.Add(new LaserBurst(_nextSequence++, start, end, laser, critical, _targets.Count));
         }

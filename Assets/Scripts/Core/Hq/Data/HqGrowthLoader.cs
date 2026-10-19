@@ -34,7 +34,8 @@ namespace BlackHole.Core
 
                 try
                 {
-                    milestones.Add(new HqMilestone(mark.Level, mark.TargetGold, mark.FieldScale));
+                    var orbit = new OrbitShape(mark.OrbitStretch, mark.OrbitTilt, mark.OrbitInward, mark.OrbitSpeed);
+                    milestones.Add(new HqMilestone(mark.Level, mark.TargetGold, mark.FieldScale, orbit));
                 }
                 catch (ArgumentException error)
                 {
@@ -50,7 +51,7 @@ namespace BlackHole.Core
             // Level 사다리의 오류는 LevelExp에, 이정표가 사다리 밖·순서가 틀린 것은 Milestones에 붙인다.
             try
             {
-                return new HqGrowthDefinition(levelExp, milestones);
+                return new HqGrowthDefinition(levelExp, milestones, item.GalaxyStage);
             }
             catch (ArgumentException error)
             {

@@ -205,7 +205,8 @@ namespace BlackHole.Unity
                 }
                 else
                 {
-                    section.Row("크기", composition.Size > SizeRule.Base ? $"{SizeRule.Base} ~ {composition.Size}" : $"{SizeRule.Base}");
+                    int minSize = SizeRule.MinSize(kind.Type, composition.Size);
+                    section.Row("크기", composition.Size > minSize ? $"{minSize} ~ {composition.Size}" : $"{composition.Size}");
                     section.Row("질량", $"{Number(composition.Mass)}%");
                     section.Row("색 등급 비율", TierRatios(composition.TierRatios));
                     if (composition.StartSupplyBonus > 0)

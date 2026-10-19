@@ -20,6 +20,12 @@ namespace BlackHole.Core
         // 이 판의 전장 배율(성장도가 정하고 판 동안 같다). 출현 띠와 화면(카메라·화면 크기가 고정인 표시)이 이 배율로 넓어진다.
         public float FieldScale { get; }
 
+        // 이 판의 은하 색 등급(HqGrowthDefinition.GalaxyTierAt). 은하가 없는 판이면 HqGrowthDefinition.NoGalaxy.
+        public int GalaxyTier { get; }
+
+        // 이 판의 적 공전 모양(HqGrowthDefinition.OrbitAt). 판 동안 같다.
+        public OrbitShape Orbit { get; }
+
         public long Exp { get; private set; } // 누적 EXP(시작 Level에 닿는 EXP부터 센다).
 
         public int Level { get; private set; }
@@ -54,6 +60,8 @@ namespace BlackHole.Core
             StartLevel = growth.StartLevelAt(stage);
             GoalLevel = growth.GoalLevelAt(stage);
             FieldScale = growth.FieldScaleAt(stage);
+            GalaxyTier = growth.GalaxyTierAt(stage);
+            Orbit = growth.OrbitAt(stage);
             Level = StartLevel;
             Exp = growth.ExpToReach(StartLevel) ?? 0;
         }

@@ -70,6 +70,8 @@ namespace BlackHole.Unity
         // 링: 고른 노드는 흰 링. 살 수 있는 노드를 꾹 누르면 그 위에 초록 링이 시계 방향으로 차오른다(HoldSeconds에 꽉 참 = 살 준비).
         // 떼서 사면 초록 링이 잠깐 머물다 사라진다. 중간에 떼면 비워진다.
         private static readonly Color SelectRingColor = new Color(1, 1, 1, 0.85f);
+        // 손을 올린 노드(PC)의 링: 고른 노드와 같은 자리·그림, 조금 흐리게. 노드 그림은 바꾸지 않는다.
+        private static readonly Color HoverRingColor = new Color(1, 1, 1, 0.55f);
         private static readonly Color FillRingColor = new Color(0.55f, 0.85f, 0.6f, 1);
         private const float FillDrainSeconds = 0.12f;
         private const float FillFadeSeconds = 0.35f;
@@ -941,19 +943,20 @@ namespace BlackHole.Unity
             SetFill(node, 0);
         }
 
-        // 흰 링의 켜짐: 고른 노드이거나 꾹 누르는 중인 노드.
+        // 흰 링의 켜짐: 고른 노드이거나 꾹 누르는 중인 노드, 또는 손을 올린 노드(조금 흐리게).
         private void RefreshRing(NodeVisual node)
         {
             if (node.SelectRing == null)
                 return;
 
-            bool on = node == _selected || node == _pressed;
+            bool chosen = node == _selected || node == _pressed;
+            bool on = chosen || node == _hovered;
 
             if (node.SelectRing.gameObject.activeSelf != on)
                 node.SelectRing.gameObject.SetActive(on);
 
             if (on)
-                node.SelectRing.color = SelectRingColor;
+                node.SelectRing.color = chosen ? SelectRingColor : HoverRingColor;
         }
 
         private void ReleasePress()
@@ -1118,7 +1121,7 @@ namespace BlackHole.Unity
                 // 안개 속: 가격·Rank 딱지는 숨긴다. 열린 구역이면 흐린 자물쇠, 먼 노드면 작고 흐린 점(레이캐스트를 받지 않아 올림·누름이 없다).
                 if (_look != null)
                 {
-                    node.Image.sprite = _style.SpriteFor(node.Far ? _look.FarSprite : _look.SpriteOf(node.Stat, node.State, false));
+                    node.Image.sprite = _style.SpriteFor(node.Far ? _look.FarSprite : _look.SpriteOf(node.Stat, node.State));
                     node.Image.color = node.Far ? _look.FarTint : TintOf(node, false);
                     SetSize(node, node.Far ? NodeSize * _look.FarScale : NodeSize);
                     node.Image.raycastTarget = !node.Far;
@@ -1155,9 +1158,10 @@ namespace BlackHole.Unity
                 return;
             }
 
-            // 고른 노드는 그림(초록 강조)은 바꾸지 않고 — 아직 산 게 아니다 — 색만 온전한 밝기로 올린다. 링이 고름을 보인다. 올림(마우스)은 그림도 밝힌다.
+            // 고른 노드는 그림은 바꾸지 않고 — 아직 산 게 아니다 — 색만 온전한 밝기로 올린다. 링이 고름을 보인다.
+            // 올림(마우스)도 그림은 그대로이고 흐린 링과 온전한 밝기로 보인다.
             bool lit = node == _hovered;
-            node.Image.sprite = _style.SpriteFor(_look.SpriteOf(node.Stat, node.State, lit));
+            node.Image.sprite = _style.SpriteFor(_look.SpriteOf(node.Stat, node.State));
             Color tint = TintOf(node, lit);
             node.Image.color = partial ? Color.Lerp(tint, OwnedColor, PartialMix) : tint;
 

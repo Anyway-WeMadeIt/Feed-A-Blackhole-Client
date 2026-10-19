@@ -83,6 +83,12 @@ namespace BlackHole.Core
             Position = EnemyBehaviors.NextPosition(Position, Stats, delta);
         }
 
+        // 모양이 있는 공전(World가 판의 OrbitShape와 바닥 반지름을 준다).
+        internal void Move(float delta, OrbitShape orbit, float minRadius)
+        {
+            Position = EnemyBehaviors.NextPosition(Position, Stats, delta, orbit, minRadius);
+        }
+
         // 공전이 아닌 힘(중력장)이 옮긴 자리. 공전은 위치만 보고 돌므로 다음 공전은 이 자리에서 이어진다.
         internal void MoveTo(Point2 position)
         {

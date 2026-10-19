@@ -7,13 +7,15 @@ namespace BlackHole.Core
     // 소지금이 이미 더 많으면 깎지 않는다(차액 0). 금액은 기획자가 정한다 [사용자].
     // 전장 배율: 이 이정표에 닿은 뒤의 판이 쓰는 배율(성장도 0 = 1). 카메라가 보여 주는 범위와 적 출현 띠가 이 배율로 넓어진다.
     // 적·Breaker·블랙홀의 크기(월드)는 바꾸지 않으므로 화면에서는 그만큼 작아진다. 원작 실측: Level 10 → 1.68, 20 → 2.27, 30 → 2.83.
+    // 공전 모양(OrbitShape): 이 이정표에 닿은 뒤의 판에서 적이 도는 모양. 은하를 부술수록(Lv60 이정표부터) 타원·기울기·안쪽 끌림·속도가 커진다 [사용자].
     public sealed class HqMilestone
     {
         public int Level { get; }
         public long TargetGold { get; }
         public float FieldScale { get; }
+        public OrbitShape Orbit { get; }
 
-        public HqMilestone(int level, long targetGold, float fieldScale)
+        public HqMilestone(int level, long targetGold, float fieldScale, OrbitShape orbit = default)
         {
             if (level <= HqGrowthDefinition.StartLevel)
                 throw new ArgumentOutOfRangeException(nameof(level), $"이정표 Level은 {HqGrowthDefinition.StartLevel + 1} 이상이어야 한다. 받은 값: {level}.");
@@ -25,6 +27,8 @@ namespace BlackHole.Core
             Level = level;
             TargetGold = DefinitionGuard.NotNegative(targetGold, nameof(targetGold));
             FieldScale = fieldScale;
+            // default(OrbitShape)는 0으로 찬 값이라 쓸 수 없다 — 기본 공전으로 본다.
+            Orbit = orbit.Speed > 0 ? orbit : OrbitShape.Default;
         }
 
         // 진행 상태의 Gold가 gold일 때 결산이 더하는 Gold.

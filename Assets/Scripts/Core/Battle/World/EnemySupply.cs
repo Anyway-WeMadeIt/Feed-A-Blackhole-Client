@@ -21,6 +21,10 @@ namespace BlackHole.Core
         private readonly Func<EnemyDefinition, EnemyTraitDefinition, int> _countActive;
 
         private readonly BattleRandom _placementRandom;
+
+        // 이 판의 은하 색 등급(Hq.GalaxyTier). 은하는 질량·색 비율과 무관하게 이 색으로 나온다 — 이정표마다 한 색씩 올라가는 목표라서.
+        // 색 수를 넘으면 마지막 색이다. NoGalaxy면 비율대로(은하가 공급되지 않는 판에서만 그렇다).
+        private readonly int _galaxyTier;
         private readonly BattleRandom _periodicSpawnPlacementRandom;
         private readonly BattleRandom _periodicSpawnRandom;
         private readonly BattleRandom _rainRandom;
@@ -59,8 +63,10 @@ namespace BlackHole.Core
             EnemyPlacementDefinition placement,
             PeriodicSpawnPlacementDefinition periodicSpawnPlacement,
             IReadOnlyList<SupplyRequest> startSupply,
-            Func<EnemyDefinition, EnemyTraitDefinition, int> countActive)
+            Func<EnemyDefinition, EnemyTraitDefinition, int> countActive,
+            int galaxyTier = HqGrowthDefinition.NoGalaxy)
         {
+            _galaxyTier = galaxyTier;
             _enemies = enemies;
             _stats = stats;
             _placement = placement;
@@ -122,8 +128,11 @@ namespace BlackHole.Core
                 {
                     var sizes = new float[size - SizeRule.Base + 1];
 
+                    // 1 ~ size가 같은 몫. 별은 큰 쪽 몇 개만(SizeRule.MinSize) — 칸 수는 그대로라 난수 소비가 바뀌지 않는다.
+                    int min = SizeRule.MinSize(kind.Type, size);
+
                     for (int i = 0; i < sizes.Length; i++)
-                        sizes[i] = 1;
+                        sizes[i] = i + SizeRule.Base >= min ? 1 : 0;
 
                     _sizePickers.Add(kind, new QuotaPicker(sizes, sizeRandom));
                 }
@@ -143,11 +152,9 @@ namespace BlackHole.Core
                 for (int i = 0; i < request.Count && room > 0; i++, room--)
                 {
                     EnemyDefinition kind = request.Enemy;
-                    int tier = _tierPickers[kind].Pick();
+                    int tier = TierOf(kind);
                     EnemyTraitDefinition trait = TraitOf(kind);
-                    int size = _sizePickers.TryGetValue(kind, out QuotaPicker sizePicker)
-                        ? sizePicker.Pick() + SizeRule.Base
-                        : SizeRule.Base;
+                    int size = SizeOf(kind);
 
                     _enemies.Spawn(
                         kind,
@@ -210,7 +217,7 @@ namespace BlackHole.Core
 
             for (int i = 0; i < count; i++)
             {
-                int tier = _tierPickers[kind].Pick();
+                int tier = TierOf(kind);
                 Point2 position = _periodicSpawnPlacement.Resolve(_placement).Pick(_periodicSpawnPlacementRandom);
 
                 _enemies.Spawn(
@@ -247,6 +254,29 @@ namespace BlackHole.Core
 
             return made;
         }
+
+        // 정한 자리에 한 마리를 만든다(성질 없음). 판의 처음 모습을 정해 둘 때 쓴다(GameSession.BeginStaged).
+        // 안전 상한(SafetyMaxAlive)보다 훨씬 적은 수만 오므로 상한을 보지 않는다.
+        internal void SpawnAt(EnemyDefinition kind, int tier, int size, Point2 position)
+        {
+            _enemies.Spawn(kind, tier, null, size, _stats.Of(kind, tier, null, size), position, tone: ToneOf(kind, tier));
+        }
+
+        // 이 개체의 크기: 은하는 이 판에 열린 가장 큰 크기(galaxy.size 노드가 곧 은하의 크기), 나머지는 열린 크기 중 같은 몫으로 하나.
+        // 은하는 판에 하나뿐이라 무작위로 고르면 노드를 사도 작게 나올 수 있어서다.
+        private int SizeOf(EnemyDefinition kind)
+        {
+            if (kind.Type == EnemyType.Galaxy)
+                return _stats.CompositionOf(kind).Size;
+
+            return _sizePickers.TryGetValue(kind, out QuotaPicker sizePicker) ? sizePicker.Pick() + SizeRule.Base : SizeRule.Base;
+        }
+
+        // 이 개체의 색 등급: 은하는 이 판의 은하 색(_galaxyTier), 나머지는 판 구성의 색 비율대로.
+        private int TierOf(EnemyDefinition kind) =>
+            kind.Type == EnemyType.Galaxy && _galaxyTier != HqGrowthDefinition.NoGalaxy
+                ? Math.Min(_galaxyTier, kind.Tiers.Count - 1)
+                : _tierPickers[kind].Pick();
 
         // 이 색 등급 개체의 톤: 마지막 색 등급이고 이 판에 톤이 있으면 같은 몫으로 하나, 아니면 0(색 등급 색 그대로).
         private int ToneOf(EnemyDefinition kind, int tier) =>

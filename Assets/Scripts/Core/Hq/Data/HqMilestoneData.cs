@@ -9,5 +9,11 @@ namespace BlackHole.Core
         public int Level;
         public long TargetGold;
         public float FieldScale;
+
+        // 공전 모양(OrbitShape). OrbitStretch 1·OrbitTilt 0·OrbitInward 0·OrbitSpeed 1이 바뀌지 않은 공전이다.
+        public float OrbitStretch = 1;
+        public float OrbitTilt;
+        public float OrbitInward;
+        public float OrbitSpeed = 1;
     }
 }

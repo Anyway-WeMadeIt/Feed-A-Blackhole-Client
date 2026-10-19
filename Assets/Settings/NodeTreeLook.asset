@@ -15,433 +15,263 @@ MonoBehaviour:
   _fallback:
     stat: 
     available: {fileID: 21300000, guid: 94565b90c3c89bb95f002127f2449c93, type: 3}
-    hover: {fileID: 21300000, guid: 4b80c1aca6c8fc1a54d3b998b73f5227, type: 3}
     purchased: {fileID: 21300000, guid: 6cdac54be1ea5873e1dad70509638d92, type: 3}
-    locked: {fileID: 21300000, guid: a1c7502f42d54ba4c2e60f0707019a05, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   _stats:
   - stat: breaker.damage
     available: {fileID: 21300000, guid: 402f08b171dd9a7a000566cce237a739, type: 3}
-    hover: {fileID: 21300000, guid: df5443a6a435e1511e627cade5b77cca, type: 3}
     purchased: {fileID: 21300000, guid: 30a6b092686e64d9003a2fb65079d39e, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: breaker.speed
     available: {fileID: 21300000, guid: 357b755cdd83cf92ea65e952d10e8d72, type: 3}
-    hover: {fileID: 21300000, guid: 981db0df3a95a18ea6bff78a7dc47521, type: 3}
     purchased: {fileID: 21300000, guid: a8125ff5b9bc4cab03c2f2f7ddced164, type: 3}
-    locked: {fileID: 21300000, guid: 648af0d8f991d9884e2e8805cf0bf5e4, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: breaker.radius
     available: {fileID: 21300000, guid: 30590392f3769b812fbb1706273782e5, type: 3}
-    hover: {fileID: 21300000, guid: 80168dce37ee2c71b5a9ae2f3209872f, type: 3}
     purchased: {fileID: 21300000, guid: 75df5480aabad552d9c6bdaec48f0395, type: 3}
-    locked: {fileID: 21300000, guid: 1ec7b5f9022b2d914e7f60781fc6b9d6, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: breaker.critChance
     available: {fileID: 21300000, guid: 38ca5ef27396bd58575645c106b3212f, type: 3}
-    hover: {fileID: 21300000, guid: f348216d8deb8364e150bf7d60cae24c, type: 3}
     purchased: {fileID: 21300000, guid: 40ee90ea18185758854ff6ab544a2355, type: 3}
-    locked: {fileID: 21300000, guid: 067cbc8296e231a4e1caded829790cd7, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: breaker.critBonus
     available: {fileID: 21300000, guid: c5820fac0240cba0f02e1616deb3adb1, type: 3}
-    hover: {fileID: 21300000, guid: 91bdbcb95b8bccd7afb4b24270f54a58, type: 3}
     purchased: {fileID: 21300000, guid: 99374565e1036af5c63e2739efe74b5e, type: 3}
-    locked: {fileID: 21300000, guid: 55197022ddec7ef91ccb57f6854901cd, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: growth.time
     available: {fileID: 21300000, guid: 7198f73d912e0b87f862a1c03634b969, type: 3}
-    hover: {fileID: 21300000, guid: 71badb1971a2f550b7fdd5ed91943a89, type: 3}
     purchased: {fileID: 21300000, guid: b29e18fc71088bc59f6cd5609ed38d66, type: 3}
-    locked: {fileID: 21300000, guid: c20f2490e7efccd8dcc7775e02d48852, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: asteroid.massScale
     available: {fileID: 21300000, guid: 4a70c58e63d1d5d09635cc24edc282ec, type: 3}
-    hover: {fileID: 21300000, guid: 2d27e38927fd8fd16b20667385bc1c3d, type: 3}
     purchased: {fileID: 21300000, guid: 8a833e4b12d44bbae652a9366522ba5f, type: 3}
-    locked: {fileID: 21300000, guid: c5dd0489473058543c9500383f8c9a4b, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: goldenAsteroid.spawnChance
     available: {fileID: 21300000, guid: c9cd040f45e6488bd3a0d4e85a1de225, type: 3}
-    hover: {fileID: 21300000, guid: 000f02a0b5ec9adac7a365471fe7c1f5, type: 3}
     purchased: {fileID: 21300000, guid: db87ebf0c7950452b3dcf16e9f1a6cb8, type: 3}
-    locked: {fileID: 21300000, guid: 6a31d0232e273a22b4e20eb42b1fdbe1, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: goldenAsteroid.rewardScale
     available: {fileID: 21300000, guid: de55b8e4b9e06c2476d0a94457d77ac4, type: 3}
-    hover: {fileID: 21300000, guid: 426e278ecb5e2edc8b985afbb26efa5a, type: 3}
     purchased: {fileID: 21300000, guid: dda1d0390320368af2636c851ba2c6a2, type: 3}
-    locked: {fileID: 21300000, guid: c7ff613b2d143d59c7cf1f1ad94d1013, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: asteroid.count
     available: {fileID: 21300000, guid: fb835c054e6ee5e021d5ea51e4860f0c, type: 3}
-    hover: {fileID: 21300000, guid: 89a6d86ccb37228c87497eb0c97b47db, type: 3}
     purchased: {fileID: 21300000, guid: 69cca40cb95d2f4473d382f5c0d0446b, type: 3}
-    locked: {fileID: 21300000, guid: fdb75e88f886a262064a88a3b970e965, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: growth.asteroids
     available: {fileID: 21300000, guid: 375acfe057a85c6f78029741c455a66b, type: 3}
-    hover: {fileID: 21300000, guid: 546f813bc78bc17b29ec452e45b5dfb8, type: 3}
     purchased: {fileID: 21300000, guid: bdd811cfd36249e7cacd6885dad60ce2, type: 3}
-    locked: {fileID: 21300000, guid: bc9e2ae03a542d64f86f31821bca56f0, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: asteroid.toPlanet
     available: {fileID: 21300000, guid: 1dff0522ff320ca967b52019b43cef2b, type: 3}
-    hover: {fileID: 21300000, guid: 31498ced4f5d49b78ba33c0eeb0a4473, type: 3}
     purchased: {fileID: 21300000, guid: 80fa698467b782c1828f4425140bc96f, type: 3}
-    locked: {fileID: 21300000, guid: 52b662c11c0d14c7ce9f1ae667580f58, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: asteroid.size
     available: {fileID: 21300000, guid: e12b994944fe3d02e18c692a6f16564d, type: 3}
-    hover: {fileID: 21300000, guid: 22f6eee11298104287b3b8ac272561bc, type: 3}
     purchased: {fileID: 21300000, guid: c769b9b6187d62ce83ad2e68da2175af, type: 3}
-    locked: {fileID: 21300000, guid: 7fc85326c46c84004e0166eec8c481a0, type: 3}
-  - stat: enemy.moon.mass-level
-    available: {fileID: 21300000, guid: 85aebab86cf460849b3fecc9776c009a, type: 3}
-    hover: {fileID: 21300000, guid: 94aadc80430befe9ae8dd30b250242ef, type: 3}
-    purchased: {fileID: 21300000, guid: f80ac93d5204f1da9d241269bf86519d, type: 3}
-    locked: {fileID: 21300000, guid: e1aed09c300a2da3590d58fe122e6564, type: 3}
-  - stat: enemy.moon.start-supply
-    available: {fileID: 21300000, guid: bef07fa31f87065e2400d9cced55a57e, type: 3}
-    hover: {fileID: 21300000, guid: 14c46ad3ecc4adf82e31945496138688, type: 3}
-    purchased: {fileID: 21300000, guid: a187aa0fd59b9a91544296569b0e2a48, type: 3}
-    locked: {fileID: 21300000, guid: 412c81628c2545ffe40994073152409f, type: 3}
-  - stat: enemy.moon.growth-supply
-    available: {fileID: 21300000, guid: d508c8dba74ec2ee1024a28019c2a722, type: 3}
-    hover: {fileID: 21300000, guid: 024b9e23b4d4403e375a1ea0c71ee7e2, type: 3}
-    purchased: {fileID: 21300000, guid: 26f9a881f7c2b495d9377f89a423a578, type: 3}
-    locked: {fileID: 21300000, guid: 7109023372cd3a607942dcc5746def08, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: moonPlanet.spawnChance
     available: {fileID: 21300000, guid: f2ec28d6953f086cebd004e09e229dda, type: 3}
-    hover: {fileID: 21300000, guid: e08fdfeed818a98c33337569e563f13b, type: 3}
     purchased: {fileID: 21300000, guid: 9f52910f24fbc68152c234a2eaada638, type: 3}
-    locked: {fileID: 21300000, guid: 987133655076b81416b28f702dc0a146, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: planet.massScale
     available: {fileID: 21300000, guid: 56186855c8498720feccaecabef79056, type: 3}
-    hover: {fileID: 21300000, guid: 079d7809511fca10496a35ab88409320, type: 3}
     purchased: {fileID: 21300000, guid: 0d0d3313f2aa91d924673f83d8bcf8dd, type: 3}
-    locked: {fileID: 21300000, guid: fd6103ae99213491e07cd31bc07cf13f, type: 3}
-  - stat: enemy.planet.start-supply
-    available: {fileID: 21300000, guid: 075ba6854895f0ff1eac512ba76eecfc, type: 3}
-    hover: {fileID: 21300000, guid: d7b5493f4ffe17c01d16e80a4a46cf06, type: 3}
-    purchased: {fileID: 21300000, guid: f12fe8ada3f55c5a8fed5464bfa3792d, type: 3}
-    locked: {fileID: 21300000, guid: 125c3ab7981bad51af3e7cda3073618a, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: growth.planets
     available: {fileID: 21300000, guid: 6b254423ad6962a2162d5d54088ace1b, type: 3}
-    hover: {fileID: 21300000, guid: ba3b340da692db88d042b1766dc86968, type: 3}
     purchased: {fileID: 21300000, guid: 5ef42abe5ce3460b32f0c807a660aaee, type: 3}
-    locked: {fileID: 21300000, guid: dd4a5fe7aad93542e38ef059f376511d, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: planet.toStar
     available: {fileID: 21300000, guid: 49a473fccc51e696699ca127ca77cea8, type: 3}
-    hover: {fileID: 21300000, guid: 3db578d814b51b0fe117b6771c123a4c, type: 3}
     purchased: {fileID: 21300000, guid: a74a99e6c72c9a15bc142d1382d93635, type: 3}
-    locked: {fileID: 21300000, guid: 3401cc2c3119ef340ebd809d4942ac90, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: star.massScale
     available: {fileID: 21300000, guid: e397d54dbce7b12dd0ec1081dba9e347, type: 3}
-    hover: {fileID: 21300000, guid: 29bd525853f00452b85437e421cafbd1, type: 3}
     purchased: {fileID: 21300000, guid: 7242ca83aa3b22eb423055cf87955dd6, type: 3}
-    locked: {fileID: 21300000, guid: 1c830516fffd11af31a2386d67785816, type: 3}
-  - stat: enemy.star.start-supply
-    available: {fileID: 21300000, guid: 2c5d77e5f38a32e9b37b579c34d69f9d, type: 3}
-    hover: {fileID: 21300000, guid: 156840c707a8896ba8c89d50e2a0abbb, type: 3}
-    purchased: {fileID: 21300000, guid: 49499bcb28e8fd4bc53d50f0cd82119a, type: 3}
-    locked: {fileID: 21300000, guid: cbc8d5cc4d7c67d1fb2b6b5500ba173f, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: growth.stars
     available: {fileID: 21300000, guid: 2004048cc72f94353900969c820f86c8, type: 3}
-    hover: {fileID: 21300000, guid: c42e123d0ac5c0675d0dfdeaaec79166, type: 3}
     purchased: {fileID: 21300000, guid: 6d76ba7a43a2319ddadc95d21c35f68d, type: 3}
-    locked: {fileID: 21300000, guid: dfc369f038db71fe5d908def5f49c397, type: 3}
-  - stat: enemy.comet.mass-level
-    available: {fileID: 21300000, guid: fc1465b63ca8f6076a9030bcc053734a, type: 3}
-    hover: {fileID: 21300000, guid: 48809e47f76923901bffcaf74ce9cd9a, type: 3}
-    purchased: {fileID: 21300000, guid: 69bc4a0e9ce737dc1718cfc608b37866, type: 3}
-    locked: {fileID: 21300000, guid: 603216175f99f8f9d1576661c3586ead, type: 3}
-  - stat: enemy.comet.start-supply
-    available: {fileID: 21300000, guid: 49ce69c54a09bfef75a55515e1dfb8f6, type: 3}
-    hover: {fileID: 21300000, guid: 00a3bffbf051dca7ceca04e2c244c3c2, type: 3}
-    purchased: {fileID: 21300000, guid: 89088e32f9b53b7b18f5f607feb158f2, type: 3}
-    locked: {fileID: 21300000, guid: 6226176b0b535eb0b1b01c65baa3b021, type: 3}
-  - stat: enemy.comet.growth-supply
-    available: {fileID: 21300000, guid: 5670e2c647fcd0c20a86fe72f1bbe31d, type: 3}
-    hover: {fileID: 21300000, guid: 81d13923c63b5f3e20d971c4795f0c76, type: 3}
-    purchased: {fileID: 21300000, guid: 497a60d293b2b36757de238eebc5aed4, type: 3}
-    locked: {fileID: 21300000, guid: 185032a28e864e4816cbb885a7b99867, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: comet.spawnChance
     available: {fileID: 21300000, guid: b83856f63de1d01300fdf121f7815f52, type: 3}
-    hover: {fileID: 21300000, guid: 5d345991d7ab058756f01dd4d821f628, type: 3}
     purchased: {fileID: 21300000, guid: 0174828afd2446f28dc23a17be53e115, type: 3}
-    locked: {fileID: 21300000, guid: 6bb807d661e1d544070870c24b5b6741, type: 3}
-  - stat: enemy.electric-asteroid.mass-level
-    available: {fileID: 21300000, guid: 81c01958d916ddd54deb2e3f2b66a29a, type: 3}
-    hover: {fileID: 21300000, guid: def171b085ec179f45e303a7d872f9ba, type: 3}
-    purchased: {fileID: 21300000, guid: dbf3ea3d4918febd9b6c25c9621600fc, type: 3}
-    locked: {fileID: 21300000, guid: 42b4ac4140d3451f5038ee26d40f7cf3, type: 3}
-  - stat: enemy.electric-asteroid.start-supply
-    available: {fileID: 21300000, guid: 6100ca5b357478b1d2f4651be7676b6a, type: 3}
-    hover: {fileID: 21300000, guid: f562229ced41120c6dadde000c3a3595, type: 3}
-    purchased: {fileID: 21300000, guid: 263f076b4223f1742e1a5bad072a5640, type: 3}
-    locked: {fileID: 21300000, guid: 1b2b487684d0cdc0f7edb4ce6f65d2bb, type: 3}
-  - stat: enemy.electric-asteroid.growth-supply
-    available: {fileID: 21300000, guid: 8eea9f1f46d206b26ff0e5d37ab19d0a, type: 3}
-    hover: {fileID: 21300000, guid: b0da8d54bb321513f8ad825dfba3065e, type: 3}
-    purchased: {fileID: 21300000, guid: ce1214bda1b56f0283da371b986ab08a, type: 3}
-    locked: {fileID: 21300000, guid: 0845e74e2f7f4cde6b29170a5e07764f, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricAsteroid.spawnChance
     available: {fileID: 21300000, guid: af428646a5500ce5d6337a5afad013ab, type: 3}
-    hover: {fileID: 21300000, guid: 5b38408d0efec74e1f5ead7525a0cb77, type: 3}
     purchased: {fileID: 21300000, guid: eea216825f67629818eb99dcb90c0c2d, type: 3}
-    locked: {fileID: 21300000, guid: 3d0119fa575259bee85448227a0c56fe, type: 3}
-  - stat: enemy.supernova.mass-level
-    available: {fileID: 21300000, guid: f96201b0a35fbcd7fb0d8dccb6eafe29, type: 3}
-    hover: {fileID: 21300000, guid: 5ab7ac70e849a0de7f61bf1d97d1cbd9, type: 3}
-    purchased: {fileID: 21300000, guid: 2f970b1408568d955a40b389917f9dda, type: 3}
-    locked: {fileID: 21300000, guid: 85e4248fd5dc183d790148f8e0438487, type: 3}
-  - stat: enemy.supernova.start-supply
-    available: {fileID: 21300000, guid: a9a9433ece10d0d47e3c581af140a391, type: 3}
-    hover: {fileID: 21300000, guid: 93526674f8f910252844aac422ce274f, type: 3}
-    purchased: {fileID: 21300000, guid: b489888b787a784a4dc042c35565b8e6, type: 3}
-    locked: {fileID: 21300000, guid: b7f12a8aa649a784b4b1da5da89dc2ec, type: 3}
-  - stat: enemy.supernova.growth-supply
-    available: {fileID: 21300000, guid: e714596e993a19dcabb69ddb33c19472, type: 3}
-    hover: {fileID: 21300000, guid: 1d0158f85aab0b9d5974cbfb95389f11, type: 3}
-    purchased: {fileID: 21300000, guid: 8a07fb4fc4f31a6b1f4b2742fc95e11f, type: 3}
-    locked: {fileID: 21300000, guid: 8025cd808ed1952169eeffeb503692a5, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: supernovaStar.spawnChance
     available: {fileID: 21300000, guid: 3e26546ae8418b6f94735e60ad670b8b, type: 3}
-    hover: {fileID: 21300000, guid: a1d7e3b2be944d866bf4db3df1dd8364, type: 3}
     purchased: {fileID: 21300000, guid: bb2f74d525f02796cd5a7a7e8a06320e, type: 3}
-    locked: {fileID: 21300000, guid: 72a2937e7815bde0cd949852cdab34e7, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: asteroid.respawnChance
     available: {fileID: 21300000, guid: abcf9c623b30693422e8af7b7976dc3b, type: 3}
-    hover: {fileID: 21300000, guid: 8709e3dc0209eab7aa626a8d6b73efea, type: 3}
     purchased: {fileID: 21300000, guid: 0b83e46ee4190721748ae8f9fd774bd3, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: asteroid.timeChance
     available: {fileID: 21300000, guid: ff02965940b53664ded7794c2278d91f, type: 3}
-    hover: {fileID: 21300000, guid: 2e3fa0b6187d8b2002fdeb9b15b45c03, type: 3}
     purchased: {fileID: 21300000, guid: 8f38558b436b390279b82095a2bb274f, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: breaker.galaxyBonusDamage
     available: {fileID: 21300000, guid: bddcea0939c6fde5810dda8a9adfd72d, type: 3}
-    hover: {fileID: 21300000, guid: a5994c1fc031b12dc3a09bc58f195f23, type: 3}
     purchased: {fileID: 21300000, guid: 236017d43c9ca7991cfe3e53bc723fd0, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: laserStar.galaxyBonusDamage
+    available: {fileID: 21300000, guid: d3596e453d5d4c0db2a42d957a082b15, type: 3}
+    purchased: {fileID: 21300000, guid: b0ed0e95034d42bc8c41f79857e3886a, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: supernovaStar.galaxyBonusDamage
+    available: {fileID: 21300000, guid: 0566a2f819144a658c5a159bfcc76a0e, type: 3}
+    purchased: {fileID: 21300000, guid: 9c0a55562cec4b1fb96d4128eb239f72, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.galaxyBonusDamage
+    available: {fileID: 21300000, guid: b90e573b6c8643e3a4476cfaf2d764e8, type: 3}
+    purchased: {fileID: 21300000, guid: d96360f9bb3744478f41ffa1dbd7334e, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: breaker.planetBonusDamage
     available: {fileID: 21300000, guid: 2fa1e14fc38d222cf8248d1443cf8c6f, type: 3}
-    hover: {fileID: 21300000, guid: 3ae3cbf0cecbfb2e379b044b26e87fc5, type: 3}
     purchased: {fileID: 21300000, guid: f205a1e8c75b439e34370194aa893a92, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: breaker.starBonusDamage
     available: {fileID: 21300000, guid: 23e8b6295a8c80056b53f2a844b042a6, type: 3}
-    hover: {fileID: 21300000, guid: 8e0cfa92c9b2de3e3424c2a05a2a7626, type: 3}
     purchased: {fileID: 21300000, guid: 3ccc27ea420f5375923edf5e56887d8a, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: comet.critBonus
     available: {fileID: 21300000, guid: 3c3992ea5eaf402e4afbbda1102aa347, type: 3}
-    hover: {fileID: 21300000, guid: 3ce375c6f77b01b94cac339b945bb04a, type: 3}
     purchased: {fileID: 21300000, guid: ca1eb284bdbeb95b1f5870bc9836aa0d, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: comet.duration
     available: {fileID: 21300000, guid: 5ae72b3e743168eb7a80a593a0adf5e8, type: 3}
-    hover: {fileID: 21300000, guid: a8885a732854ee5fe23f528af3543778, type: 3}
     purchased: {fileID: 21300000, guid: 3a3230057603f40414cb507ecb4eac5c, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: comet.rainChance
     available: {fileID: 21300000, guid: 77601719dfb5cdbdd0d54e313ebdbfb3, type: 3}
-    hover: {fileID: 21300000, guid: 4e88aaa52b7cb33c1fe68c9d78ebe9f2, type: 3}
     purchased: {fileID: 21300000, guid: e62342a1add92cee18aae9b73b5459dc, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricAsteroid.chain
     available: {fileID: 21300000, guid: 5e825db5ae526464622903e07dcabdc0, type: 3}
-    hover: {fileID: 21300000, guid: 01c516396f468aa69b439535cdf7b86e, type: 3}
     purchased: {fileID: 21300000, guid: 3d652025cf5af4497e39d6189de3d324, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricAsteroid.critBonus
     available: {fileID: 21300000, guid: 41c5ea84adf49e685a15dfaac1eb2ac2, type: 3}
-    hover: {fileID: 21300000, guid: 6c83404b65fcd4d2235a50342653f316, type: 3}
     purchased: {fileID: 21300000, guid: a40d8961adeb16cd3212c0881ba66efb, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricAsteroid.critChance
     available: {fileID: 21300000, guid: 64b95acfd33c86e438879637f2bb85c7, type: 3}
-    hover: {fileID: 21300000, guid: e2cd3114f16bfff34ccc24c9ee65abe5, type: 3}
     purchased: {fileID: 21300000, guid: a805dd29e00e304afbfb275268090efd, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricAsteroid.damage
     available: {fileID: 21300000, guid: 81f131c03086407af45df01fdc7d22d0, type: 3}
-    hover: {fileID: 21300000, guid: 82c469aac8db7a9738bb1200f710c221, type: 3}
     purchased: {fileID: 21300000, guid: 5e1d0239d1e4e0cfd08ea242b22e430c, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricAsteroid.splitChance
     available: {fileID: 21300000, guid: d16b731c2b88e620a28ea5db09da7874, type: 3}
-    hover: {fileID: 21300000, guid: b9e05e1b3215121b4c9e077baa31d5f9, type: 3}
     purchased: {fileID: 21300000, guid: 3bb0f35903a193a6819a30969796e350, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricStar.chain
     available: {fileID: 21300000, guid: 74e3a12a10e71b5f67fd568522e5c2b1, type: 3}
-    hover: {fileID: 21300000, guid: 916a72877183e0694aa73438b159ab4b, type: 3}
     purchased: {fileID: 21300000, guid: 151d1bcbf9e0b72d26c5af6f58f33da4, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricStar.critBonus
     available: {fileID: 21300000, guid: b963161e9b7d489de897746e7fd97c08, type: 3}
-    hover: {fileID: 21300000, guid: f4addfc31f406409a99591e74a87212b, type: 3}
     purchased: {fileID: 21300000, guid: fb8e707de9edd73c5a895a1fcae840b7, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricStar.critChance
     available: {fileID: 21300000, guid: 83a602b598e697c27322b11ba731ab2c, type: 3}
-    hover: {fileID: 21300000, guid: 93c804ce1f82461c2e75b582e39362f7, type: 3}
     purchased: {fileID: 21300000, guid: 235f84ce4e931bfc363c514a82ee0425, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricStar.damage
     available: {fileID: 21300000, guid: 7bf1e67aee0e3993d0ea951332aef09d, type: 3}
-    hover: {fileID: 21300000, guid: c0643c3396228aefda90081824263a25, type: 3}
     purchased: {fileID: 21300000, guid: 3b0ccd0ed2ceae96d02ffe936f76da8e, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricStar.spawnChance
     available: {fileID: 21300000, guid: b540f2ec4c45c34d74c4d051d63d5662, type: 3}
-    hover: {fileID: 21300000, guid: 3288fe5ec303b6864e7378c9edf4ddec, type: 3}
     purchased: {fileID: 21300000, guid: f0f1a743ecdb428fd39cad3f476a4518, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: electricStar.splitChance
     available: {fileID: 21300000, guid: 11908491c2e1686fee7dcd4dd6fe4e91, type: 3}
-    hover: {fileID: 21300000, guid: fb0e40e69bfe03debf4f722cdc896448, type: 3}
     purchased: {fileID: 21300000, guid: 0160dbd902cb775975a560788ec2d05d, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: galaxy.massScale
-    available: {fileID: 21300000, guid: 708aed5d9e543a3979daae5a9d20eed0, type: 3}
-    hover: {fileID: 21300000, guid: 62e424f0e42ba9c459a752a5e2d607b9, type: 3}
-    purchased: {fileID: 21300000, guid: 32b42b7a1144999355e1910925800dee, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: galaxy.respawnChance
-    available: {fileID: 21300000, guid: e13c1dc0df48bfb23ee69782d3f67394, type: 3}
-    hover: {fileID: 21300000, guid: d61899aa1b038a27e6b7bcfcec2f29b9, type: 3}
-    purchased: {fileID: 21300000, guid: 40b8798a28dec4761d53ee4eb4405b00, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: galaxy.size
-    available: {fileID: 21300000, guid: 3e4503beb28cac1cb4297709d0fa7eb3, type: 3}
-    hover: {fileID: 21300000, guid: d70ae6df81db4b8ec598a0c9307d6acd, type: 3}
-    purchased: {fileID: 21300000, guid: e0f493c167ef18673d5acce3fd81e218, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: galaxy.timeChance
-    available: {fileID: 21300000, guid: 76b2b9448e04ec1cd9b9f98a0cac882a, type: 3}
-    hover: {fileID: 21300000, guid: 00f7f110a816e4fe8355d593fb7a57e2, type: 3}
-    purchased: {fileID: 21300000, guid: 43fd23979f8e29f2b10716a9d4ecd50f, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: goldenAsteroid.critChance
     available: {fileID: 21300000, guid: 208d64647dbcab56e210c89dc1780706, type: 3}
-    hover: {fileID: 21300000, guid: b0e4d1f52476f58c7d1ab7b46e3f019e, type: 3}
     purchased: {fileID: 21300000, guid: 15571d6bb15a7a5c0272924ddb9a58ae, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: goldenAsteroid.critRewardScale
     available: {fileID: 21300000, guid: 9fcdc3adbcb49bbe81ad646fcd633bcf, type: 3}
-    hover: {fileID: 21300000, guid: e0ba31c88ad901339dfbd7bf376e604a, type: 3}
     purchased: {fileID: 21300000, guid: f70443b93c02b21a8ce672589142f954, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: gravityGalaxy.duration
-    available: {fileID: 21300000, guid: 34f8cf3cafe2f70ef277114b65ad7e71, type: 3}
-    hover: {fileID: 21300000, guid: e936e0afa7272d06467a4c0ca6c8b898, type: 3}
-    purchased: {fileID: 21300000, guid: 29947ad3ff230797760c4fb6a5fa6802, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: gravityGalaxy.force
-    available: {fileID: 21300000, guid: 4c9d8b6132906e06f95449d3f48a7684, type: 3}
-    hover: {fileID: 21300000, guid: 498a9255591d3b9cbb6edb34e486864c, type: 3}
-    purchased: {fileID: 21300000, guid: 3531535cd3bb72115c3cd768a311612d, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: gravityGalaxy.radius
-    available: {fileID: 21300000, guid: 9ad2b57a96c79e6fce5110dac39705de, type: 3}
-    hover: {fileID: 21300000, guid: 2601f4447228ea8c27861938618c7499, type: 3}
-    purchased: {fileID: 21300000, guid: f05945ae7d3d57ffc30db56a3daa029e, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: gravityGalaxy.spawnChance
-    available: {fileID: 21300000, guid: ba0995fd9628281eac4550ac33242a2d, type: 3}
-    hover: {fileID: 21300000, guid: 422e35b0335914f505bd39a70cfd745c, type: 3}
-    purchased: {fileID: 21300000, guid: 1b8ee7b7afbcdddffaf8dcc589d10956, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: growth.galaxies
-    available: {fileID: 21300000, guid: 6b758ba8c8b3bc2235675226d8c75e22, type: 3}
-    hover: {fileID: 21300000, guid: 9ebdc8f9c704299bc51211755e3767bf, type: 3}
-    purchased: {fileID: 21300000, guid: e9fd72306f36956ad356ad8db8bb1a64, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: laserStar.critBonus
     available: {fileID: 21300000, guid: b61d60421e39bf10adcd4581606d4433, type: 3}
-    hover: {fileID: 21300000, guid: 81cba8c4a459a665ca10703cb1259168, type: 3}
     purchased: {fileID: 21300000, guid: 6ba00758a5f01195f9b6c621edc15993, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: laserStar.critChance
     available: {fileID: 21300000, guid: 4c762d1776998221e2ed38b15ef1337e, type: 3}
-    hover: {fileID: 21300000, guid: 284353041988ae567cb3667c058d8134, type: 3}
     purchased: {fileID: 21300000, guid: 2ac9098b7f88e150af3d8b5da7a671e3, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: laserStar.damage
     available: {fileID: 21300000, guid: fdff1bf3f9eab9a075d4470f963b7a62, type: 3}
-    hover: {fileID: 21300000, guid: bb6f10c48772bdf9ab7942f9dd0e8690, type: 3}
     purchased: {fileID: 21300000, guid: 84440e84451ece686d50497d91c13582, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: laserStar.spawnChance
     available: {fileID: 21300000, guid: fe3503d32591386c2d8fde50c00d1bd4, type: 3}
-    hover: {fileID: 21300000, guid: d28a89905a4e284703d8cb83ae9385d5, type: 3}
     purchased: {fileID: 21300000, guid: d22c031fabe7154416056e13ec1fc54d, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: laserStar.width
     available: {fileID: 21300000, guid: b6299233ea1d96782f2d66af99bbaf94, type: 3}
-    hover: {fileID: 21300000, guid: ae9472f36bd52cb6a38bef6c03219838, type: 3}
     purchased: {fileID: 21300000, guid: 788fdcfe8e28d95885c08adc763d8274, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: moonPlanet.duration
     available: {fileID: 21300000, guid: 0d464261cf01b7a167075344f4f161fb, type: 3}
-    hover: {fileID: 21300000, guid: f6e3cae060c4ceebeecb514e45d20d2c, type: 3}
     purchased: {fileID: 21300000, guid: 81a0647695cc2f387e0b2ba7bf91b493, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: moonPlanet.maxCount
     available: {fileID: 21300000, guid: c1e9f7d5086774041394810bf570c4c2, type: 3}
-    hover: {fileID: 21300000, guid: 0e2268a1474956bbcf60573236038a18, type: 3}
     purchased: {fileID: 21300000, guid: 9d4d5a081145ef08bc629fb4d6bc8f1b, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: moonPlanet.rangeScale
     available: {fileID: 21300000, guid: 017aba7bd06862da5a56acb4037ff123, type: 3}
-    hover: {fileID: 21300000, guid: 536cb46ecb8c1e7099338fda0e089b5c, type: 3}
     purchased: {fileID: 21300000, guid: 7f6adcf349f871e91042ec0d91de1edf, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: moonPlanet.speedScale
     available: {fileID: 21300000, guid: 910e6a15eed3d553fee121ec94bb323f, type: 3}
-    hover: {fileID: 21300000, guid: 48aa26b4ad4c4ae610c463273d0da248, type: 3}
     purchased: {fileID: 21300000, guid: 3bcf27009aa7112af0133683f3c103f7, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: planet.respawnChance
     available: {fileID: 21300000, guid: ae06349363c56fde0b5d7c16185fdfcc, type: 3}
-    hover: {fileID: 21300000, guid: 01a9572e85645dada8180c8488787bb2, type: 3}
     purchased: {fileID: 21300000, guid: 7bb89029d00aa79b5b26216b794e83d1, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: planet.size
     available: {fileID: 21300000, guid: b1acff00a73b3f75d18d78455e1f2e4b, type: 3}
-    hover: {fileID: 21300000, guid: 886736975f3ae7703df12fcf3af431d0, type: 3}
     purchased: {fileID: 21300000, guid: d9acab57908c0510856151259ebfea0f, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: planet.timeChance
     available: {fileID: 21300000, guid: 8e719c8b2c16e455ae34c17b9924aae1, type: 3}
-    hover: {fileID: 21300000, guid: 8c79f9da4d43ef6eb684e5223fef9878, type: 3}
     purchased: {fileID: 21300000, guid: 447c6fc4d4a2b311f1594cfb6d2d8652, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: star.respawnChance
     available: {fileID: 21300000, guid: f6aa21e1f06b9a949550c4c06d92eef0, type: 3}
-    hover: {fileID: 21300000, guid: e94b5cca018965d3b11fe214c9a365cf, type: 3}
     purchased: {fileID: 21300000, guid: e6f1d8174a2809295541a6b3554326dd, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: star.size
     available: {fileID: 21300000, guid: 5e7e55827498f20ada929f3f5cdfee1f, type: 3}
-    hover: {fileID: 21300000, guid: cf768110a35e7cbf49f08c0ce0964060, type: 3}
     purchased: {fileID: 21300000, guid: cdcbf86a43d7d00df3fd73d4540378b4, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: star.timeChance
     available: {fileID: 21300000, guid: fc529f5fa4a13c949b3fe5843e8a660c, type: 3}
-    hover: {fileID: 21300000, guid: 20b6df6168233b22a7d700ea62e0c558, type: 3}
     purchased: {fileID: 21300000, guid: 5c04a25c619d1aa5d6150ed2c65bf253, type: 3}
-    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
-  - stat: star.toGalaxy
-    available: {fileID: 21300000, guid: a5e9117dd2069d115876812a312cc7e1, type: 3}
-    hover: {fileID: 21300000, guid: e6191f0f16a4c312b34adc6f51e852d7, type: 3}
-    purchased: {fileID: 21300000, guid: 3e5f16b842b8df89c10593768ebd4137, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: supernovaStar.damage
     available: {fileID: 21300000, guid: 22a536af3dd7a64f6b942d0b59c562e4, type: 3}
-    hover: {fileID: 21300000, guid: 00378227abf35ffde11635e7819061a4, type: 3}
     purchased: {fileID: 21300000, guid: a683ccd85853e78c052cb013bc46b610, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: supernovaStar.range
     available: {fileID: 21300000, guid: 5a4846d59f31a59b1cb7fe2dc7933f2b, type: 3}
-    hover: {fileID: 21300000, guid: 8bb2b00c2d7cfd7b02284381e109f0f8, type: 3}
     purchased: {fileID: 21300000, guid: 7ecdb82a91ebf20560b9bd6e1dba58a7, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   - stat: timer
     available: {fileID: 21300000, guid: b70b74999092632ccb6934cff024f9db, type: 3}
-    hover: {fileID: 21300000, guid: 31b8cfd185cf9d58cb389974d87ff896, type: 3}
     purchased: {fileID: 21300000, guid: a74d7cc156370d4022fad44215373c00, type: 3}
     locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
   _purchasableTint: {r: 0.88, g: 0.88, b: 0.88, a: 1}

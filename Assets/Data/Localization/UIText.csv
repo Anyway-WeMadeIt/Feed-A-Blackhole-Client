@@ -65,6 +65,14 @@ BattleScreen.EndBtn_Text,End,종료
 battle.pause,Pause,일시 정지
 battle.resume,Resume,계속
 battle.earned,+{0} Gold,+{0} 골드
+battle.galaxy,Galaxy,은하
+# 은하 이름(전투 HP 막대). 0~5 = 빨강·주황·노랑·초록·파랑·보라. 이정표 7~12 이름과 같게 둔다.
+battle.galaxy.0,Fireworks Galaxy,불꽃놀이 은하
+battle.galaxy.1,Sunflower Galaxy,해바라기 은하
+battle.galaxy.2,Pinwheel Galaxy,바람개비 은하
+battle.galaxy.3,Cartwheel Galaxy,수레바퀴 은하
+battle.galaxy.4,Whirlpool Galaxy,소용돌이 은하
+battle.galaxy.5,Andromeda Galaxy,안드로메다 은하
 # 결산 화면
 SettlementScreen.DestroyedCaption_Text,DESTROYED,파괴
 SettlementScreen.AsteroidName_Text,ASTEROID,소행성
@@ -76,7 +84,7 @@ SettlementScreen.ContinueBtn_Text,Continue,계속
 settlement.result.milestone,Milestone reached,이정표 도달
 settlement.result.over,Battle over,전투 종료
 settlement.stage,Stage {0} / {1},단계 {0} / {1}
-# 이정표 이름: 0은 시작 자리, 1~6은 Lv 10/20/30/35/40/50 이정표. 전투 HUD·결산·업그레이드가 같은 키를 쓴다.
+# 이정표 이름: 0은 시작 자리, 1~6은 Lv 10/20/30/35/40/50 이정표, 7~12는 Lv 51~56 이정표(은하 0~5를 삼키면 닿는다 — 그 은하 이름을 쓴다). 전투 HUD·결산·업그레이드가 같은 키를 쓴다.
 milestone.0.name,Asteroid Belt,소행성대
 milestone.1.name,Planetary System,행성계
 milestone.2.name,Stellar Cradle,항성 요람
@@ -84,6 +92,28 @@ milestone.3.name,Supernova,초신성
 milestone.4.name,Supernova Remnant,초신성 잔해
 milestone.5.name,Galactic Core,은하핵
 milestone.6.name,Black Hole,블랙홀
+milestone.7.name,Fireworks Galaxy,불꽃놀이 은하
+milestone.8.name,Sunflower Galaxy,해바라기 은하
+milestone.9.name,Pinwheel Galaxy,바람개비 은하
+milestone.10.name,Cartwheel Galaxy,수레바퀴 은하
+milestone.11.name,Whirlpool Galaxy,소용돌이 은하
+milestone.12.name,Andromeda Galaxy,안드로메다 은하
+milestone.tutorial.name,Tutorial,튜토리얼
+# 엔딩·크레딧 [임시 문구] (마지막 이정표 = 보라 은하 격파 뒤 EndingScreen). 줄·크레딧 묶음은 1부터 번호가 끊길 때까지 읽는다. 이름 칸은 | 로 사람을 나눈다(한 줄에 한 사람).
+ending.line.1,The last galaxy has fallen.,마지막 은하가 무너졌습니다.
+ending.line.2,"Stars, planets and every drifting speck of dust have become one.","별도, 행성도, 떠돌던 먼지까지도 모두 하나로 모였습니다."
+ending.line.3,Nothing remains outside the black hole now.,이제 블랙홀 바깥에는 아무것도 남지 않았습니다.
+ending.line.4,"The universe is once again a single, silent point.",우주는 다시 고요한 한 점이 되었습니다.
+ending.credits.title,Feed-A-Blackhole,Feed-A-Blackhole
+ending.credits.1.role,Team,팀
+ending.credits.1.names,"Anyway, We Made It","Anyway, We Made It"
+ending.credits.2.role,Made by,만든 사람들
+ending.credits.2.names,Hicanos|RCO8|healthcabbage|123456789qwaszx|gwangmin-kim|JKH201020,Hicanos|RCO8|healthcabbage|123456789qwaszx|gwangmin-kim|JKH201020
+ending.credits.3.role,And,그리고
+ending.credits.3.names,"You, for feeding the black hole to the very end",끝까지 블랙홀을 먹여 준 당신
+ending.thanks,Thank you for playing,플레이해 주셔서 감사합니다
+ending.prompt,Click or tap to return to the title,화면을 누르면 타이틀로 돌아갑니다
+tutorial.hint.hold,Press and hold to break it,꾹 눌러서 부숴 보세요
 settlement.milestone,{0}  →  {1},{0}  →  {1}
 settlement.milestone.last,{0},{0}
 settlement.milestone.reached,{0} reached!,{0} 도달!
@@ -124,43 +154,43 @@ node.region.core,Galactic Core,은하핵
 node.region.blackhole,Black Hole,블랙홀
 
 # 스킬 노드
-stat.timer.name,Session Timer,세션 타이머
-stat.timer.desc,Increases the length of a run.,한 판의 시간을 늘립니다.
-stat.growth.time.name,Time Added on Growth,블랙홀 성장 시 추가되는 시간
-stat.growth.time.desc,Adds time when the black hole grows.,블랙홀 성장 시 시간을 추가합니다.
-stat.growth.asteroids.name,Asteroids Spawned on Growth,블랙홀 성장 시 생성되는 소행성 수
-stat.growth.asteroids.desc,Increases the number of asteroids spawned when the black hole grows.,블랙홀이 성장할 때 생성되는 소행성의 양을 늘립니다.
-stat.growth.planets.name,Planets Spawned on Growth,블랙홀 성장 시 생성되는 행성 수
-stat.growth.planets.desc,Increases the number of planets spawned when the black hole grows.,블랙홀이 성장할 때 생성되는 행성의 양을 늘립니다.
-stat.growth.stars.name,Stars Spawned on Growth,블랙홀 성장 시 생성되는 별 수
-stat.growth.stars.desc,Increases the number of stars spawned when the black hole grows.,블랙홀이 성장할 때 생성되는 별의 양을 늘립니다.
+stat.timer.name,Session Timer,제한 시간
+stat.timer.desc,Increases the length of a run.,한 판의 기본 제한 시간이 늘어납니다.
+stat.growth.time.name,Time Added on Growth,성장시 추가 시간
+stat.growth.time.desc,Adds time when the black hole grows.,블랙홀 성장 시 제한 시간이 추가됩니다.
+stat.growth.asteroids.name,Asteroids Spawned on Growth,성장 시 소행성 추가
+stat.growth.asteroids.desc,Increases the number of asteroids spawned when the black hole grows.,블랙홀이 성장할 때마다 새 소행성이 나타납니다.\n판 시작 시 소행성이 많을수록 더 많이 나타납니다.
+stat.growth.planets.name,Planets Spawned on Growth,성장 시 행성 추가
+stat.growth.planets.desc,Increases the number of planets spawned when the black hole grows.,블랙홀이 성장할 때마다 새 행성이 나타납니다.\n판 시작 시 행성이 많을수록 더 많이 나타납니다.
+stat.growth.stars.name,Stars Spawned on Growth,성장 시 별 추가
+stat.growth.stars.desc,Increases the number of stars spawned when the black hole grows.,"블랙홀이 성장할 때마다 새 별이 나타납니다.\n판 시작 시 별이 많을수록 더 많이 나타나며, 없으면 효과가 없습니다."
 stat.breaker.damage.name,Breaker Damage,브레이커 피해
-stat.breaker.damage.desc,Increases the base damage of Breaker attacks.,브레이커 공격으로 대상에게 주는 기본 피해량을 높입니다.
+stat.breaker.damage.desc,Increases the base damage of Breaker attacks.,브레이커 공격의 기본 피해가 증가합니다.
 stat.breaker.radius.name,Breaker Range,브레이커 범위
-stat.breaker.radius.desc,Increases the area Breaker attacks reach.,브레이커 공격이 닿는 범위를 넓힙니다.
-stat.breaker.speed.name,Breaker Speed,브레이커 속도
-stat.breaker.speed.desc,Increases Breaker attack speed so it attacks more often.,브레이커의 공격 속도를 높여 더 자주 공격하도록 강화합니다.
+stat.breaker.radius.desc,Increases the area Breaker attacks reach.,브레이커 공격 범위가 넓어집니다.
+stat.breaker.speed.name,Breaker Speed,브레이커 공격 속도
+stat.breaker.speed.desc,Increases Breaker attack speed so it attacks more often.,브레이커가 더 자주 공격합니다.
 stat.breaker.critChance.name,Breaker Crit Chance,브레이커 치명타 확률
-stat.breaker.critChance.desc,Increases the chance for Breaker attacks to crit.,브레이커 공격에서 치명타가 발생할 확률을 높입니다.
-stat.breaker.critBonus.name,Breaker Crit Bonus,브레이커 치명타 보너스
-stat.breaker.critBonus.desc,Increases the damage bonus of Breaker critical hits.,브레이커가 치명타를 냈을 때 적용되는 피해 보너스를 높입니다.
-stat.breaker.planetBonusDamage.name,Breaker Bonus Damage vs Planets,행성에 대한 브레이커의 보너스 피해
-stat.breaker.planetBonusDamage.desc,Increases the extra damage the Breaker deals to planets.,브레이커가 행성을 공격할 때 주는 추가 피해를 높입니다.
-stat.breaker.starBonusDamage.name,Breaker Bonus Damage vs Stars,별에 대한 브레이커의 보너스 대미지
-stat.breaker.starBonusDamage.desc,Increases the extra damage the Breaker deals to stars.,브레이커가 별을 공격할 때 주는 추가 피해를 높입니다.
+stat.breaker.critChance.desc,Increases the chance for Breaker attacks to crit.,브레이커 공격의 치명타 확률이 증가합니다.\n치명타는 그 공격에 맞은 모든 적에게 적용됩니다.
+stat.breaker.critBonus.name,Breaker Crit Bonus,브레이커 치명타 피해
+stat.breaker.critBonus.desc,Increases the damage bonus of Breaker critical hits.,브레이커 치명타의 피해 배율이 증가합니다.
+stat.breaker.planetBonusDamage.name,Breaker Bonus Damage vs Planets,행성 추가 피해
+stat.breaker.planetBonusDamage.desc,Increases the extra damage the Breaker deals to planets.,브레이커가 행성에 고정 추가 피해를 줍니다.
+stat.breaker.starBonusDamage.name,Breaker Bonus Damage vs Stars,별 추가 피해
+stat.breaker.starBonusDamage.desc,Increases the extra damage the Breaker deals to stars.,브레이커가 별에 고정 추가 피해를 줍니다.
 stat.asteroid.count.name,Asteroid Count,소행성 수
-stat.asteroid.count.desc,Increases the number of asteroids.,소행성의 개수를 늘립니다.
+stat.asteroid.count.desc,Increases the number of asteroids.,판 시작 시 등장하는 소행성 수가 늘어납니다.
 stat.asteroid.size.name,Asteroid Size,소행성 크기
-stat.asteroid.size.desc,Adds larger asteroid size tiers to the spawn pool.,더 큰 크기 등급의 소행성을 등장 목록에 추가합니다.
+stat.asteroid.size.desc,Adds larger asteroid size tiers to the spawn pool.,더 큰 소행성이 섞여 나옵니다.\n클수록 체력과 보상이 큽니다.
 stat.asteroid.massScale.name,Asteroid Mass,소행성 질량
-stat.asteroid.massScale.desc,Increases asteroid mass.,소행성의 질량을 높입니다.
-stat.asteroid.timeChance.name,Time Chance on Asteroid Destroy,소행성이 파괴될 때 시간이 추가될 확률
-stat.asteroid.timeChance.desc,Increases the chance to add play time when an asteroid is destroyed.,소행성이 파괴될 때 남은 플레이 시간이 추가될 확률을 높입니다.
-stat.asteroid.respawnChance.name,Asteroid Respawn Chance,소행성이 파괴될 때 새로운 소행성을 생성할 확률
-stat.asteroid.respawnChance.desc,Increases the chance a new asteroid spawns when an asteroid is destroyed.,소행성이 파괴될 때 새로운 소행성이 생성될 확률을 높입니다.
-stat.asteroid.toPlanet.name,Upgrade Asteroids to Planets,소행성을 행성으로 업그레이드
+stat.asteroid.massScale.desc,Increases asteroid mass.,더 높은 색 등급의 소행성이 섞여 나옵니다.\n등급이 높을수록 체력과 보상이 큽니다.
+stat.asteroid.timeChance.name,Time Chance on Asteroid Destroy,소행성 파괴 시 시간 추가
+stat.asteroid.timeChance.desc,Increases the chance to add play time when an asteroid is destroyed.,소행성을 파괴할 때 남은 시간이 늘어날 확률이 증가합니다.
+stat.asteroid.respawnChance.name,Asteroid Respawn Chance,소행성 재생성
+stat.asteroid.respawnChance.desc,Increases the chance a new asteroid spawns when an asteroid is destroyed.,소행성을 파괴하면 새 소행성이 나타날 확률이 증가합니다.
+stat.asteroid.toPlanet.name,Upgrade Asteroids to Planets,소행성 → 행성 전환
 stat.asteroid.toPlanet.desc,More planets appear.,더 많은 행성이 등장합니다.
-stat.planet.toStar.name,Upgrade Planets to Stars,행성을 별로 업그레이드
+stat.planet.toStar.name,Upgrade Planets to Stars,행성 → 별 전환
 stat.planet.toStar.desc,More stars appear.,더 많은 별이 등장합니다.
 stat.electricAsteroid.spawnChance.name,Electric Asteroid Spawn Chance,전기 소행성 생성 확률
 stat.electricAsteroid.spawnChance.desc,Increases the chance electric asteroids spawn.,전기 소행성이 생성되는 확률을 높입니다.
@@ -176,48 +206,48 @@ stat.electricAsteroid.critBonus.name,Electric Asteroid Crit Bonus,전기 소행�
 stat.electricAsteroid.critBonus.desc,Increases the crit damage bonus of electric asteroid lightning.,전기 소행성의 전기 효과가 치명타를 냈을 때의 피해 보너스를 높입니다.
 stat.goldenAsteroid.spawnChance.name,Golden Asteroid Spawn Chance,황금 소행성 생성 확률
 stat.goldenAsteroid.spawnChance.desc,Increases the chance golden asteroids spawn.,황금 소행성이 생성되는 확률을 높입니다.
-stat.goldenAsteroid.rewardScale.name,Golden Asteroid Money Bonus,황금 소행성 보너스 돈 스케일
-stat.goldenAsteroid.rewardScale.desc,Increases the bonus money from golden asteroids.,황금 소행성에서 얻는 돈의 보너스 스케일을 높입니다.
+stat.goldenAsteroid.rewardScale.name,Golden Asteroid Money Bonus,황금 소행성 보너스 돈 증가
+stat.goldenAsteroid.rewardScale.desc,Increases the bonus money from golden asteroids.,황금 소행성에서 얻는 돈의 보너스를 높입니다.
 stat.goldenAsteroid.critChance.name,Golden Asteroid Crit Chance,황금 소행성 치명타 확률
 stat.goldenAsteroid.critChance.desc,Increases the crit chance of golden asteroids.,황금 소행성의 치명타 확률을 높입니다.
-stat.goldenAsteroid.critRewardScale.name,Golden Asteroid Crit Money Bonus,황금 소행성 보너스 치명타 돈 스케일
-stat.goldenAsteroid.critRewardScale.desc,Increases the bonus money from golden asteroid crits.,황금 소행성의 치명타에 따른 돈 보너스 스케일을 높입니다.
+stat.goldenAsteroid.critRewardScale.name,Golden Asteroid Crit Money Bonus,황금 소행성 보너스 치명타 돈 증가
+stat.goldenAsteroid.critRewardScale.desc,Increases the bonus money from golden asteroid crits.,황금 소행성의 치명타에 따른 돈 보너스를 높입니다.
 stat.moonPlanet.spawnChance.name,Moon Spawn Chance,달 생성 확률
 stat.moonPlanet.spawnChance.desc,Increases the chance moons spawn.,달이 생성되는 확률을 높입니다.
-stat.moonPlanet.speedScale.name,Moon Buff: Breaker Speed,브레이커 속도에 대한 달 버프 스케일
-stat.moonPlanet.speedScale.desc,Increases the Breaker attack speed bonus from moon buffs.,달 버프로 얻는 브레이커 공격 속도 보너스를 높입니다.
-stat.moonPlanet.rangeScale.name,Moon Buff: Breaker Range,브레이커 범위에 대한 달 버프 스케일
-stat.moonPlanet.rangeScale.desc,Increases the Breaker range bonus from moon buffs.,달 버프로 얻는 브레이커 공격 범위 보너스를 높입니다.
+stat.moonPlanet.speedScale.name,Moon Buff: Breaker Speed,달 버프: 공격 속도
+stat.moonPlanet.speedScale.desc,Increases the Breaker attack speed bonus from moon buffs.,달 버프 1중첩당 브레이커 공격 속도 증가량이 커집니다.
+stat.moonPlanet.rangeScale.name,Moon Buff: Breaker Range,달 버프: 공격 범위
+stat.moonPlanet.rangeScale.desc,Increases the Breaker range bonus from moon buffs.,달 버프 1중첩당 브레이커 공격 범위 증가량이 커집니다.
 stat.moonPlanet.duration.name,Moon Buff Duration,달 버프 지속시간
 stat.moonPlanet.duration.desc,Increases how long moon buffs last.,달 버프가 유지되는 시간을 늘립니다.
 stat.moonPlanet.maxCount.name,Max Moons,달 최대 개수
-stat.moonPlanet.maxCount.desc,Increases the maximum number of moons.,달의 최대 개수를 늘립니다.
+stat.moonPlanet.maxCount.desc,Increases the maximum number of moons.,화면에 동시에 나올 수 있는 달의 수가 늘어납니다.
 stat.planet.size.name,Planet Size,행성 크기
-stat.planet.size.desc,Adds larger planet size tiers to the spawn pool.,더 큰 크기 등급의 행성을 등장 목록에 추가합니다.
-stat.planet.respawnChance.name,Planet Respawn Chance,행성이 파괴될 때 새로운 행성을 생성할 확률
-stat.planet.respawnChance.desc,Increases the chance a new planet spawns when a planet is destroyed.,행성이 파괴될 때 새로운 행성을 생성할 확률을 높입니다.
+stat.planet.size.desc,Adds larger planet size tiers to the spawn pool.,더 큰 행성이 섞여 나옵니다.\n클수록 체력과 보상이 큽니다.
+stat.planet.respawnChance.name,Planet Respawn Chance,행성 재생성
+stat.planet.respawnChance.desc,Increases the chance a new planet spawns when a planet is destroyed.,행성을 파괴하면 다른 위치에 새 행성이 나타날 확률이 높아집니다.
 stat.planet.massScale.name,Planet Mass,행성 질량
-stat.planet.massScale.desc,"Increases planet mass, changing which enemy colors appear.",행성의 질량을 높이고 등장하는 적의 색 종류를 변화시킵니다.
-stat.planet.timeChance.name,Time Chance on Planet Destroy,행성이 파괴될 때 시간이 추가될 확률
-stat.planet.timeChance.desc,Increases the chance to add time when a planet is destroyed.,행성이 파괴될 때 남은 시간이 추가될 확률을 높입니다.
-stat.comet.spawnChance.name,Crit Comet Spawn Chance,치명타 혜성 생성 확률
+stat.planet.massScale.desc,"Increases planet mass, changing which enemy colors appear.",더 높은 색 등급의 행성이 섞여 나옵니다.\n등급이 높을수록 색 종류와 체력과 보상이 큽니다.
+stat.planet.timeChance.name,Time Chance on Planet Destroy,행성 파괴 시 시간 추가
+stat.planet.timeChance.desc,Increases the chance to add time when a planet is destroyed.,행성을 파괴할 때 남은 시간이 늘어날 확률이 증가합니다.
+stat.comet.spawnChance.name,Crit Comet Spawn Chance,치명타 혜성 등장 확률
 stat.comet.spawnChance.desc,Increases the chance crit comets spawn.,치명타 혜성이 생성되는 확률을 높입니다.
 stat.comet.duration.name,Crit Comet Buff Duration,치명타 혜성 버프 지속시간
-stat.comet.duration.desc,Increases the duration of the crit comet buff.,치명타 혜성으로 얻는 버프의 지속 시간을 늘립니다.
-stat.comet.critBonus.name,Crit Comet Crit Damage Bonus,치명타 혜성 보너스 치명타 대미지
-stat.comet.critBonus.desc,Increases the crit damage bonus from the crit comet buff.,치명타 혜성 버프로 얻는 치명타 피해 보너스를 높입니다.
-stat.comet.rainChance.name,Comet Shower Chance,혜성이 내릴 확률
-stat.comet.rainChance.desc,Increases the chance of a comet shower.,혜성비 현상이 발생할 확률을 높입니다.
-stat.star.respawnChance.name,Star Respawn Chance,별이 파괴될 때 새로운 별을 생성할 확률
-stat.star.respawnChance.desc,Increases the chance a new star spawns when a star is destroyed.,별이 파괴될 때 새로운 별이 생성될 확률을 높입니다.
-stat.star.timeChance.name,Time Chance on Star Destroy,별이 파괴될 때 시간이 추가될 확률
+stat.comet.duration.desc,Increases the duration of the crit comet buff.,치명타 혜성 버프가 더 오래 유지됩니다.\n혜성을 맞힐 때마다 버프가 1중첩씩 쌓입니다.
+stat.comet.critBonus.name,Crit Comet Crit Damage Bonus,치명타 혜성 치명타 피해
+stat.comet.critBonus.desc,Increases the crit damage bonus from the crit comet buff.,치명타 혜성 버프 1중첩당 브레이커 치명타 피해가 더 커집니다.
+stat.comet.rainChance.name,Comet Shower Chance,혜성비 확률
+stat.comet.rainChance.desc,Increases the chance of a comet shower.,치명타 혜성이 나타날 때 일정 확률로 한번에 쏟아집니다.
+stat.star.respawnChance.name,Star Respawn Chance,별 재생성
+stat.star.respawnChance.desc,Increases the chance a new star spawns when a star is destroyed.,별을 파괴하면 일정 확률로 새 별이 나타납니다.
+stat.star.timeChance.name,Time Chance on Star Destroy,별 파괴 시 시간 추가
 stat.star.timeChance.desc,Increases the chance to add play time when a star is destroyed.,별이 파괴될 때 남은 플레이 시간이 추가될 확률을 높입니다.
 stat.star.size.name,Star Size,별 크기
-stat.star.size.desc,Adds larger star size tiers to the spawn pool.,더 큰 크기 등급의 별을 등장 목록에 추가합니다.
+stat.star.size.desc,Adds larger star size tiers to the spawn pool.,더 큰 별이 섞여 나옵니다.\n클수록 체력과 보상이 크고 슈퍼노바 폭발도 넓어집니다.
 stat.star.massScale.name,Star Mass,별 질량
-stat.star.massScale.desc,Increases star mass.,별의 질량을 높입니다.
-stat.electricStar.spawnChance.name,Electric Star Spawn Chance,전기 별 생성 확률
-stat.electricStar.spawnChance.desc,Increases the chance electric stars spawn.,전기 별이 생성되는 확률을 높입니다.
+stat.star.massScale.desc,Increases star mass.,더 높은 색 등급의 별이 섞여 나옵니다.\n등급이 높을수록 체력과 보상이 큽니다.
+stat.electricStar.spawnChance.name,Electric Star Spawn Chance,전기 별 등장 확률
+stat.electricStar.spawnChance.desc,Increases the chance electric stars spawn.,파괴되면 주변 적에게 번개를 튀기는 전기 별이 더 자주 등장합니다.
 stat.electricStar.damage.name,Electric Star Damage,전기 별 대미지
 stat.electricStar.damage.desc,Increases the damage of electric star lightning.,전기 별의 전기 효과의 대미지를 높입니다.
 stat.electricStar.critChance.name,Electric Star Crit Chance,전기 별 치명타 확률
@@ -225,13 +255,13 @@ stat.electricStar.critChance.desc,Increases the chance for electric star lightni
 stat.electricStar.chain.name,Electric Star Max Chain,전기 별 최대 연쇄
 stat.electricStar.chain.desc,Increases the maximum chain length of electric star lightning.,전기 별의 전기 효과가 이어지는 최대 연쇄 수를 늘립니다.
 stat.electricStar.splitChance.name,Electric Star Split Chance,전기 별 갈라질 확률
-stat.electricStar.splitChance.desc,Increases the chance electric star lightning splits into extra paths.,전기 별의 전기 효과가 갈라져 추가 경로로 퍼질 확률을 높입니다.
+stat.electricStar.splitChance.desc,Increases the chance electric star lightning splits into extra paths.,전기 별 번개가 여러 줄기로 갈라질 확률이 증가합니다.\n최대 8줄기까지 갈라집니다.
 stat.electricStar.critBonus.name,Electric Star Crit Bonus,전기 별 치명타 보너스
 stat.electricStar.critBonus.desc,Increases the crit damage of electric star lightning.,전기 별의 전기 효과의 치명타 피해량을 높입니다.
-stat.laserStar.spawnChance.name,Laser Star Spawn Chance,레이저 별 생성 확률
+stat.laserStar.spawnChance.name,Laser Star Spawn Chance,레이저 별 등장 확률
 stat.laserStar.spawnChance.desc,Increases the chance laser stars spawn.,레이저 별이 생성되는 확률을 높입니다.
 stat.laserStar.width.name,Laser Width,레이저 너비
-stat.laserStar.width.desc,Increases the width of lasers.,레이저의 너비를 넓힙니다.
+stat.laserStar.width.desc,Increases the width of lasers.,레이저가 굵어져 더 많은 적을 맞힙니다.
 stat.laserStar.critChance.name,Laser Crit Chance,레이저 치명타 확률
 stat.laserStar.critChance.desc,Increases the chance for lasers to crit.,레이저가 치명타로 발생할 확률을 높입니다.
 stat.laserStar.damage.name,Laser Damage,레이저 대미지
@@ -243,26 +273,32 @@ stat.supernovaStar.range.desc,Increases the blast range of supernovas.,슈퍼노
 stat.supernovaStar.damage.name,Supernova Damage,슈퍼노바 대미지
 stat.supernovaStar.damage.desc,Increases the damage of supernova blasts.,슈퍼노바 폭발의 대미지를 높입니다.
 stat.supernovaStar.spawnChance.name,Supernova Star Spawn Chance,슈퍼노바 별 생성 확률
-stat.supernovaStar.spawnChance.desc,Increases the chance supernova stars spawn.,슈퍼노바 별이 생성되는 확률을 높입니다.
+stat.supernovaStar.spawnChance.desc,Increases the chance supernova stars spawn.,파괴되면 주변에 폭발을 일으키는 슈퍼노바 별이 더 자주 등장합니다.
 stat.growth.galaxies.name,Galaxies Spawned on Growth,블랙홀 성장 시 생성되는 은하 수
 stat.growth.galaxies.desc,Increases the number of galaxies spawned when the black hole levels up.,블랙홀이 레벨업할 때 생성되는 은하 수를 늘립니다.
-stat.star.toGalaxy.name,Upgrade Stars to Galaxies,별을 은하로 업그레이드
+stat.star.toGalaxy.name,Upgrade Stars to Galaxies,별 → 은하 전환
 stat.star.toGalaxy.desc,Turns some stars into galaxies at the start of a run.,판 시작 시 별 일부를 은하로 바꿉니다.
 stat.galaxy.size.name,Galaxy Size,은하 크기
-stat.galaxy.size.desc,Adds larger galaxy size tiers to the spawn pool.,등장 가능한 은하의 크기 단계를 추가합니다.
+stat.galaxy.size.desc,Makes the galaxy larger.,은하가 더 커집니다.
 stat.galaxy.massScale.name,Galaxy Mass,은하 질량
-stat.galaxy.massScale.desc,"Increases galaxy mass, changing the mix of color tiers.",은하의 질량을 높여 색 등급별 출현 비율을 바꿉니다.
-stat.galaxy.respawnChance.name,Galaxy Respawn Chance,은하가 파괴될 때 새로운 은하를 생성할 확률
-stat.galaxy.respawnChance.desc,Increases the chance a new galaxy spawns when a galaxy is destroyed.,은하가 파괴될 때 새 은하 한 마리를 생성할 확률을 높입니다.
-stat.galaxy.timeChance.name,Time Chance on Galaxy Destroy,은하가 파괴될 때 시간이 추가될 확률
-stat.galaxy.timeChance.desc,Increases the chance to add time when a galaxy is destroyed.,은하가 파괴될 때 남은 시간이 추가될 확률을 높입니다.
-stat.breaker.galaxyBonusDamage.name,Breaker Bonus Damage vs Galaxies,은하에 대한 브레이커의 보너스 피해
-stat.breaker.galaxyBonusDamage.desc,Increases the extra damage the Breaker deals to galaxies.,은하에 대한 브레이커의 추가 피해를 늘립니다.
+stat.galaxy.massScale.desc,"Increases galaxy mass, changing the mix of color tiers.",더 높은 색 등급의 은하가 섞여 나옵니다.\n등급이 높을수록 체력과 보상이 큽니다.
+stat.galaxy.respawnChance.name,Galaxy Respawn Chance,은하 재생성
+stat.galaxy.respawnChance.desc,Increases the chance a new galaxy spawns when a galaxy is destroyed.,은하를 파괴하면 일정 확률로 새 은하가 나타납니다.
+stat.galaxy.timeChance.name,Time Chance on Galaxy Destroy,은하 파괴 시 시간 추가
+stat.galaxy.timeChance.desc,Increases the chance to add time when a galaxy is destroyed.,은하를 파괴하면 일정 확률로 남은 시간이 늘어납니다.
+stat.breaker.galaxyBonusDamage.name,Breaker Bonus Damage vs Galaxies,은하 추가 피해
+stat.breaker.galaxyBonusDamage.desc,Increases the extra damage the Breaker deals to galaxies.,브레이커의 은하 고정 추가 피해가 증가합니다.
+stat.laserStar.galaxyBonusDamage.name,Laser Bonus Damage vs Galaxies,은하에 대한 레이저의 보너스 피해
+stat.laserStar.galaxyBonusDamage.desc,Increases the extra damage lasers deal to galaxies.,레이저가 은하에 주는 추가 피해를 늘립니다.
+stat.supernovaStar.galaxyBonusDamage.name,Supernova Bonus Damage vs Galaxies,은하에 대한 슈퍼노바의 보너스 피해
+stat.supernovaStar.galaxyBonusDamage.desc,Increases the extra damage supernovas deal to galaxies.,슈퍼노바가 은하에 주는 추가 피해를 늘립니다.
+stat.electricStar.galaxyBonusDamage.name,Electric Star Bonus Damage vs Galaxies,은하에 대한 전기 별의 보너스 피해
+stat.electricStar.galaxyBonusDamage.desc,Increases the extra damage electric star lightning deals to galaxies.,전기 별의 번개가 은하에 주는 추가 피해를 늘립니다.
 stat.gravityGalaxy.spawnChance.name,Gravity Galaxy Spawn Chance,중력장 은하 생성 확률
-stat.gravityGalaxy.spawnChance.desc,Increases the chance galaxies with a gravity field spawn.,중력장 성질을 가진 은하가 생성될 확률을 높입니다.
+stat.gravityGalaxy.spawnChance.desc,Increases the chance galaxies with a gravity field spawn.,파괴되면 주변 적을 끌어모으는 중력장을 남기는 은하가 더 자주 등장합니다.
 stat.gravityGalaxy.radius.name,Gravity Field Range,중력장 범위
-stat.gravityGalaxy.radius.desc,Increases the radius of the gravity field left by a destroyed galaxy.,은하 처치로 발생하는 중력장의 반경을 늘립니다.
-stat.gravityGalaxy.force.name,Gravity Field Pull,중력장이 적을 끌어당기는 힘
+stat.gravityGalaxy.radius.desc,Increases the radius of the gravity field left by a destroyed galaxy.,중력장이 더 넓은 범위의 적을 끌어모읍니다.
+stat.gravityGalaxy.force.name,Gravity Field Pull,중력장 세기
 stat.gravityGalaxy.force.desc,Increases how fast gravity fields pull enemies toward the center.,중력장이 적을 중심으로 끌어당기는 속도를 높입니다.
 stat.gravityGalaxy.duration.name,Gravity Field Duration,중력장 지속 시간
 stat.gravityGalaxy.duration.desc,Increases the duration of the gravity field left by a destroyed galaxy.,은하 처치로 발생하는 중력장의 지속 시간을 늘립니다.

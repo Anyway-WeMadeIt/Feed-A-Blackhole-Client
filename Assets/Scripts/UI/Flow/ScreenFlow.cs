@@ -18,6 +18,7 @@ namespace BlackHole.Unity
         private readonly HqGrowthDefinition _growth;// 블랙홀 성장(성장도별 Level 표, 이정표).
         private readonly GameSettings _settings;// 플레이어 설정.
         private readonly Localizer _localizer;// 코드가 쓰는 UI 글자의 번역.
+        private readonly UIFontSet _fonts;// 언어·역할별 글꼴. 프리팹 없이 코드로 만드는 화면(엔딩)이 쓴다.
         private readonly ScreenTransition _transition;
         private readonly KeyInput _keyInput;
         private readonly SyncLogFactory _syncLogs;// 판 시작·결산, 노드 구매, 새 게임을 서버 동기화 로그로 만든다.
@@ -37,6 +38,7 @@ namespace BlackHole.Unity
             HqGrowthDefinition growth,
             GameSettings settings,
             Localizer localizer,
+            UIFontSet fonts,
             ScreenTransition transition,
             KeyInput keyInput,
             SyncLogFactory syncLogs)
@@ -52,6 +54,7 @@ namespace BlackHole.Unity
             _growth = growth;
             _settings = settings;
             _localizer = localizer;
+            _fonts = fonts;
             _transition = transition;
             _keyInput = keyInput;
             _syncLogs = syncLogs;
@@ -104,6 +107,8 @@ namespace BlackHole.Unity
             _keyInput.ContinuePressed -= HandleKeyActionSpace;
             _keyInput.UpgradePressed -= HandleKeyActionShift;
             _keyInput.PausePressed -= HandleKeyActionEsc;
+
+            CloseEnding();
 
             foreach (List<Action> cleanups in _cleanupByScreen.Values)
                 RunCleanups(cleanups);

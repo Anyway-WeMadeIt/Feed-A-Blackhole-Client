@@ -7,8 +7,15 @@ namespace BlackHole.Unity
     internal sealed partial class ScreenFlow
     {
         // 끝난 판의 원자료와 결산을 마친 진행 상태를 보여 준다(성장도는 이미 올라 있다).
-        private void ShowSettlement(BattleRawData raw)
+        // tutorial: 튜토리얼 판의 결과. 진행 상태에 결산하지 않았으므로 단계는 "튜토리얼 → 첫 단계"로 보이고 막대는 가득 찬다.
+        private void ShowSettlement(BattleRawData raw, bool tutorial = false)
         {
+            string stageName = tutorial ? _localizer.Get("milestone.tutorial.name") : MilestoneName(raw.Stage);
+            string nextName = tutorial
+                ? MilestoneName(HqGrowthDefinition.StartStage)
+                : raw.Stage < _growth.MaxStage ? MilestoneName(raw.Stage + 1) : null;
+            float fraction = tutorial ? 1f : LevelFraction(raw);
+
             _ui.SwitchRoot<SettlementScreen>(
                 _presentations.Settlement,
                 afterPresented: root =>
@@ -20,8 +27,7 @@ namespace BlackHole.Unity
 
                     BindView(root, ApplyBindings);
                     root.ShowResult(raw.ReachedMilestone);
-                    root.ShowStage(MilestoneName(raw.Stage), raw.Stage < _growth.MaxStage ? MilestoneName(raw.Stage + 1) : null,
-                        LevelFraction(raw), raw.ReachedMilestone);
+                    root.ShowStage(stageName, nextName, fraction, raw.ReachedMilestone);
                     root.ShowMatter(asteroids, planets, stars);
                     root.ShowGold(raw.EarnedGold, raw.SettledGold, raw.ReachedMilestone, _progress.Gold);
                     root.ShowStats(raw.Stats, asteroids, planets, stars);

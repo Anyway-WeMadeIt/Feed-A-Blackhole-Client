@@ -107,6 +107,12 @@ namespace BlackHole.Core
                 _alive[i].Move(delta);
         }
 
+        public void Move(float delta, OrbitShape orbit, float minRadius)
+        {
+            for (int i = 0; i < _alive.Count; i++)
+                _alive[i].Move(delta, orbit, minRadius);
+        }
+
         // true는 이번 피해로 죽었다는 뜻.
         public bool DealDamage(Enemy enemy, Damage damage)
         {
