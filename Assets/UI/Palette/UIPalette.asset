@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b933a13777a846d592224302988a722b, type: 3}
+  m_Name: UIPalette
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIPalette
+  themes:
+  - themeId: Light
+    textMain: {r: 0.125, g: 0.129, b: 0.141, a: 1}
+    textWeak: {r: 0.42, g: 0.435, b: 0.424, a: 1}
+    accent: {r: 0.341, g: 0.592, b: 0.412, a: 1}
+    surface: {r: 0.953, g: 0.945, b: 0.91, a: 1}
+    line: {r: 0.722, g: 0.729, b: 0.725, a: 1}
+    backdrop: {r: 0.906, g: 0.89, b: 0.839, a: 1}
+  - themeId: Dark
+    textMain: {r: 0.949, g: 0.945, b: 0.91, a: 1}
+    textWeak: {r: 0.659, g: 0.678, b: 0.651, a: 1}
+    accent: {r: 0.341, g: 0.592, b: 0.412, a: 1}
+    surface: {r: 0.165, g: 0.176, b: 0.2, a: 1}
+    line: {r: 0.29, g: 0.31, b: 0.337, a: 1}
+    backdrop: {r: 0.078, g: 0.09, b: 0.11, a: 1}

@@ -1,0 +1,6 @@
+{
+  "name": "BlackHole.Core.Hq",
+  "rootNamespace": "BlackHole.Core",
+  "references": ["BlackHole.Core.Common"],
+  "noEngineReferences": true
+}

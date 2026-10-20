@@ -1,0 +1,26 @@
+{
+  "name": "BlackHole.Save.Tests",
+  "rootNamespace": "BlackHole.Save.Tests",
+  "references": [
+    "BlackHole.Save",
+    "BlackHole.Sync",
+    "BlackHole.Net",
+    "BlackHole.Core.Common",
+    "BlackHole.Core.Hq",
+    "BlackHole.Core.Battle",
+    "BlackHole.Core.Nodes",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}

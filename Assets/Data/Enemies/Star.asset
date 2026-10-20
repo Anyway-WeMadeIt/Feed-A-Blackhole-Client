@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62ca70292566404596f44063455f757e, type: 3}
+  m_Name: Star
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemyKind
+  type: 2
+  moveSpeed: 0.68
+  radius: 3
+  radiusStep: 0.16
+  upgradesTo: {fileID: 11400000, guid: 29e4d81e98ee4f70aa1065bfd408911e, type: 2}
+  spawnPeriod: 0
+  rainCount: 0
+  killTimeBonus: 0
+  respawnDecay: 0.7
+  respawnStages:
+  - stage: 3
+    decay: 0.88
+    maxGeneration: 0
+  - stage: 5
+    decay: 0.96
+    maxGeneration: 0
+  - stage: 6
+    decay: 1
+    maxGeneration: 0
+  rainCooldown: 0
+  rainDelay: 0
+  tiers:
+  - color: {r: 0.62, g: 0.32, b: 0.26, a: 1}
+    maxHealth: 4800
+    gold: 50000000000
+    exp: 1500000
+  - color: {r: 0.93, g: 0.55, b: 0.2, a: 1}
+    maxHealth: 8800
+    gold: 100000000000
+    exp: 1800000
+  - color: {r: 0.95, g: 0.85, b: 0.3, a: 1}
+    maxHealth: 17800
+    gold: 200000000000
+    exp: 2200000
+  - color: {r: 0.4, g: 0.68, b: 0.42, a: 1}
+    maxHealth: 38800
+    gold: 400000000000
+    exp: 2680000
+  - color: {r: 0.33, g: 0.46, b: 0.81, a: 1}
+    maxHealth: 67000
+    gold: 580000000000
+    exp: 3600000
+  - color: {r: 0.68, g: 0.47, b: 0.93, a: 1}
+    maxHealth: 132000
+    gold: 2080000000000
+    exp: 7800000
+  traits:
+  - type: 1
+    color: {r: 0.45, g: 0.75, b: 1, a: 1}
+    multiplier: 1
+    critRewardScale: 0
+    damage: 5800
+    radius: 8.8
+    maxTargets: 6
+    branches: 2
+    branchChance: 0.5
+    critChance: 0
+    critMultiplier: 1.5
+    width: 0
+    maxActive: 0
+    force: 0
+    duration: 0
+  - type: 3
+    color: {r: 1, g: 0.3, b: 0.3, a: 1}
+    multiplier: 1
+    critRewardScale: 0
+    damage: 8000
+    radius: 0
+    maxTargets: 0
+    branches: 0
+    branchChance: 0
+    critChance: 0
+    critMultiplier: 2
+    width: 2
+    maxActive: 0
+    force: 0
+    duration: 0
+  - type: 4
+    color: {r: 1, g: 0.55, b: 0.2, a: 1}
+    multiplier: 1
+    critRewardScale: 0
+    damage: 10000
+    radius: 8
+    maxTargets: 0
+    branches: 0
+    branchChance: 0
+    critChance: 0
+    critMultiplier: 0
+    width: 0
+    maxActive: 0
+    force: 0
+    duration: 0
+  sprite: {fileID: 0}

@@ -1,0 +1,42 @@
+{
+  "name": "test-profile",
+  "note": "test-profile",
+  "patches": [
+    {
+      "path": "node/asteroid.respawnChance-01/1/asteroid.respawnChance",
+      "value": 0.3
+    },
+    {
+      "path": "node/asteroid.respawnChance-02/1/asteroid.respawnChance",
+      "value": 0.4
+    },
+    {
+      "path": "node/asteroid.respawnChance-03/1/asteroid.respawnChance",
+      "value": 0.05
+    },
+    {
+      "path": "node/asteroid.respawnChance-04/1/asteroid.respawnChance",
+      "value": 0.13
+    },
+    {
+      "path": "node/asteroid.respawnChance-05/1/asteroid.respawnChance",
+      "value": 0.13
+    },
+    {
+      "path": "node/planet.respawnChance-01/1/planet.respawnChance",
+      "value": 6
+    },
+    {
+      "path": "node/planet.respawnChance-02/1/planet.respawnChance",
+      "value": 2
+    },
+    {
+      "path": "node/planet.respawnChance-03/1/planet.respawnChance",
+      "value": 1
+    },
+    {
+      "path": "node/planet.respawnChance-04/1/planet.respawnChance",
+      "value": 1
+    }
+  ]
+}

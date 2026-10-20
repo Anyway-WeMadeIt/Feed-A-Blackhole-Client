@@ -1,0 +1,6 @@
+{
+  "name": "BlackHole.Core.Enemies",
+  "rootNamespace": "BlackHole.Core",
+  "references": ["BlackHole.Core.Common", "BlackHole.Core.Hq"],
+  "noEngineReferences": true
+}

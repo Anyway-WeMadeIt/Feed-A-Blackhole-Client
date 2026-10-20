@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14ca981c10484c0ea3f88123526fc364, type: 3}
+  m_Name: GameContentSetup
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.GameContentSetup
+  _battleRules: {fileID: 11400000, guid: 6d87197bb0db42cdaa326de4df103401, type: 2}
+  _skills: {fileID: 11400000, guid: 3ab44acfb37f427790e580c9f6a10538, type: 2}
+  _enemies: {fileID: 11400000, guid: ded2d6b762d0427189db081f4023c81a, type: 2}
+  _supply: {fileID: 11400000, guid: 1506d53a97654897bc5d7b4126a28333, type: 2}
+  _growth: {fileID: 11400000, guid: 2218973c18e541949f58c6719fd25c5e, type: 2}
+  _nodes: {fileID: 11400000, guid: dc906d29ddfc4d0089200fffb6c6e8be, type: 2}

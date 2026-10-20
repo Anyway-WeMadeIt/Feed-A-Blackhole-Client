@@ -1,0 +1,10 @@
+{
+  "name": "golden-x10",
+  "note": "황금 소행성 배율 ×50 → ×10(황금 몫 약 53% 예상). golden-x5와 같은 시나리오로 비교한다.",
+  "patches": [
+    {
+      "path": "enemy/asteroid/trait/golden/multiplier",
+      "value": 10
+    }
+  ]
+}

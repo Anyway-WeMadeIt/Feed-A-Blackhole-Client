@@ -1,0 +1,22 @@
+float t = lerp(Time, Clock, step(0.5, UseExternalClock));
+float2 p = (UV - float2(CenterX, CenterY)) * float2(max(Aspect, 0.01), 1.0) / max(PatternSize, 0.01);
+float a = radians(t * RotationSpeed);
+float cs = cos(a), sn = sin(a);
+float2 q = float2(cs*p.x + sn*p.y, -sn*p.x + cs*p.y) + 0.5;
+float inside = step(0.0,q.x)*step(q.x,1.0)*step(0.0,q.y)*step(q.y,1.0);
+float3 m = SAMPLE_TEXTURE2D(Masks.tex, Masks.samplerstate, q).rgb;
+float4 f = SAMPLE_TEXTURE2D(Flow.tex, Flow.samplerstate, q);
+float phase = atan2(f.g-0.5, f.r-0.5) / 6.28318530718;
+float d = frac(t*FlowSpeed + f.a - phase);
+float head = exp(-pow(min(d,1.0-d)/0.007,2.0));
+float tail = exp(-d/0.035)*step(d,0.16);
+float gate = smoothstep(0.0,0.12,frac(t/17.0+f.a)) * (1.0-smoothstep(0.65,0.85,frac(t/17.0+f.a)));
+float twinkle = 0.7 + 0.3*sin(t*TwinkleSpeed + dot(q,float2(73.0,127.0)));
+float l = m.r * LineOpacity * LineColor.a;
+float s = (m.g*twinkle + m.b*0.2)*StarOpacity + f.b*(head+tail*0.35)*gate*FlowOpacity;
+s *= StarColor.a;
+Color = (LineColor.rgb*l + StarColor.rgb*s)/max(l+s,0.00001);
+// Protect the central gameplay region in screen UV, regardless of pattern rotation.
+float edgeDistance = max(abs(UV.x-0.5), abs(UV.y-0.5));
+float edgeFade = smoothstep(0.28, 0.46, edgeDistance);
+Alpha = saturate(l+s)*saturate(OverallOpacity)*inside*edgeFade;

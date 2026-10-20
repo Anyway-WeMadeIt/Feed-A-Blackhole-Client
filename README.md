@@ -33,3 +33,13 @@ git config --local commit.template .gitmessage
 `git commit -m` 또는 일부 IDE의 커밋 입력 창에는 자동 적용되지 않습니다.
 
 협업 규칙은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
+
+## 서버 연동 계획
+
+서버 연동(게스트 로그인, 오프라인 플레이 기록 동기화, 전투 결산 검증)의 계획과 계약 문서는 서버 저장소에서 관리합니다.
+
+- [계획서](https://github.com/Anyway-WeMadeIt/Feed-A-Blackhole-Server/blob/dev/docs/server-sync-plan.md): 설계, 결정 사항, 작업 정의
+- [작업지시](https://github.com/Anyway-WeMadeIt/Feed-A-Blackhole-Server/blob/dev/docs/server-sync-assignment.md): 담당과 순서, 충돌 주의 파일
+- [API 명세](https://github.com/Anyway-WeMadeIt/Feed-A-Blackhole-Server/blob/dev/docs/api-spec.md): 클라이언트와 서버의 통신 계약
+
+전투·노드 콘텐츠의 원본은 이 저장소입니다. 콘텐츠를 바꾸면 계획서의 콘텐츠 이관 절차에 따라 서버에도 반영해야 합니다.

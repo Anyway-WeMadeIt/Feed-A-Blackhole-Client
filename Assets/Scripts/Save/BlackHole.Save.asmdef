@@ -1,0 +1,13 @@
+{
+  "name": "BlackHole.Save",
+  "rootNamespace": "BlackHole.Unity",
+  "references": [
+    "BlackHole.Core.Common",
+    "BlackHole.Core.Hq",
+    "BlackHole.Core.Enemies",
+    "BlackHole.Core.Battle",
+    "BlackHole.Core.Nodes",
+    "BlackHole.Net",
+    "BlackHole.Sync"
+  ]
+}

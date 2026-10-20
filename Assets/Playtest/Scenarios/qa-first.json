@@ -1,0 +1,13 @@
+{
+  "name": "qa-first",
+  "category": "QA/기본",
+  "note": "공유용 대표 시점. 예산이 있으면 현재 가격으로 생성하는 레시피.",
+  "expected": "첫 판 시작·기본 브레이커·제한 시간·결산",
+  "growthStage": 0,
+  "gold": 0,
+  "nodes": [],
+  "autoBuyBudget": 0,
+  "startLevel": 0,
+  "seed": 1,
+  "freezeTime": false
+}

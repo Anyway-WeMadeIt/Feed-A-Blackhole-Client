@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf3a9f673c3c4e90a4450bb4b480a056, type: 3}
+  m_Name: NodeContent
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.NodeContentSource
+  _upgradeStats: {fileID: 4900000, guid: 4631f5f620384232a080cad490c14137, type: 3}
+  _nodes: {fileID: 4900000, guid: 62745ce8492a4f9dbcb556ae7b001080, type: 3}
+  _nodeCost: {fileID: 4900000, guid: 106063e3612d4b888456d6180f3ae446, type: 3}
+  _nodeEffects: {fileID: 4900000, guid: e268c84ea66b4ea79e2e60ad14f1bda8, type: 3}

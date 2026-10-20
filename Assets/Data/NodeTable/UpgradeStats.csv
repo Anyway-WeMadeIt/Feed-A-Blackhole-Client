@@ -1,0 +1,75 @@
+StatId,ValueType,Unit,DefaultValue,Aggregation,Min,Max,Enabled,Memo,원작 이름,원작 단위,원작 시작값,원작 노드 수,구현 상태,사용 노드 수,검사
+timer,Float,Flat,12,Add,0,,TRUE,,세션 타이머,값,12,4,[2]동일한것,3,OK
+growth.time,Float,Flat,0,Add,0,,TRUE,,블랙홀 성장 시 추가되는 시간,값,0,1,[2]동일한것,1,OK
+growth.asteroids,Float,Percent,0,Add,0,,TRUE,,블랙홀 성장 시 생성되는 소행성 수,%,0,3,[2]동일한것,4,OK
+growth.planets,Float,Percent,0,Add,0,,TRUE,,블랙홀 성장 시 생성되는 행성 수,%,0,2,[2]동일한것,2,OK
+growth.stars,Float,Percent,0,Add,0,,TRUE,,블랙홀 성장 시 생성되는 별 수,%,0,1,[2]동일한것,1,OK
+breaker.damage,Float,Flat,1,Add,0,,TRUE,,브레이커 피해,값,1,28,[2]동일한것,27,OK
+breaker.radius,Float,Percent,100,Add,0,,TRUE,,브레이커 범위,%,100,13,[2]동일한것,13,OK
+breaker.speed,Float,Percent,100,Add,0,,TRUE,,브레이커 속도,%,100,12,[2]동일한것,20,OK
+breaker.critChance,Float,Percent,0,Add,0,100,TRUE,,브레이커 치명타 확률,%,0,5,[2]동일한것,4,OK
+breaker.critBonus,Float,Percent,200,Add,0,,TRUE,,브레이커 치명타 보너스,%,200,5,[2]동일한것,12,OK
+breaker.planetBonusDamage,Float,Flat,0,Add,0,,TRUE,,행성에 대한 브레이커의 보너스 피해,값,,4,[2]동일한것,4,OK
+breaker.starBonusDamage,Float,Flat,0,Add,0,,TRUE,,별에 대한 브레이커의 보너스 대미지,값,,2,[2]동일한것,2,OK
+asteroid.count,Int,Flat,12,Add,0,,TRUE,,소행성 수,값,20,5,[2]동일한것,5,OK
+asteroid.size,Int,Flat,1,Add,0,,TRUE,,소행성 크기,값,1,2,[2]동일한것,2,OK
+asteroid.massScale,Float,Percent,100,Add,0,,TRUE,,소행성 질량,%,100,10,[2]동일한것,10,OK
+asteroid.timeChance,Float,Percent,0,Add,0,100,TRUE,,소행성이 파괴될 때 시간이 추가될 확률,%,0,2,[2]동일한것,2,OK
+asteroid.respawnChance,Float,Percent,0,Add,0,100,TRUE,,소행성이 파괴될 때 새로운 소행성을 생성할 확률,%,0,5,[2]동일한것,5,OK
+asteroid.toPlanet,Float,Flat,0,Add,0,,TRUE,,소행성을 행성으로 업그레이드,값,0,5,[2]동일한것,15,OK
+planet.toStar,Float,Flat,0,Add,0,,TRUE,,행성을 별로 업그레이드,값,0,6,[2]동일한것,16,OK
+electricAsteroid.spawnChance,Float,Percent,0,Add,0,100,TRUE,,전기 소행성 생성 확률,%,0,1,[2]동일한것,1,OK
+electricAsteroid.damage,Float,Flat,1,Add,0,,TRUE,,전기 소행성 피해,값,1,3,[2]동일한것,3,OK
+electricAsteroid.critChance,Float,Percent,0,Add,0,100,TRUE,,전기 소행성 치명타 확률,%,0,2,[2]동일한것,2,OK
+electricAsteroid.chain,Int,Flat,3,Add,0,,TRUE,,전기 소행성 최대 연쇄,값,3,2,[2]동일한것,2,OK
+electricAsteroid.splitChance,Float,Percent,0,Add,0,100,TRUE,,전기 소행성이 갈라질 확률,%,0,2,[2]동일한것,2,OK
+electricAsteroid.critBonus,Float,Percent,200,Add,0,,TRUE,,전기 소행성 치명타 보너스,%,200,2,[2]동일한것,2,OK
+goldenAsteroid.spawnChance,Float,Percent,0,Add,0,100,TRUE,,황금 소행성 생성 확률,%,0,1,[2]동일한것,1,OK
+goldenAsteroid.rewardScale,Float,Percent,50,Add,0,,TRUE,,황금 소행성 보너스 돈 스케일,%,50,5,[2]동일한것,5,OK
+goldenAsteroid.critChance,Float,Percent,0,Add,0,100,TRUE,,황금 소행성 치명타 확률,%,0,3,[2]동일한것,3,OK
+goldenAsteroid.critRewardScale,Float,Percent,100,Add,0,,TRUE,,황금 소행성 보너스 치명타 돈 스케일,%,100,4,[2]동일한것,4,OK
+moonPlanet.spawnChance,Float,Percent,0,Add,0,100,TRUE,,달 생성 확률,%,0,2,[2]동일한것,2,OK
+moonPlanet.speedScale,Float,Percent,9.3,Add,0,,TRUE,,브레이커 속도에 대한 달 버프 스케일,%,10,4,[2]동일한것,4,OK
+moonPlanet.rangeScale,Float,Percent,6,Add,0,,TRUE,,브레이커 범위에 대한 달 버프 스케일,%,10,7,[2]동일한것,6,OK
+moonPlanet.duration,Float,Flat,5,Add,0,,TRUE,,달 버프 지속시간,값,3,4,[2]동일한것,3,OK
+moonPlanet.maxCount,Int,Flat,10,Add,0,,TRUE,,달 최대 개수,값,10,1,[2]동일한것,1,OK
+planet.size,Int,Flat,1,Add,0,,TRUE,,행성 크기,값,1,2,[2]동일한것,2,OK
+planet.respawnChance,Float,Percent,0,Add,0,100,TRUE,,행성이 파괴될 때 새로운 행성을 생성할 확률,%,0,4,[2]동일한것,4,OK
+planet.massScale,Float,Percent,0,Add,0,,TRUE,,행성 질량,%,0,8,[2]동일한것,7,OK
+planet.timeChance,Float,Percent,0,Add,0,100,TRUE,,행성이 파괴될 때 시간이 추가될 확률,%,0,2,[2]동일한것,2,OK
+comet.spawnChance,Float,Percent,0,Add,0,100,TRUE,,치명타 혜성 생성 확률,%,0,4,[2]동일한것,4,OK
+comet.duration,Float,Flat,3.5,Add,0,,TRUE,,치명타 혜성 버프 지속시간,값,3,1,[2]동일한것,1,OK
+comet.critBonus,Float,Percent,50,Add,0,,TRUE,,치명타 혜성 보너스 치명타 대미지,%,50,1,[2]동일한것,1,OK
+comet.rainChance,Float,Percent,0,Add,0,100,TRUE,,혜성이 내릴 확률,%,0,4,[2]동일한것,3,OK
+star.respawnChance,Float,Percent,0,Add,0,100,TRUE,,별이 파괴될 때 새로운 별을 생성할 확률,%,0,4,[2]동일한것,4,OK
+star.timeChance,Float,Percent,0,Add,0,100,TRUE,,별이 파괴될 때 시간이 추가될 확률,%,0,2,[2]동일한것,2,OK
+star.size,Int,Flat,1,Add,0,,TRUE,,별 크기,값,1,3,[2]동일한것,12,OK
+star.massScale,Float,Percent,100,Add,0,,TRUE,,별 질량,%,100,10,[2]동일한것,17,OK
+electricStar.spawnChance,Float,Percent,0,Add,0,100,TRUE,,전기 별 생성 확률,%,0,1,[2]동일한것,1,OK
+electricStar.damage,Float,Flat,1800,Add,0,,TRUE,,전기 별 대미지,값,1800,2,[2]동일한것,2,OK
+electricStar.critChance,Float,Percent,0,Add,0,100,TRUE,,전기 별 치명타 확률,%,0,1,[2]동일한것,1,OK
+electricStar.chain,Int,Flat,5,Add,0,,TRUE,,전기 별 최대 연쇄,값,5,3,[2]동일한것,3,OK
+electricStar.splitChance,Float,Percent,0,Add,0,100,TRUE,,전기 별 갈라질 확률,%,0,3,[2]동일한것,2,OK
+electricStar.critBonus,Float,Percent,200,Add,0,,TRUE,,전기 별 치명타 보너스,%,200,2,[2]동일한것,11,OK
+laserStar.spawnChance,Float,Percent,0,Add,0,100,TRUE,,레이저 별 생성 확률,%,0,1,[2]동일한것,1,OK
+laserStar.width,Float,Percent,100,Add,0,,TRUE,,레이저 너비,%,100,10,[2]동일한것,18,OK
+laserStar.critChance,Float,Percent,0,Add,0,100,TRUE,,레이저 치명타 확률,%,0,1,[2]동일한것,1,OK
+laserStar.damage,Float,Flat,2000,Add,0,,TRUE,,레이저 대미지,값,2000,6,[2]동일한것,6,OK
+laserStar.critBonus,Float,Percent,200,Add,0,,TRUE,,레이저 치명타 보너스,%,200,3,[2]동일한것,3,OK
+supernovaStar.range,Float,Percent,100,Add,0,,TRUE,,슈퍼노바 범위,%,100,4,[2]동일한것,4,OK
+supernovaStar.damage,Float,Flat,12000,Add,0,,TRUE,고정 피해(원작은 현재체력 비례),현재체력 비례 슈퍼노바 대미지,%,20,6,[2]동일한것,4,OK
+supernovaStar.spawnChance,Float,Percent,0,Add,0,100,TRUE,,슈퍼노바 별 생성 확률,%,0,1,[2]동일한것,1,OK
+growth.galaxies,Float,Percent,0,Add,0,,TRUE,신규,블랙홀 성장 시 생성되는 은하 수,%,,,[신규],2,
+star.toGalaxy,Float,Flat,0,Add,0,,TRUE,신규,별을 은하로 업그레이드,값,,,[신규],3,
+galaxy.size,Int,Flat,1,Add,0,,TRUE,신규,은하 크기,값,,,[신규],3,
+galaxy.massScale,Float,Percent,100,Add,0,,TRUE,신규,은하 질량,%,,,[신규],4,
+galaxy.respawnChance,Float,Percent,0,Add,0,100,TRUE,신규,은하가 파괴될 때 새로운 은하를 생성할 확률,%,,,[신규],2,
+galaxy.timeChance,Float,Percent,0,Add,0,100,TRUE,신규,은하가 파괴될 때 시간이 추가될 확률,%,,,[신규],1,
+breaker.galaxyBonusDamage,Float,Flat,0,Add,0,,TRUE,신규,은하에 대한 브레이커의 보너스 피해,값,,,[신규],3,
+gravityGalaxy.spawnChance,Float,Percent,0,Add,0,100,TRUE,신규,중력장 은하 생성 확률,%,,,[신규],3,
+gravityGalaxy.radius,Float,Percent,100,Add,0,,TRUE,신규,중력장 범위,%,,,[신규],3,
+gravityGalaxy.force,Float,Percent,100,Add,0,,TRUE,신규,중력장이 적을 끌어당기는 힘,%,,,[신규],2,
+gravityGalaxy.duration,Float,Flat,3,Add,0,,TRUE,신규,중력장 지속 시간,값,,,[신규],3,
+laserStar.galaxyBonusDamage,Float,Flat,0,Add,0,,TRUE,신규,은하에 대한 레이저의 보너스 피해,값,,,[신규],1,
+supernovaStar.galaxyBonusDamage,Float,Flat,0,Add,0,,TRUE,신규,은하에 대한 슈퍼노바의 보너스 피해,값,,,[신규],1,
+electricStar.galaxyBonusDamage,Float,Flat,0,Add,0,,TRUE,신규,은하에 대한 전기 별 번개의 보너스 피해,값,,,[신규],1,

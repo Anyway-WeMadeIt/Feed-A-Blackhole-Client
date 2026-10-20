@@ -1,0 +1,10 @@
+{
+  "name": "golden-x5",
+  "note": "황금 소행성 배율 ×50 → ×5. 더미 분석에서 성장도 0 Gold의 84%가 황금이었다(×5면 약 36% 예상).",
+  "patches": [
+    {
+      "path": "enemy/asteroid/trait/golden/multiplier",
+      "value": 5
+    }
+  ]
+}

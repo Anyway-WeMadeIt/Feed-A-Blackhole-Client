@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
+  m_Name: PausePanel.ImageBinding
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
+  viewId: BlackHole.Unity.PausePanel
+  images:
+  - refId: Panel_Image
+    baseSprite: {fileID: 21300000, guid: 8957c4c38765fb468103e265720a80f5, type: 3}
+    sprite: {fileID: 21300000, guid: 7ac3a456bec0481285df47255c161b85, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0
+  - refId: ResumeBtn_Image
+    baseSprite: {fileID: 21300000, guid: 800bb959fcdfa3ea61799a706b19bc34, type: 3}
+    sprite: {fileID: 21300000, guid: 57ec12e646364509b0fe99c56a49b2fc, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: 4472870daead405591dda407d4b5706c, type: 3}
+    pressedSprite: {fileID: 21300000, guid: e2a86483aa364a689c3ce5e0ed37d1a8, type: 3}
+    disabledSprite: {fileID: 21300000, guid: f99ab14d96eb4cfaa81c69bd84cd3740, type: 3}
+    stale: 0
+  - refId: SettingsBtn_Image
+    baseSprite: {fileID: 21300000, guid: e48d09db3de19d6963638773f758a95a, type: 3}
+    sprite: {fileID: 21300000, guid: 207fad57210b42ab9ab8968d09a7b3b3, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: b34995c559164fe3b5138df479d35a0c, type: 3}
+    pressedSprite: {fileID: 21300000, guid: 38d3746e892c4ba8986d216c32ca4e78, type: 3}
+    disabledSprite: {fileID: 21300000, guid: 41daee56374f4e0890efeed36e9b5161, type: 3}
+    stale: 0
+  - refId: MainMenuBtn_Image
+    baseSprite: {fileID: 21300000, guid: b28bfa96ffde758f6f8a627832c5ca20, type: 3}
+    sprite: {fileID: 21300000, guid: 833efa7cdf304f0e9571bf7c320db439, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: 75c4a270d69440cc96811fbc7ae3691d, type: 3}
+    pressedSprite: {fileID: 21300000, guid: c074bc6158a04325861b1b88580c5f2c, type: 3}
+    disabledSprite: {fileID: 21300000, guid: 1a9bec8d076f4ca3a70602db4e7171c2, type: 3}
+    stale: 0
+  - refId: QuitBtn_Image
+    baseSprite: {fileID: 21300000, guid: c04179f561daf996f69985448c7dee5b, type: 3}
+    sprite: {fileID: 21300000, guid: 200672a6cee04f7ea781d8bd64067434, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: 97cb90c15ba4400fa135900e8865428a, type: 3}
+    pressedSprite: {fileID: 21300000, guid: da4768d15d144dfb98aeed9ffc5e82ff, type: 3}
+    disabledSprite: {fileID: 21300000, guid: 1f4dcc46671e4b93b43f260f412bd149, type: 3}
+    stale: 0

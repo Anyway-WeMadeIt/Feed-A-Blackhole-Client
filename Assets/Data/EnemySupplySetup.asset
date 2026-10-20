@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 366f5d0c79f545f5867ffc1eb4b3b186, type: 3}
+  m_Name: EnemySupplySetup
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EnemySupplySetup
+  minDistance: 2
+  maxDistance: 9.6
+  periodicSpawnInnerOffset: -1
+  periodicSpawnOuterOffset: 0.5
+  startSupply:
+  - kind: {fileID: 11400000, guid: 05425233efee43ed8109228e30eff09f, type: 2}
+    count: 12

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a06cbe5afad344a98aa035e45f5d155a, type: 3}
+  m_Name: UI.TextBindings
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UITextBindingCatalog
+  bindings:
+  - {fileID: 11400000, guid: edc3ea03df3b6a619f8b932d215c6c4d, type: 2}
+  - {fileID: 11400000, guid: eea9cde34f9c3b12abe991f72306c7ae, type: 2}
+  - {fileID: 11400000, guid: 050c9043fa3c0add929ebc82b4c09544, type: 2}
+  - {fileID: 11400000, guid: 9b82f9412228345961610a491efda669, type: 2}
+  - {fileID: 11400000, guid: d9c92b47273ccaddccd59b20d214d305, type: 2}
+  - {fileID: 11400000, guid: b73084f4172697d75181bd3cb54121ef, type: 2}
+  - {fileID: 11400000, guid: 28d3842353036a457cc7baee34bf80b4, type: 2}
+  - {fileID: 11400000, guid: 1bd0683ef66d47648e7b15a9dd68999c, type: 2}

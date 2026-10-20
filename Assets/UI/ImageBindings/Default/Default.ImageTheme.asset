@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17344dcba8353634d94eb728f255b1ea, type: 3}
+  m_Name: Default.ImageTheme
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageThemeSpec
+  themeId: Default
+  bindings:
+  - {fileID: 11400000, guid: 8857360e7c58293a954eab098f092b21, type: 2}
+  - {fileID: 11400000, guid: ed41656793f8a747070cb0ad70b6f707, type: 2}
+  - {fileID: 11400000, guid: 35df6e10d6ca00bc3bbf01eea1b0b633, type: 2}
+  - {fileID: 11400000, guid: 53eec9e616405de52c4e693103f9051d, type: 2}
+  - {fileID: 11400000, guid: cf085e3285e64981104942c3fe45e1dc, type: 2}
+  - {fileID: 11400000, guid: 8ee8e34818a7b3b94d6002f209dc5cec, type: 2}
+  - {fileID: 11400000, guid: c6a1979b5fc73db60a7b1a201949d2db, type: 2}
+  - {fileID: 11400000, guid: 16be4cef48664ef1866d8a92380b4705, type: 2}

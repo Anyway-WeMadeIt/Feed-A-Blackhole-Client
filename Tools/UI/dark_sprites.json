@@ -1,0 +1,454 @@
+{
+ "BlackHoleGUI/PNG/Buttons/circle_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/circle_normal",
+  "8b6d189352214b77b386577944beec4d"
+ ],
+ "BlackHoleGUI/PNG/Buttons/circle_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/circle_hover",
+  "32ad15a2dbe445428e5ef617c4ad448a"
+ ],
+ "BlackHoleGUI/PNG/Buttons/circle_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/circle_pressed",
+  "5cbefd2ff94d4f09a7e6c1f9012ec956"
+ ],
+ "BlackHoleGUI/PNG/Buttons/circle_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/circle_disabled",
+  "ca1853d479c9473aa9941015453f9311"
+ ],
+ "BlackHoleGUI/PNG/Buttons/rect_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/rect_normal",
+  "c3d15f3faea24efb8254cf3bf0ce030f"
+ ],
+ "BlackHoleGUI/PNG/Buttons/rect_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/rect_hover",
+  "1dbe86fb06544019b604b8857064bdf7"
+ ],
+ "BlackHoleGUI/PNG/Buttons/rect_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/rect_pressed",
+  "96072248cb704b468a55840054d21043"
+ ],
+ "BlackHoleGUI/PNG/Buttons/rect_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/rect_disabled",
+  "bcb439eb7c90401f88566ef99ec6ff38"
+ ],
+ "BlackHoleGUI/PNG/Buttons/square_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/square_normal",
+  "5dcef0cafcc6470a95b4643692c580f9"
+ ],
+ "BlackHoleGUI/PNG/Buttons/square_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/square_hover",
+  "95c7ade7939b44218a457fa996828798"
+ ],
+ "BlackHoleGUI/PNG/Buttons/square_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/square_pressed",
+  "6f9d8b4a446b4e1fac14a5077c13c809"
+ ],
+ "BlackHoleGUI/PNG/Buttons/square_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/square_disabled",
+  "3546fe6ffc2e4f1a8615912c4cc2464a"
+ ],
+ "BlackHoleGUI/PNG/Buttons/hexagon_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/hexagon_normal",
+  "f1f9bae276a44668979a8c3351ca4b26"
+ ],
+ "BlackHoleGUI/PNG/Buttons/hexagon_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/hexagon_hover",
+  "2d6a2fbfb416445fa45791fa5066c46f"
+ ],
+ "BlackHoleGUI/PNG/Buttons/hexagon_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/hexagon_pressed",
+  "af7a62839b984607b91e772b1521576a"
+ ],
+ "BlackHoleGUI/PNG/Buttons/hexagon_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/hexagon_disabled",
+  "8702d4cf222f4458bf29cd0dfa9b152e"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/back_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/back_normal",
+  "a4f6a9643ff74b5db6bc2cb09aecbfd4"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/back_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/back_hover",
+  "bc747fdd68bd4d4ab786dc44104d324a"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/back_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/back_pressed",
+  "64fcb0393085420ebf69572f99aecd50"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/back_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/back_disabled",
+  "3a0c0a17303b47d4bb401d3c056d5918"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/exit_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/exit_normal",
+  "200672a6cee04f7ea781d8bd64067434"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/exit_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/exit_hover",
+  "97cb90c15ba4400fa135900e8865428a"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/exit_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/exit_pressed",
+  "da4768d15d144dfb98aeed9ffc5e82ff"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/exit_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/exit_disabled",
+  "1f4dcc46671e4b93b43f260f412bd149"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/home_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/home_normal",
+  "833efa7cdf304f0e9571bf7c320db439"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/home_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/home_hover",
+  "75c4a270d69440cc96811fbc7ae3691d"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/home_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/home_pressed",
+  "c074bc6158a04325861b1b88580c5f2c"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/home_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/home_disabled",
+  "1a9bec8d076f4ca3a70602db4e7171c2"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/play_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/play_normal",
+  "57ec12e646364509b0fe99c56a49b2fc"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/play_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/play_hover",
+  "4472870daead405591dda407d4b5706c"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/play_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/play_pressed",
+  "e2a86483aa364a689c3ce5e0ed37d1a8"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/play_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/play_disabled",
+  "f99ab14d96eb4cfaa81c69bd84cd3740"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/restart_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/restart_normal",
+  "8e05dd3775db45e08ff258f049178993"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/restart_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/restart_hover",
+  "244e9a9c04fe4066b6479e9382fce934"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/restart_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/restart_pressed",
+  "363dcb3cec9b4a6f8b25fef902b7a03d"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/restart_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/restart_disabled",
+  "284cb259580b480688be92177d70b873"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/settings_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/settings_normal",
+  "207fad57210b42ab9ab8968d09a7b3b3"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/settings_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/settings_hover",
+  "b34995c559164fe3b5138df479d35a0c"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/settings_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/settings_pressed",
+  "38d3746e892c4ba8986d216c32ca4e78"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/settings_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/settings_disabled",
+  "41daee56374f4e0890efeed36e9b5161"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/upgrade_tree_normal": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/upgrade_tree_normal",
+  "1535b0ad5aa542bea854919f20b0e422"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/upgrade_tree_hover": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/upgrade_tree_hover",
+  "f0e749c3ff92416fa3ce0a2954fd47ec"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/upgrade_tree_pressed": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/upgrade_tree_pressed",
+  "b8f83d55bb4f4b3c86d2d7846e073a88"
+ ],
+ "BlackHoleGUI/PNG/Buttons/Ready/upgrade_tree_disabled": [
+  "BlackHoleGUI/PNG/Dark/Buttons/Ready/upgrade_tree_disabled",
+  "9c620e8ed60b46eba69e074f02505b18"
+ ],
+ "BlackHoleGUI/PNG/Controls/panel": [
+  "BlackHoleGUI/PNG/Dark/Controls/panel",
+  "7ac3a456bec0481285df47255c161b85"
+ ],
+ "BlackHoleGUI/PNG/Controls/tooltip": [
+  "BlackHoleGUI/PNG/Dark/Controls/tooltip",
+  "a6f00e9873cf415e9d9a72381eced6a6"
+ ],
+ "BlackHoleGUI/PNG/Controls/slider_track": [
+  "BlackHoleGUI/PNG/Dark/Controls/slider_track",
+  "ded61282ef184279b3b15caf9ee9c8a5"
+ ],
+ "BlackHoleGUI/PNG/Controls/slider_knob": [
+  "BlackHoleGUI/PNG/Dark/Controls/slider_knob",
+  "014ae2c378b6403591a49ce0133feb97"
+ ],
+ "BlackHoleGUI/PNG/Controls/slider_fill": [
+  "BlackHoleGUI/PNG/Dark/Controls/slider_fill",
+  "48bf5065292046889cbfe99ac0a25e8f"
+ ],
+ "BlackHoleGUI/PNG/Controls/toggle_off": [
+  "BlackHoleGUI/PNG/Dark/Controls/toggle_off",
+  "5f79e7d17e684cee9fbd6e0ea38f9803"
+ ],
+ "BlackHoleGUI/PNG/Controls/toggle_on": [
+  "BlackHoleGUI/PNG/Dark/Controls/toggle_on",
+  "42313e34681a46a5ae8f8488acde1af7"
+ ],
+ "BlackHoleGUI/PNG/Controls/checkbox_off": [
+  "BlackHoleGUI/PNG/Dark/Controls/checkbox_off",
+  "1fb5ec2ab5eb48ef86d834161432f256"
+ ],
+ "BlackHoleGUI/PNG/Controls/checkbox_on": [
+  "BlackHoleGUI/PNG/Dark/Controls/checkbox_on",
+  "e5157688d4814fc78d2c8840b0c7e932"
+ ],
+ "BlackHoleGUI/PNG/Settlement/Components/bar_track": [
+  "BlackHoleGUI/PNG/Dark/Settlement/Components/bar_track",
+  "b49f04c0e0ff48109d63d363a85d0087"
+ ],
+ "UI/Backgrounds/Background_Arcs": [
+  "UI/Backgrounds/Background_Arcs_Dark",
+  "3b303324c237479cad803cc2ae501f33"
+ ],
+ "UI/Backgrounds/Background_Warm": [
+  "UI/Backgrounds/Background_Warm_Dark",
+  "f300f38d210740d0b615c49762195728"
+ ],
+ "BlackHoleGUI/PNG/Nodes/asteroid_count_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/asteroid_count_available",
+  "775099385db644f3b1d1027d585423a9"
+ ],
+ "BlackHoleGUI/PNG/Nodes/asteroid_count_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/asteroid_count_hover",
+  "354bd73c87c44c48bd26b780061b6d61"
+ ],
+ "BlackHoleGUI/PNG/Nodes/asteroid_count_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/asteroid_count_locked",
+  "4c8e57ac0fc64a33964424926651674a"
+ ],
+ "BlackHoleGUI/PNG/Nodes/asteroid_count_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/asteroid_count_purchased",
+  "1f95bb331f6742428376a53985c7f61b"
+ ],
+ "BlackHoleGUI/PNG/Nodes/critical_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/critical_available",
+  "5eb4d7af31194993b2ae735de5e7b0ac"
+ ],
+ "BlackHoleGUI/PNG/Nodes/critical_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/critical_hover",
+  "9e04009baeff4d93be414a91d1cba789"
+ ],
+ "BlackHoleGUI/PNG/Nodes/critical_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/critical_locked",
+  "f2439ddb95d5408c9d4e596387edb8f6"
+ ],
+ "BlackHoleGUI/PNG/Nodes/critical_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/critical_purchased",
+  "c1071a5095fc4489861ee195e862537f"
+ ],
+ "BlackHoleGUI/PNG/Nodes/damage_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/damage_available",
+  "8d20a6a9e4974324aaded68a48f58313"
+ ],
+ "BlackHoleGUI/PNG/Nodes/damage_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/damage_hover",
+  "89b5f40b4bbc4471a856e051b1421a2f"
+ ],
+ "BlackHoleGUI/PNG/Nodes/damage_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/damage_locked",
+  "d2e8f2a5beb8460a95acff21d799ef7a"
+ ],
+ "BlackHoleGUI/PNG/Nodes/damage_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/damage_purchased",
+  "6093f3d13328432c8223ddc08bb7a0ae"
+ ],
+ "BlackHoleGUI/PNG/Nodes/electric_asteroid_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/electric_asteroid_available",
+  "59bc1b3ea7354bf1a73f5eb52a0dce88"
+ ],
+ "BlackHoleGUI/PNG/Nodes/electric_asteroid_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/electric_asteroid_hover",
+  "9d7381708bd648a7b4afd7097acfed3c"
+ ],
+ "BlackHoleGUI/PNG/Nodes/electric_asteroid_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/electric_asteroid_locked",
+  "dc89d99d680c48c8ad17422dd4fd3323"
+ ],
+ "BlackHoleGUI/PNG/Nodes/electric_asteroid_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/electric_asteroid_purchased",
+  "69b1f9cd8fca4072a206263ab812901c"
+ ],
+ "BlackHoleGUI/PNG/Nodes/gold_asteroid_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/gold_asteroid_available",
+  "bd603b9902644d12970d626a88228900"
+ ],
+ "BlackHoleGUI/PNG/Nodes/gold_asteroid_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/gold_asteroid_hover",
+  "3833630ae20443e4b492c2d89b23d7bf"
+ ],
+ "BlackHoleGUI/PNG/Nodes/gold_asteroid_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/gold_asteroid_locked",
+  "31e77a1ec0624291aaf0ef83dea161f9"
+ ],
+ "BlackHoleGUI/PNG/Nodes/gold_asteroid_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/gold_asteroid_purchased",
+  "7b7c1a5ffb584b1b9e48d4792b6f5576"
+ ],
+ "BlackHoleGUI/PNG/Nodes/growth_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/growth_available",
+  "8bd9929c028041e3a0da63f6d3d76c04"
+ ],
+ "BlackHoleGUI/PNG/Nodes/growth_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/growth_hover",
+  "78907fde205d4942baf08f267f06973b"
+ ],
+ "BlackHoleGUI/PNG/Nodes/growth_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/growth_locked",
+  "22db0236ab4f4569997c0fa1bebb8b14"
+ ],
+ "BlackHoleGUI/PNG/Nodes/growth_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/growth_purchased",
+  "f6b4f9ab9219413093b92a5ed0876c61"
+ ],
+ "BlackHoleGUI/PNG/Nodes/haste_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/haste_available",
+  "1feb6258d8a04b10be05df4e459593a6"
+ ],
+ "BlackHoleGUI/PNG/Nodes/haste_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/haste_hover",
+  "aff00d90df28403fa871be6f576c4168"
+ ],
+ "BlackHoleGUI/PNG/Nodes/haste_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/haste_locked",
+  "d854d9462837433987e8f103b151488f"
+ ],
+ "BlackHoleGUI/PNG/Nodes/haste_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/haste_purchased",
+  "725ff86be43046b9bc9187cd527370b1"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_available",
+  "c80850c6f91848bf95602c1e4d364f98"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_hover",
+  "46c8a97d51c447a6902d12d9f71eca48"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_locked",
+  "a8dd2a8797df4a3fb36424d3f22f505b"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_purchased",
+  "5c1899f6826d40e987a56fe45ada35de"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_width_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_width_available",
+  "58ab3827c44542d798be874b62888e4c"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_width_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_width_hover",
+  "74b68db51fe54be8bab1412276ec302f"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_width_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_width_locked",
+  "866517750dd747bb9837d9162d7b5afb"
+ ],
+ "BlackHoleGUI/PNG/Nodes/laser_width_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/laser_width_purchased",
+  "954d10185314421a95be5ec902fd30aa"
+ ],
+ "BlackHoleGUI/PNG/Nodes/lightning_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/lightning_available",
+  "a32235dc7d574b55a3ae57ef3fa3756d"
+ ],
+ "BlackHoleGUI/PNG/Nodes/lightning_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/lightning_hover",
+  "d1f949bb00de467d9f79b4518d74d7e9"
+ ],
+ "BlackHoleGUI/PNG/Nodes/lightning_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/lightning_locked",
+  "0254e865dbf94d9eb9cc93e67cae661c"
+ ],
+ "BlackHoleGUI/PNG/Nodes/lightning_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/lightning_purchased",
+  "ead16239d54a4d419b714d640356eee0"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_available",
+  "609a4d0cd3224466aa5ff8c22be8e6fa"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_hover",
+  "c2c4a50fa6ad49caa52fbac5e4196ca4"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_locked",
+  "9bc9c13cb6c8455bb1e0ba5dbfe92396"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_mass_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_mass_available",
+  "5f92388495954e598bbd3e054ee9c54b"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_mass_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_mass_hover",
+  "fecae4ee50fd4aeabc6ab9824d147a09"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_mass_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_mass_locked",
+  "541a38a35a934a5db93e4fb587a9fbed"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_mass_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_mass_purchased",
+  "d350510446154cc894970981193c75c8"
+ ],
+ "BlackHoleGUI/PNG/Nodes/planet_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/planet_purchased",
+  "54774d65ebac425b9d996d94de2015b5"
+ ],
+ "BlackHoleGUI/PNG/Nodes/radius_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/radius_available",
+  "c449a27912cc4c9984b7573e1d6e8ff0"
+ ],
+ "BlackHoleGUI/PNG/Nodes/radius_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/radius_hover",
+  "9aace42b4ec547c4b75b5459be9346e2"
+ ],
+ "BlackHoleGUI/PNG/Nodes/radius_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/radius_locked",
+  "df97afab5a7b4391bc47cc098597c64c"
+ ],
+ "BlackHoleGUI/PNG/Nodes/radius_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/radius_purchased",
+  "f204888faeaf4f4fbce8e92b1fde77f2"
+ ],
+ "BlackHoleGUI/PNG/Nodes/timer_plus_available": [
+  "BlackHoleGUI/PNG/Dark/Nodes/timer_plus_available",
+  "ccab2fad044642e4a3bad486e5de1493"
+ ],
+ "BlackHoleGUI/PNG/Nodes/timer_plus_hover": [
+  "BlackHoleGUI/PNG/Dark/Nodes/timer_plus_hover",
+  "4e30556c488446f2910403b39cbf1853"
+ ],
+ "BlackHoleGUI/PNG/Nodes/timer_plus_locked": [
+  "BlackHoleGUI/PNG/Dark/Nodes/timer_plus_locked",
+  "a33ce0291fc24e6c9861c6976fa2feea"
+ ],
+ "BlackHoleGUI/PNG/Nodes/timer_plus_purchased": [
+  "BlackHoleGUI/PNG/Dark/Nodes/timer_plus_purchased",
+  "1ef65d98e9594f3f8a5754843cabf09e"
+ ],
+ "BlackHoleGUI/PNG/Tokens/blackhole": [
+  "BlackHoleGUI/PNG/Dark/Tokens/blackhole",
+  "ff0e4f0015334e7b8e8b43e46114cba1"
+ ]
+}

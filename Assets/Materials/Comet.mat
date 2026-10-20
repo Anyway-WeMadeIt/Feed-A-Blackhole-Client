@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Comet
+  m_Shader: {fileID: 4800000, guid: 014ea476042142e7a09411386012cfd5, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Direction: 1
+    - _GradientAngle: 0.7853982
+    - _HeadRadius: 0.3
+    - _RainbowSaturation: 0.75
+    - _RainbowSpan: 1
+    - _RainbowSpeed: 0.5
+    - _RainbowValue: 1
+    - _TailAlpha: 0.8
+    - _TailLength: 1.5
+    - _TailTaper: 0.2
+    m_Colors:
+    - _ToCenter: {r: -3, g: 0, b: 0, a: 0}
+    m_BuildTextureStacks: []
+  m_AllowLocking: 1

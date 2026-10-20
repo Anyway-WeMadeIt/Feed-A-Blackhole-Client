@@ -1,0 +1,13 @@
+{
+  "name": "BlackHole.ContentExport",
+  "rootNamespace": "BlackHole.ContentExport",
+  "references": [
+    "BlackHole.Core.Common",
+    "BlackHole.Core.Hq",
+    "BlackHole.Core.Enemies",
+    "BlackHole.Core.Battle",
+    "BlackHole.Core.Nodes",
+    "BlackHole.Net"
+  ],
+  "noEngineReferences": true
+}

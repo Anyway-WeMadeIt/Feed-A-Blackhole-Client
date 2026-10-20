@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
+  m_Name: UpgradeScreen.ImageBinding
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
+  viewId: BlackHole.Unity.UpgradeScreen
+  images:
+  - refId: NodeTooltip_Image
+    baseSprite: {fileID: 21300000, guid: b0a0becc67d4d6b74932f6108a0d23a6, type: 3}
+    sprite: {fileID: 21300000, guid: b0a0becc67d4d6b74932f6108a0d23a6, type: 3}
+    stale: 0
+  - refId: GoldChip_Image
+    baseSprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    sprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    stale: 0
+  - refId: GoldIcon_Image
+    baseSprite: {fileID: 21300000, guid: 0b88540d7b7c09f52b7f20b90ad15600, type: 3}
+    sprite: {fileID: 21300000, guid: 0b88540d7b7c09f52b7f20b90ad15600, type: 3}
+    stale: 0
+  - refId: HqChip_Image
+    baseSprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    sprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    stale: 0
+  - refId: HqIcon_Image
+    baseSprite: {fileID: 21300000, guid: af59e8e2248c83384f2ab25443690301, type: 3}
+    sprite: {fileID: 21300000, guid: af59e8e2248c83384f2ab25443690301, type: 3}
+    stale: 0
+  - refId: StartBattleBtn_Image
+    baseSprite: {fileID: 21300000, guid: 800bb959fcdfa3ea61799a706b19bc34, type: 3}
+    sprite: {fileID: 21300000, guid: 800bb959fcdfa3ea61799a706b19bc34, type: 3}
+    stale: 0
+  - refId: Background_Image
+    baseSprite: {fileID: 21300000, guid: bc5ffc9d1623acb7a5c175792218bfba, type: 3}
+    sprite: {fileID: 21300000, guid: bc5ffc9d1623acb7a5c175792218bfba, type: 3}
+    stale: 0

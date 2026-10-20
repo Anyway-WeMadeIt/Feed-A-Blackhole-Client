@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
+  m_Name: SettingsPanel.ImageBinding
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
+  viewId: BlackHole.Unity.SettingsPanel
+  images:
+  - refId: Sheet_Image
+    baseSprite: {fileID: 21300000, guid: 8957c4c38765fb468103e265720a80f5, type: 3}
+    sprite: {fileID: 21300000, guid: 7ac3a456bec0481285df47255c161b85, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0
+  - refId: BackBtn_Image
+    baseSprite: {fileID: 21300000, guid: e866ea352e2c05f7f5a23eae8fd71734, type: 3}
+    sprite: {fileID: 21300000, guid: a4f6a9643ff74b5db6bc2cb09aecbfd4, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: bc747fdd68bd4d4ab786dc44104d324a, type: 3}
+    pressedSprite: {fileID: 21300000, guid: 64fcb0393085420ebf69572f99aecd50, type: 3}
+    disabledSprite: {fileID: 21300000, guid: 3a0c0a17303b47d4bb401d3c056d5918, type: 3}
+    stale: 0

@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3cb9f20dcb376d428e2d3b0386482f6, type: 3}
+  m_Name: BreakerLook
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.BreakerLook
+  _material: {fileID: 2100000, guid: 68919185f544bac4980bc5f5b15f3de5, type: 2}
+  _thicknessRatio: 0.15
+  _dashCount: 8
+  _dashRatio: 0.6
+  _color: {r: 0.6, g: 0.6, b: 0.66, a: 0.92}
+  _rotationSpeed: 0.05
+  _punchDuration: 0.14
+  _punchCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.25
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _punchRadiusScale: 0.1
+  _punchThicknessScale: 0.6
+  _missStrength: 0.5
+  _hitFlashColor: {r: 0.106265545, g: 0.108193874, b: 0.11320752, a: 1}
+  _criticalFlashColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  _orbMaterial: {fileID: 2100000, guid: 89089763f29d1ad439f6b3238e56e555, type: 2}
+  _orbRadius: 0.343
+  _orbitOffset: 0.1
+  _orbitSpeed: 0.15
+  _moonFill: {r: 1, g: 1, b: 1, a: 1}
+  _moonOutline: {r: 0.10588236, g: 0.10980393, b: 0.1137255, a: 1}
+  _moonOutlineWidth: 0.01
+  _cometAuraMaterial: {fileID: 2100000, guid: 639016228afccd6439ce70c7d8e79a29, type: 2}
+  _cometAuraOffset: 0.15

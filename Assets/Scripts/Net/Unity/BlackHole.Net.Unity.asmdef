@@ -1,0 +1,7 @@
+{
+  "name": "BlackHole.Net.Unity",
+  "rootNamespace": "BlackHole.Net.Unity",
+  "references": [
+    "BlackHole.Net"
+  ]
+}

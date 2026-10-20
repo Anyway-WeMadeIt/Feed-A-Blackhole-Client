@@ -1,0 +1,292 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9eabd7c5d4b6e1a379304b07ff79798, type: 3}
+  m_Name: NodeTreeLook
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.NodeTreeLook
+  _fallback:
+    stat: 
+    available: {fileID: 21300000, guid: 94565b90c3c89bb95f002127f2449c93, type: 3}
+    purchased: {fileID: 21300000, guid: 6cdac54be1ea5873e1dad70509638d92, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  _stats:
+  - stat: breaker.damage
+    available: {fileID: 21300000, guid: 402f08b171dd9a7a000566cce237a739, type: 3}
+    purchased: {fileID: 21300000, guid: 30a6b092686e64d9003a2fb65079d39e, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: breaker.speed
+    available: {fileID: 21300000, guid: 357b755cdd83cf92ea65e952d10e8d72, type: 3}
+    purchased: {fileID: 21300000, guid: a8125ff5b9bc4cab03c2f2f7ddced164, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: breaker.radius
+    available: {fileID: 21300000, guid: 30590392f3769b812fbb1706273782e5, type: 3}
+    purchased: {fileID: 21300000, guid: 75df5480aabad552d9c6bdaec48f0395, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: breaker.critChance
+    available: {fileID: 21300000, guid: 38ca5ef27396bd58575645c106b3212f, type: 3}
+    purchased: {fileID: 21300000, guid: 40ee90ea18185758854ff6ab544a2355, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: breaker.critBonus
+    available: {fileID: 21300000, guid: c5820fac0240cba0f02e1616deb3adb1, type: 3}
+    purchased: {fileID: 21300000, guid: 99374565e1036af5c63e2739efe74b5e, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: growth.time
+    available: {fileID: 21300000, guid: 7198f73d912e0b87f862a1c03634b969, type: 3}
+    purchased: {fileID: 21300000, guid: b29e18fc71088bc59f6cd5609ed38d66, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: asteroid.massScale
+    available: {fileID: 21300000, guid: 4a70c58e63d1d5d09635cc24edc282ec, type: 3}
+    purchased: {fileID: 21300000, guid: 8a833e4b12d44bbae652a9366522ba5f, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: goldenAsteroid.spawnChance
+    available: {fileID: 21300000, guid: c9cd040f45e6488bd3a0d4e85a1de225, type: 3}
+    purchased: {fileID: 21300000, guid: db87ebf0c7950452b3dcf16e9f1a6cb8, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: goldenAsteroid.rewardScale
+    available: {fileID: 21300000, guid: de55b8e4b9e06c2476d0a94457d77ac4, type: 3}
+    purchased: {fileID: 21300000, guid: dda1d0390320368af2636c851ba2c6a2, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: asteroid.count
+    available: {fileID: 21300000, guid: fb835c054e6ee5e021d5ea51e4860f0c, type: 3}
+    purchased: {fileID: 21300000, guid: 69cca40cb95d2f4473d382f5c0d0446b, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: growth.asteroids
+    available: {fileID: 21300000, guid: 375acfe057a85c6f78029741c455a66b, type: 3}
+    purchased: {fileID: 21300000, guid: bdd811cfd36249e7cacd6885dad60ce2, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: asteroid.toPlanet
+    available: {fileID: 21300000, guid: 1dff0522ff320ca967b52019b43cef2b, type: 3}
+    purchased: {fileID: 21300000, guid: 80fa698467b782c1828f4425140bc96f, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: asteroid.size
+    available: {fileID: 21300000, guid: e12b994944fe3d02e18c692a6f16564d, type: 3}
+    purchased: {fileID: 21300000, guid: c769b9b6187d62ce83ad2e68da2175af, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: moonPlanet.spawnChance
+    available: {fileID: 21300000, guid: f2ec28d6953f086cebd004e09e229dda, type: 3}
+    purchased: {fileID: 21300000, guid: 9f52910f24fbc68152c234a2eaada638, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: planet.massScale
+    available: {fileID: 21300000, guid: 56186855c8498720feccaecabef79056, type: 3}
+    purchased: {fileID: 21300000, guid: 0d0d3313f2aa91d924673f83d8bcf8dd, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: growth.planets
+    available: {fileID: 21300000, guid: 6b254423ad6962a2162d5d54088ace1b, type: 3}
+    purchased: {fileID: 21300000, guid: 5ef42abe5ce3460b32f0c807a660aaee, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: planet.toStar
+    available: {fileID: 21300000, guid: 49a473fccc51e696699ca127ca77cea8, type: 3}
+    purchased: {fileID: 21300000, guid: a74a99e6c72c9a15bc142d1382d93635, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: star.massScale
+    available: {fileID: 21300000, guid: e397d54dbce7b12dd0ec1081dba9e347, type: 3}
+    purchased: {fileID: 21300000, guid: 7242ca83aa3b22eb423055cf87955dd6, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: growth.stars
+    available: {fileID: 21300000, guid: 2004048cc72f94353900969c820f86c8, type: 3}
+    purchased: {fileID: 21300000, guid: 6d76ba7a43a2319ddadc95d21c35f68d, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: comet.spawnChance
+    available: {fileID: 21300000, guid: b83856f63de1d01300fdf121f7815f52, type: 3}
+    purchased: {fileID: 21300000, guid: 0174828afd2446f28dc23a17be53e115, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricAsteroid.spawnChance
+    available: {fileID: 21300000, guid: af428646a5500ce5d6337a5afad013ab, type: 3}
+    purchased: {fileID: 21300000, guid: eea216825f67629818eb99dcb90c0c2d, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: supernovaStar.spawnChance
+    available: {fileID: 21300000, guid: 3e26546ae8418b6f94735e60ad670b8b, type: 3}
+    purchased: {fileID: 21300000, guid: bb2f74d525f02796cd5a7a7e8a06320e, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: asteroid.respawnChance
+    available: {fileID: 21300000, guid: abcf9c623b30693422e8af7b7976dc3b, type: 3}
+    purchased: {fileID: 21300000, guid: 0b83e46ee4190721748ae8f9fd774bd3, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: asteroid.timeChance
+    available: {fileID: 21300000, guid: ff02965940b53664ded7794c2278d91f, type: 3}
+    purchased: {fileID: 21300000, guid: 8f38558b436b390279b82095a2bb274f, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: breaker.galaxyBonusDamage
+    available: {fileID: 21300000, guid: bddcea0939c6fde5810dda8a9adfd72d, type: 3}
+    purchased: {fileID: 21300000, guid: 236017d43c9ca7991cfe3e53bc723fd0, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: laserStar.galaxyBonusDamage
+    available: {fileID: 21300000, guid: d3596e453d5d4c0db2a42d957a082b15, type: 3}
+    purchased: {fileID: 21300000, guid: b0ed0e95034d42bc8c41f79857e3886a, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: supernovaStar.galaxyBonusDamage
+    available: {fileID: 21300000, guid: 0566a2f819144a658c5a159bfcc76a0e, type: 3}
+    purchased: {fileID: 21300000, guid: 9c0a55562cec4b1fb96d4128eb239f72, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.galaxyBonusDamage
+    available: {fileID: 21300000, guid: b90e573b6c8643e3a4476cfaf2d764e8, type: 3}
+    purchased: {fileID: 21300000, guid: d96360f9bb3744478f41ffa1dbd7334e, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: breaker.planetBonusDamage
+    available: {fileID: 21300000, guid: 2fa1e14fc38d222cf8248d1443cf8c6f, type: 3}
+    purchased: {fileID: 21300000, guid: f205a1e8c75b439e34370194aa893a92, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: breaker.starBonusDamage
+    available: {fileID: 21300000, guid: 23e8b6295a8c80056b53f2a844b042a6, type: 3}
+    purchased: {fileID: 21300000, guid: 3ccc27ea420f5375923edf5e56887d8a, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: comet.critBonus
+    available: {fileID: 21300000, guid: 3c3992ea5eaf402e4afbbda1102aa347, type: 3}
+    purchased: {fileID: 21300000, guid: ca1eb284bdbeb95b1f5870bc9836aa0d, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: comet.duration
+    available: {fileID: 21300000, guid: 5ae72b3e743168eb7a80a593a0adf5e8, type: 3}
+    purchased: {fileID: 21300000, guid: 3a3230057603f40414cb507ecb4eac5c, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: comet.rainChance
+    available: {fileID: 21300000, guid: 77601719dfb5cdbdd0d54e313ebdbfb3, type: 3}
+    purchased: {fileID: 21300000, guid: e62342a1add92cee18aae9b73b5459dc, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricAsteroid.chain
+    available: {fileID: 21300000, guid: 5e825db5ae526464622903e07dcabdc0, type: 3}
+    purchased: {fileID: 21300000, guid: 3d652025cf5af4497e39d6189de3d324, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricAsteroid.critBonus
+    available: {fileID: 21300000, guid: 41c5ea84adf49e685a15dfaac1eb2ac2, type: 3}
+    purchased: {fileID: 21300000, guid: a40d8961adeb16cd3212c0881ba66efb, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricAsteroid.critChance
+    available: {fileID: 21300000, guid: 64b95acfd33c86e438879637f2bb85c7, type: 3}
+    purchased: {fileID: 21300000, guid: a805dd29e00e304afbfb275268090efd, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricAsteroid.damage
+    available: {fileID: 21300000, guid: 81f131c03086407af45df01fdc7d22d0, type: 3}
+    purchased: {fileID: 21300000, guid: 5e1d0239d1e4e0cfd08ea242b22e430c, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricAsteroid.splitChance
+    available: {fileID: 21300000, guid: d16b731c2b88e620a28ea5db09da7874, type: 3}
+    purchased: {fileID: 21300000, guid: 3bb0f35903a193a6819a30969796e350, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.chain
+    available: {fileID: 21300000, guid: 74e3a12a10e71b5f67fd568522e5c2b1, type: 3}
+    purchased: {fileID: 21300000, guid: 151d1bcbf9e0b72d26c5af6f58f33da4, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.critBonus
+    available: {fileID: 21300000, guid: b963161e9b7d489de897746e7fd97c08, type: 3}
+    purchased: {fileID: 21300000, guid: fb8e707de9edd73c5a895a1fcae840b7, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.critChance
+    available: {fileID: 21300000, guid: 83a602b598e697c27322b11ba731ab2c, type: 3}
+    purchased: {fileID: 21300000, guid: 235f84ce4e931bfc363c514a82ee0425, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.damage
+    available: {fileID: 21300000, guid: 7bf1e67aee0e3993d0ea951332aef09d, type: 3}
+    purchased: {fileID: 21300000, guid: 3b0ccd0ed2ceae96d02ffe936f76da8e, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.spawnChance
+    available: {fileID: 21300000, guid: b540f2ec4c45c34d74c4d051d63d5662, type: 3}
+    purchased: {fileID: 21300000, guid: f0f1a743ecdb428fd39cad3f476a4518, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: electricStar.splitChance
+    available: {fileID: 21300000, guid: 11908491c2e1686fee7dcd4dd6fe4e91, type: 3}
+    purchased: {fileID: 21300000, guid: 0160dbd902cb775975a560788ec2d05d, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: goldenAsteroid.critChance
+    available: {fileID: 21300000, guid: 208d64647dbcab56e210c89dc1780706, type: 3}
+    purchased: {fileID: 21300000, guid: 15571d6bb15a7a5c0272924ddb9a58ae, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: goldenAsteroid.critRewardScale
+    available: {fileID: 21300000, guid: 9fcdc3adbcb49bbe81ad646fcd633bcf, type: 3}
+    purchased: {fileID: 21300000, guid: f70443b93c02b21a8ce672589142f954, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: laserStar.critBonus
+    available: {fileID: 21300000, guid: b61d60421e39bf10adcd4581606d4433, type: 3}
+    purchased: {fileID: 21300000, guid: 6ba00758a5f01195f9b6c621edc15993, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: laserStar.critChance
+    available: {fileID: 21300000, guid: 4c762d1776998221e2ed38b15ef1337e, type: 3}
+    purchased: {fileID: 21300000, guid: 2ac9098b7f88e150af3d8b5da7a671e3, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: laserStar.damage
+    available: {fileID: 21300000, guid: fdff1bf3f9eab9a075d4470f963b7a62, type: 3}
+    purchased: {fileID: 21300000, guid: 84440e84451ece686d50497d91c13582, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: laserStar.spawnChance
+    available: {fileID: 21300000, guid: fe3503d32591386c2d8fde50c00d1bd4, type: 3}
+    purchased: {fileID: 21300000, guid: d22c031fabe7154416056e13ec1fc54d, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: laserStar.width
+    available: {fileID: 21300000, guid: b6299233ea1d96782f2d66af99bbaf94, type: 3}
+    purchased: {fileID: 21300000, guid: 788fdcfe8e28d95885c08adc763d8274, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: moonPlanet.duration
+    available: {fileID: 21300000, guid: 0d464261cf01b7a167075344f4f161fb, type: 3}
+    purchased: {fileID: 21300000, guid: 81a0647695cc2f387e0b2ba7bf91b493, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: moonPlanet.maxCount
+    available: {fileID: 21300000, guid: c1e9f7d5086774041394810bf570c4c2, type: 3}
+    purchased: {fileID: 21300000, guid: 9d4d5a081145ef08bc629fb4d6bc8f1b, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: moonPlanet.rangeScale
+    available: {fileID: 21300000, guid: 017aba7bd06862da5a56acb4037ff123, type: 3}
+    purchased: {fileID: 21300000, guid: 7f6adcf349f871e91042ec0d91de1edf, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: moonPlanet.speedScale
+    available: {fileID: 21300000, guid: 910e6a15eed3d553fee121ec94bb323f, type: 3}
+    purchased: {fileID: 21300000, guid: 3bcf27009aa7112af0133683f3c103f7, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: planet.respawnChance
+    available: {fileID: 21300000, guid: ae06349363c56fde0b5d7c16185fdfcc, type: 3}
+    purchased: {fileID: 21300000, guid: 7bb89029d00aa79b5b26216b794e83d1, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: planet.size
+    available: {fileID: 21300000, guid: b1acff00a73b3f75d18d78455e1f2e4b, type: 3}
+    purchased: {fileID: 21300000, guid: d9acab57908c0510856151259ebfea0f, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: planet.timeChance
+    available: {fileID: 21300000, guid: 8e719c8b2c16e455ae34c17b9924aae1, type: 3}
+    purchased: {fileID: 21300000, guid: 447c6fc4d4a2b311f1594cfb6d2d8652, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: star.respawnChance
+    available: {fileID: 21300000, guid: f6aa21e1f06b9a949550c4c06d92eef0, type: 3}
+    purchased: {fileID: 21300000, guid: e6f1d8174a2809295541a6b3554326dd, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: star.size
+    available: {fileID: 21300000, guid: 5e7e55827498f20ada929f3f5cdfee1f, type: 3}
+    purchased: {fileID: 21300000, guid: cdcbf86a43d7d00df3fd73d4540378b4, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: star.timeChance
+    available: {fileID: 21300000, guid: fc529f5fa4a13c949b3fe5843e8a660c, type: 3}
+    purchased: {fileID: 21300000, guid: 5c04a25c619d1aa5d6150ed2c65bf253, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: supernovaStar.damage
+    available: {fileID: 21300000, guid: 22a536af3dd7a64f6b942d0b59c562e4, type: 3}
+    purchased: {fileID: 21300000, guid: a683ccd85853e78c052cb013bc46b610, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: supernovaStar.range
+    available: {fileID: 21300000, guid: 5a4846d59f31a59b1cb7fe2dc7933f2b, type: 3}
+    purchased: {fileID: 21300000, guid: 7ecdb82a91ebf20560b9bd6e1dba58a7, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  - stat: timer
+    available: {fileID: 21300000, guid: b70b74999092632ccb6934cff024f9db, type: 3}
+    purchased: {fileID: 21300000, guid: a74d7cc156370d4022fad44215373c00, type: 3}
+    locked: {fileID: 21300000, guid: 4f16c09eddf02e7ab55192f57cce4839, type: 3}
+  _purchasableTint: {r: 0.88, g: 0.88, b: 0.88, a: 1}
+  _revealedTint: {r: 0.68, g: 0.68, b: 0.68, a: 1}
+  _revealedAsLocked: 0
+  _showHidden: 1
+  _lockedTint: {r: 1, g: 1, b: 1, a: 0.6}
+  _lockAhead: 1
+  _farSprite: {fileID: 21300000, guid: a1c7502f42d54ba4c2e60f0707019a05, type: 3}
+  _farScale: 0.3
+  _farTint: {r: 1, g: 1, b: 1, a: 0.35}
+  _hiddenLinkColor: {r: 0.722, g: 0.729, b: 0.725, a: 0.18}
+  _ownedLinkColor: {r: 0.341, g: 0.592, b: 0.412, a: 1}
+  _openLinkColor: {r: 0.125, g: 0.129, b: 0.141, a: 1}
+  _lockedLinkColor: {r: 0.722, g: 0.729, b: 0.725, a: 1}
+  _priceColor: {r: 0.125, g: 0.129, b: 0.141, a: 1}
+  _unaffordablePriceColor: {r: 0.42, g: 0.435, b: 0.424, a: 1}
+  _priceBackColor: {r: 0.953, g: 0.945, b: 0.91, a: 1}

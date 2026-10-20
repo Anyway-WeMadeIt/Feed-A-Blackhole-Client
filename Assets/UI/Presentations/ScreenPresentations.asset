@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1d913e274514953a3025123f54f0eab, type: 3}
+  m_Name: ScreenPresentations
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.ScreenPresentations
+  _title: {fileID: 11400000, guid: 5bf6ea4ae0c89569dabd8cb158fdfe18, type: 2}
+  _upgrade: {fileID: 11400000, guid: 34ec83ad126b2f66f19c2f7c01ad3f6c, type: 2}
+  _battle: {fileID: 11400000, guid: 7556f2a983f8add90d155e1104db4b7d, type: 2}
+  _settlement: {fileID: 11400000, guid: 53e70f788b782c86dea9f0ccabaeaf4a, type: 2}
+  _nodeTree: {fileID: 11400000, guid: d448cd7e8b924044b4c85f13a499a212, type: 2}
+  _modeSelect: {fileID: 11400000, guid: 13520271f37be7f5f476d103f91fea11, type: 2}
+  _settings: {fileID: 11400000, guid: 79b59cf03ed15cc61b9670cee87c0176, type: 2}
+  _pause: {fileID: 11400000, guid: 1374d3343c1e8709b59738e3ceedd700, type: 2}
+  _confirm: {fileID: 11400000, guid: c248df9f586a46cd824e90aa1bf5bf51, type: 2}

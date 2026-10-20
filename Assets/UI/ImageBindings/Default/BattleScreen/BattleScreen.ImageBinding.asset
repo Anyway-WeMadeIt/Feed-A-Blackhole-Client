@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
+  m_Name: BattleScreen.ImageBinding
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
+  viewId: BlackHole.Unity.BattleScreen
+  images:
+  - refId: LevelFill_Image
+    baseSprite: {fileID: 21300000, guid: 01d80bfdd10c67d8545c2e3dca1a8e85, type: 3}
+    sprite: {fileID: 21300000, guid: 01d80bfdd10c67d8545c2e3dca1a8e85, type: 3}
+    stale: 0
+  - refId: GoldChip_Image
+    baseSprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    sprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    stale: 0
+  - refId: GoldIcon_Image
+    baseSprite: {fileID: 21300000, guid: 0b88540d7b7c09f52b7f20b90ad15600, type: 3}
+    sprite: {fileID: 21300000, guid: 0b88540d7b7c09f52b7f20b90ad15600, type: 3}
+    stale: 0
+  - refId: LevelChip_Image
+    baseSprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    sprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    stale: 0
+  - refId: LevelBar_Image
+    baseSprite: {fileID: 21300000, guid: b20c42781ef81e4cc77748161f33b272, type: 3}
+    sprite: {fileID: 21300000, guid: b20c42781ef81e4cc77748161f33b272, type: 3}
+    stale: 0
+  - refId: PauseBtn_Image
+    baseSprite: {fileID: 21300000, guid: 94565b90c3c89bb95f002127f2449c93, type: 3}
+    sprite: {fileID: 21300000, guid: 94565b90c3c89bb95f002127f2449c93, type: 3}
+    stale: 0
+  - refId: PauseIcon_Image
+    baseSprite: {fileID: 21300000, guid: 74ce244cff1be59fcc2ebcbf46007fd3, type: 3}
+    sprite: {fileID: 21300000, guid: 74ce244cff1be59fcc2ebcbf46007fd3, type: 3}
+    stale: 0
+  - refId: EndBtn_Image
+    baseSprite: {fileID: 21300000, guid: 94565b90c3c89bb95f002127f2449c93, type: 3}
+    sprite: {fileID: 21300000, guid: 94565b90c3c89bb95f002127f2449c93, type: 3}
+    stale: 0
+  - refId: EndIcon_Image
+    baseSprite: {fileID: 21300000, guid: fb8fd11070676f513a410c18388f5bc3, type: 3}
+    sprite: {fileID: 21300000, guid: fb8fd11070676f513a410c18388f5bc3, type: 3}
+    stale: 0

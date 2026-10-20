@@ -1,0 +1,14 @@
+{
+  "name": "time-18",
+  "note": "판 기본 시간 12초 → 18초, 처치 추가 시간 0.3 → 0.4초. 판 길이 감 확인용.",
+  "patches": [
+    {
+      "path": "battle/timeLimit",
+      "value": 18
+    },
+    {
+      "path": "battle/killTimeBonus",
+      "value": 0.4
+    }
+  ]
+}

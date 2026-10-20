@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17344dcba8353634d94eb728f255b1ea, type: 3}
+  m_Name: Dark.ImageTheme
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageThemeSpec
+  themeId: Dark
+  bindings:
+  - {fileID: 11400000, guid: 811c4464a30d429aa933194b79075174, type: 2}
+  - {fileID: 11400000, guid: 47bd8b871d81496ca14c8867b6721809, type: 2}
+  - {fileID: 11400000, guid: 21ab17d403e34f88b0a00b0936f4f246, type: 2}
+  - {fileID: 11400000, guid: 2464431ff1434d369a5fa05019350f65, type: 2}
+  - {fileID: 11400000, guid: 2328091a716e44fba2f42b9d42aecde3, type: 2}
+  - {fileID: 11400000, guid: 2d8e86ece85e493e95e788d05c25aa8f, type: 2}
+  - {fileID: 11400000, guid: 37b2777f3b1e4a759720f07bc1f3f7f5, type: 2}
+  - {fileID: 11400000, guid: 25b737448a9e467bbd06719d0c06cb1e, type: 2}

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25e7e5a14ac8deb42a75b4539f9884c3, type: 3}
+  m_Name: UpgradeScreen.Presentation
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIPresentationSpec
+  presentationId: Upgrade
+  baseTheme: {fileID: 11400000, guid: d72bf618d81794d6f227cf86a0d09261, type: 2}
+  baseLayout: {fileID: 0}
+  baseImageTheme: {fileID: 11400000, guid: 7ccc6a8739f62c57463c86ca60f048e8, type: 2}
+  textBindings: {fileID: 11400000, guid: 5515b4ff7d538c923758b8ce113de04f, type: 2}
+  variants:
+  - variantId: Dark
+    priority: 10
+    condition:
+      themeId: Dark
+      localeId: 
+      usePlatform: 0
+      platform: 0
+      useLayoutClass: 0
+      layoutClass: 0
+      useAspectRatio: 0
+      aspectRule: 0
+      aspectMin: 1.5
+      aspectMax: 2.5
+    overrideTheme: {fileID: 0}
+    overrideLayout: {fileID: 0}
+    overrideImageTheme: {fileID: 11400000, guid: 50d47aa084ae4bbebc14b76ad5b9d520, type: 2}

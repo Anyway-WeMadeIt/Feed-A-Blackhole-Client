@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
+  m_Name: UpgradeScreen.ImageBinding
+  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
+  viewId: BlackHole.Unity.UpgradeScreen
+  images:
+  - refId: NodeTooltip_Image
+    baseSprite: {fileID: 21300000, guid: b0a0becc67d4d6b74932f6108a0d23a6, type: 3}
+    sprite: {fileID: 21300000, guid: a6f00e9873cf415e9d9a72381eced6a6, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0
+  - refId: GoldChip_Image
+    baseSprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    sprite: {fileID: 21300000, guid: 27a849bf7ee2e47f02eb7ede5ec0252f, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0
+  - refId: GoldIcon_Image
+    baseSprite: {fileID: 21300000, guid: 0b88540d7b7c09f52b7f20b90ad15600, type: 3}
+    sprite: {fileID: 21300000, guid: e6bf34f31e45974fbefbb49747e3f6ca, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0
+  - refId: HqChip_Image
+    baseSprite: {fileID: 21300000, guid: 5212c279e634d9c2fe33c20a08ac279f, type: 3}
+    sprite: {fileID: 21300000, guid: 27a849bf7ee2e47f02eb7ede5ec0252f, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0
+  - refId: HqIcon_Image
+    baseSprite: {fileID: 21300000, guid: af59e8e2248c83384f2ab25443690301, type: 3}
+    sprite: {fileID: 21300000, guid: ff0e4f0015334e7b8e8b43e46114cba1, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0
+  - refId: StartBattleBtn_Image
+    baseSprite: {fileID: 21300000, guid: 800bb959fcdfa3ea61799a706b19bc34, type: 3}
+    sprite: {fileID: 21300000, guid: 57ec12e646364509b0fe99c56a49b2fc, type: 3}
+    highlightedSprite: {fileID: 21300000, guid: 4472870daead405591dda407d4b5706c, type: 3}
+    pressedSprite: {fileID: 21300000, guid: e2a86483aa364a689c3ce5e0ed37d1a8, type: 3}
+    disabledSprite: {fileID: 21300000, guid: f99ab14d96eb4cfaa81c69bd84cd3740, type: 3}
+    stale: 0
+  - refId: Background_Image
+    baseSprite: {fileID: 21300000, guid: bc5ffc9d1623acb7a5c175792218bfba, type: 3}
+    sprite: {fileID: 21300000, guid: 3b303324c237479cad803cc2ae501f33, type: 3}
+    highlightedSprite: {fileID: 0}
+    pressedSprite: {fileID: 0}
+    disabledSprite: {fileID: 0}
+    stale: 0

@@ -129,14 +129,17 @@ $RECYCLE.BIN/
 *.swo
 *~
 
-# Keep only the team's shared VS Code configuration
-/.vscode/*
-!/.vscode/extensions.json
-!/.vscode/launch.json
-!/.vscode/settings.json
-!/.vscode/tasks.json
+# Visual Studio configuration and VS Code workspace files
+.vsconfig
+.vscode/
 
 # Local environment configuration (commit examples without credentials)
 .env
 .env.*
 !.env.example
+
+# Cowork(Claude)가 미리보기 이미지를 저장하는 폴더
+/Claude outputs/
+
+# 테스트 도구가 쓰는 개인 테스트 데이터(느낌 메모, 노드 검사 결과 등)
+/PlaytestData/

@@ -1,0 +1,26 @@
+{
+  "name": "BlackHole.ContentExport.Tests",
+  "rootNamespace": "BlackHole.ContentExport.Tests",
+  "references": [
+    "BlackHole.ContentExport",
+    "BlackHole.Core.Common",
+    "BlackHole.Core.Hq",
+    "BlackHole.Core.Enemies",
+    "BlackHole.Core.Battle",
+    "BlackHole.Core.Nodes",
+    "BlackHole.Net",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}
