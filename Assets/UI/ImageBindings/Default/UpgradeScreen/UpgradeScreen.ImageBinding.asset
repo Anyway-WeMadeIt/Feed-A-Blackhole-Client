@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
   m_Name: UpgradeScreen.ImageBinding
   m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
-  viewId: BlackHole.Unity.UpgradeScreen
+  viewId: UpgradeScreen
   images:
   - refId: NodeTooltip_Image
     baseSprite: {fileID: 21300000, guid: b0a0becc67d4d6b74932f6108a0d23a6, type: 3}

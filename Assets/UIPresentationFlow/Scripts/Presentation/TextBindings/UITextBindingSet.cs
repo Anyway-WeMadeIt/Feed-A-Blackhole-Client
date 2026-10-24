@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed class UITextBindingSet : ScriptableObject
 {
-    // Concrete UI View type FullName.
+    // The View's key (UIViewKey.Of: type name, or [UIViewKey]).
     public string viewId;
 
     public List<UITextBindingEntry> texts = new();

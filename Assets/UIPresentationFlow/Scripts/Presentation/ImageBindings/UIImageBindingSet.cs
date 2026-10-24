@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed class UIImageBindingSet : ScriptableObject
 {
-    // Concrete UI View type FullName.
+    // The View's key (UIViewKey.Of: type name, or [UIViewKey]).
     // Example: "TitleUIRoot" or "Game.UI.TitleUIRoot".
     public string viewId;
 

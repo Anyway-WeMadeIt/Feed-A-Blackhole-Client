@@ -7,6 +7,8 @@ using UnityEngine;
 public sealed partial class UIManager
 {
     private readonly Dictionary<Type, UIBase> _views = new();
+    // View data key (UIViewKey) → type. Two types with one key would read each other's bindings.
+    private readonly Dictionary<string, Type> _typesByKey = new();
     private readonly Stack<UIBase> _panelStack = new();
 
     private readonly Transform _rootLayer;
@@ -55,10 +57,19 @@ public sealed partial class UIManager
                 "One concrete View type must identify one registered View instance.");
         }
 
+        string key = UIViewKey.Of(type);
+        if (_typesByKey.TryGetValue(key, out Type other) && other != type)
+        {
+            throw new InvalidOperationException(
+                $"[UIManager] View types '{other.FullName}' and '{type.FullName}' share the key '{key}'. " +
+                "Rename one or pin a key with [UIViewKey].");
+        }
+
         view.EnsureInitialized();
         // Editor and development builds: report prefab children that the View's Refs expect but are missing.
         UIRefCheck.WarnMissing(view);
         _views[type] = view;
+        _typesByKey[key] = type;
     }
 
     public T GetUI<T>() where T : UIBase

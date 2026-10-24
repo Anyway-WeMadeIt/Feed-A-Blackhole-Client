@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58cf6ff2397a40189e634e5bffeb46c4, type: 3}
   m_Name: BattleScreen.TextBinding
   m_EditorClassIdentifier: UIPresentationFlow.Runtime::UITextBindingSet
-  viewId: BlackHole.Unity.BattleScreen
+  viewId: BattleScreen
   texts:
   - refId: Remaining_Text
     role: 1

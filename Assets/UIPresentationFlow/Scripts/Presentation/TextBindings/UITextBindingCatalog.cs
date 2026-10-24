@@ -16,7 +16,7 @@ public sealed class UITextBindingCatalog : ScriptableObject
         if (viewType == null)
             return false;
 
-        string viewId = viewType.FullName ?? viewType.Name;
+        string viewId = UIViewKey.Of(viewType);
         return TryGetBinding(viewId, out binding);
     }
 

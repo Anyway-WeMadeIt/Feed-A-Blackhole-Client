@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
   m_Name: ModeSelectPanel.ImageBinding
   m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
-  viewId: BlackHole.Unity.ModeSelectPanel
+  viewId: ModeSelectPanel
   images:
   - refId: BackBtn_Image
     baseSprite: {fileID: 21300000, guid: e866ea352e2c05f7f5a23eae8fd71734, type: 3}

@@ -25,7 +25,7 @@ public static class UIImageBindingBuilder
             UIImageBindingScanner.Scan(view);
 
         string viewName = view.GetType().Name;
-        string viewId = view.GetType().FullName ?? viewName;
+        string viewId = UIViewKey.Of(view);
         string themePath = $"{RootPath}/{themeId}";
         string viewPath = $"{themePath}/{viewName}";
         string assetPath =

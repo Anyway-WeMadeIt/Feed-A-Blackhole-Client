@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
   m_Name: BattleScreen.ImageBinding
   m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
-  viewId: BlackHole.Unity.BattleScreen
+  viewId: BattleScreen
   images:
   - refId: LevelFill_Image
     baseSprite: {fileID: 21300000, guid: 01d80bfdd10c67d8545c2e3dca1a8e85, type: 3}

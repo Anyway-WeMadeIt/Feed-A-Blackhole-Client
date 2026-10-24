@@ -18,7 +18,7 @@ public sealed class UIImageThemeSpec : ScriptableObject
         if (viewType == null)
             return false;
 
-        string viewId = viewType.FullName ?? viewType.Name;
+        string viewId = UIViewKey.Of(viewType);
         return TryGetBinding(viewId, out binding);
     }
 
