@@ -27,91 +27,12 @@ public abstract class UIBase : MonoBehaviour, IUIPresentationRefProvider
     protected virtual void PreInitialize() { }
     protected virtual void OnInitialize() { }
 
-    // 버튼의 포인터 사건 하나에 처리를 묶는다. 같은 처리를 두 번 묶어도 한 번만 불린다.
-    // 화면 밖의 도우미(버튼 연출·소리를 한 번에 묶는 것 등)도 쓰므로 public이다.
-    public static void BindEvent(
+    // 버튼의 포인터 사건 하나에 처리를 묶는다(UIEvents.Bind). 뷰가 자기 버튼을 묶을 때 쓴다.
+    protected static void BindEvent(
         Button button,
         Action<PointerEventData> action,
         ETouchEvent type = ETouchEvent.Click)
-    {
-        if (button == null || action == null)
-            return;
-
-        BindEvent(button.gameObject, action, type);
-    }
-
-    private static void BindEvent(
-        GameObject target,
-        Action<PointerEventData> action,
-        ETouchEvent type)
-    {
-        if (target == null || action == null)
-            return;
-
-        UI_EventHandler eventHandler =
-            GetOrAddComponent<UI_EventHandler>(target);
-
-        switch (type)
-        {
-            case ETouchEvent.Click:
-                eventHandler.OnClickHandler -= action;
-                eventHandler.OnClickHandler += action;
-                break;
-
-            case ETouchEvent.PointerDown:
-                eventHandler.OnPointerDownHandler -= action;
-                eventHandler.OnPointerDownHandler += action;
-                break;
-
-            case ETouchEvent.PointerUp:
-                eventHandler.OnPointerUpHandler -= action;
-                eventHandler.OnPointerUpHandler += action;
-                break;
-
-            case ETouchEvent.LongPressed:
-                eventHandler.OnLongPressHandler -= action;
-                eventHandler.OnLongPressHandler += action;
-                break;
-
-            case ETouchEvent.BeginDrag:
-                eventHandler.OnBeginDragHandler -= action;
-                eventHandler.OnBeginDragHandler += action;
-                break;
-
-            case ETouchEvent.Drag:
-                eventHandler.OnDragHandler -= action;
-                eventHandler.OnDragHandler += action;
-                break;
-
-            case ETouchEvent.EndDrag:
-                eventHandler.OnEndDragHandler -= action;
-                eventHandler.OnEndDragHandler += action;
-                break;
-
-            case ETouchEvent.PointerEnter:
-                eventHandler.OnPointerEnterHandler -= action;
-                eventHandler.OnPointerEnterHandler += action;
-                break;
-
-            case ETouchEvent.PointerExit:
-                eventHandler.OnPointerExitHandler -= action;
-                eventHandler.OnPointerExitHandler += action;
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
-    }
-
-    private static T GetOrAddComponent<T>(GameObject target)
-        where T : Component
-    {
-        T component = target.GetComponent<T>();
-        if (component == null)
-            component = target.AddComponent<T>();
-
-        return component;
-    }
+        => UIEvents.Bind(button, action, type);
 
     public abstract bool TryGetRect(
         string refId,

@@ -16,22 +16,22 @@ namespace BlackHole.Unity
             ButtonAnimation animation = ButtonAnimation.Of(button);
 
             if (onClick != null)
-                UIBase.BindEvent(button, _ => onClick());
+                UIEvents.Bind(button, _ => onClick());
 
-            UIBase.BindEvent(button, _ =>
+            UIEvents.Bind(button, _ =>
             {
                 animation.Hover();
                 onHover?.Invoke();
             }, ETouchEvent.PointerEnter);
 
-            UIBase.BindEvent(button, _ =>
+            UIEvents.Bind(button, _ =>
             {
                 animation.Leave();
                 onLeave?.Invoke();
             }, ETouchEvent.PointerExit);
 
-            UIBase.BindEvent(button, _ => animation.Press(), ETouchEvent.PointerDown);
-            UIBase.BindEvent(button, _ => animation.Release(), ETouchEvent.PointerUp);
+            UIEvents.Bind(button, _ => animation.Press(), ETouchEvent.PointerDown);
+            UIEvents.Bind(button, _ => animation.Release(), ETouchEvent.PointerUp);
 
             return animation;
         }
