@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b38391fe64648feb5b8372fc4e7569e, type: 3}
+  m_Script: {fileID: 11500000, guid: 4db43f43e22014643b531df10c81f18d, type: 3}
   m_Name: UISpriteSet
   m_EditorClassIdentifier: UIPresentationFlow.Runtime::UISpriteSet
   _entries:

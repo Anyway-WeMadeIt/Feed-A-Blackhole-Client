@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7945380522024594443}
   - component: {fileID: 6400351341334276051}
   m_Layer: 0
-  m_Name: SoundManager
+  m_Name: SoundPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4fb558220c4af1d43b34e77a17fc755b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SoundManager
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.SoundPlayer
   _sfxSource: {fileID: 7945380522024594443}
   _bgmSource: {fileID: 6400351341334276051}
   _soundSetup: {fileID: 11400000, guid: 00a9bdf1b2c46864882598139d680101, type: 2}

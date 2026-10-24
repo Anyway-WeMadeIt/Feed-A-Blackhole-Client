@@ -29,7 +29,7 @@ namespace BlackHole.Unity
         [SerializeField] private CometLook _cometLook;
         [SerializeField] private GameObject _blackHole;
 
-        // 소리를 내는 씬 객체(SoundManager 프리팹). 비우면 소리 없이 실행한다.
+        // 소리를 내는 씬 객체(SoundPlayer 프리팹). 비우면 소리 없이 실행한다.
         [Header("Sound")]
         [SerializeField] private SoundPlayer _sound;
 

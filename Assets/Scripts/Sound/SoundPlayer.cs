@@ -13,7 +13,7 @@ namespace BlackHole.Unity
         [SerializeField] private AudioSource _sfxSource;
         [SerializeField] private AudioSource _bgmSource;
 
-        [Header("SoundSO를 직접 추가"), SerializeField] private UISoundSetup _soundSetup;
+        [Header("UISoundSetup을 직접 추가"), SerializeField] private UISoundSetup _soundSetup;
 
         // 같은 소리는 이 시간 안에 중복 재생하지 않는다.
         private const float MinInterval = 0.05f;

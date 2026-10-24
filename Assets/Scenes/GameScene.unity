@@ -1231,7 +1231,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6300388621650018509, guid: 8fcc8e782e30f8e459be118d653ad5e8, type: 3}
       propertyPath: m_Name
-      value: SoundManager
+      value: SoundPlayer
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2412,7 +2412,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4fb558220c4af1d43b34e77a17fc755b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SoundManager
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.SoundPlayer
 --- !u!1001 &1732142111
 PrefabInstance:
   m_ObjectHideFlags: 0

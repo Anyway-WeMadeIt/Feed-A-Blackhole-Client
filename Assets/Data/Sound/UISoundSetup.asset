@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 90f1eacd74d78a0408a007472ec9d995, type: 3}
-  m_Name: SoundSO
-  m_EditorClassIdentifier: Assembly-CSharp::UISoundSetup
+  m_Name: UISoundSetup
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.UISoundSetup
   _bgmSound:
   - {fileID: 8300000, guid: 8897ed8afc783c44e8e75219d46567ac, type: 3}
   - {fileID: 8300000, guid: 76df0c2d06af13945b95cc741dc0c234, type: 3}
