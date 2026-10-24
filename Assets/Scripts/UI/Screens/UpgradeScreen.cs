@@ -139,8 +139,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _gold = View.Text(Refs.Gold_Text);
             _hq = View.Text(Refs.Hq_Text);
             _tooltip = View.Rect(Refs.NodeTooltip_Image);

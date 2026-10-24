@@ -89,8 +89,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _remaining = View.Text(Refs.Remaining_Text);
             _gain = View.Text(Refs.TimeGain_Text);
             ResetGain();

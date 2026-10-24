@@ -55,8 +55,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _themed.AddColor(GetComponent<Image>(), UIColorRole.Backdrop);
             _startButton = View.Button(Refs.StartBtn_Button);
             _settingsButton = View.Button(Refs.SettingsBtn_Button);

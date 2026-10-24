@@ -94,8 +94,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _track = View.Rect(Refs.CardTrack);
             _template = View.Widget<ModeCard>(Refs.CardTemplate);
             ThemeFixedImages();

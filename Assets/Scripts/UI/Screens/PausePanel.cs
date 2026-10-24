@@ -42,8 +42,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _resumeButton = View.Button(Refs.ResumeBtn_Button);
             _settingsButton = View.Button(Refs.SettingsBtn_Button);
             _mainMenuButton = View.Button(Refs.MainMenuBtn_Button);

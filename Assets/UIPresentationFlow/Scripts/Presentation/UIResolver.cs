@@ -14,6 +14,10 @@ public sealed class UIResolver
     private readonly UIVariantResolver _variantResolver = new();
     private UIContext _context;
 
+    // When true, each Resolve records how the variant was chosen (UIResolveResult.Trace).
+    // Off by default: the trace builds strings on every resolve and nothing reads it in a shipped game.
+    public bool TraceEnabled { get; set; }
+
     public UIResolver(UIContext context)
     {
         _context = context;
@@ -32,7 +36,7 @@ public sealed class UIResolver
         UIPresentationSpec spec,
         in DisplayContext display)
     {
-        var trace = new UIResolveTrace();
+        UIResolveTrace trace = TraceEnabled ? new UIResolveTrace() : null;
         ResolvedUIPresentation resolved =
             _variantResolver.Resolve(spec, _context, display, trace);
 
@@ -45,7 +49,7 @@ public sealed class UIResolver
             _context.ThemeId);
         resolved.Layout?.BuildPatches(patches);
         resolved.ImageTheme?.BuildPatches(patches);
-        trace.Add($"[Patches] {patches.Count}");
+        trace?.Add($"[Patches] {patches.Count}");
 
         return new UIResolveResult(resolved, patches, trace);
     }

@@ -245,8 +245,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _result = View.Text(Refs.Result_Text);
             _stageFill = View.Rect(Refs.StageFill_Image);
             _stageFillImage = View.Image(Refs.StageFill_Image);

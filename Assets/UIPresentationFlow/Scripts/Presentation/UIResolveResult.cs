@@ -4,6 +4,7 @@ public sealed class UIResolveResult
 {
     public ResolvedUIPresentation Resolved { get; }
     public List<IUIPatch> Patches { get; }
+    // Null unless UIResolver.TraceEnabled was set when this result was resolved.
     public UIResolveTrace Trace { get; }
 
     public UIResolveResult(

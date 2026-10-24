@@ -56,6 +56,8 @@ public sealed partial class UIManager
         }
 
         view.EnsureInitialized();
+        // Editor and development builds: report prefab children that the View's Refs expect but are missing.
+        UIRefCheck.WarnMissing(view);
         _views[type] = view;
     }
 

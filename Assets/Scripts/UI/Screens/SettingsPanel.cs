@@ -81,8 +81,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _rowList = View.Rect(Refs.RowList);
             _blocker = View.Rect(Refs.ChoiceBlocker_Button);
             _popup = View.Rect(Refs.ChoicePopup);

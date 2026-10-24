@@ -38,8 +38,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             BindEvent(GetComponent<Button>(), HandleClicked);
         }
 
