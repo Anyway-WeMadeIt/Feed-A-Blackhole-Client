@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using BlackHole.Core;
+using BlackHole.Systems.Numbers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -553,7 +554,7 @@ namespace BlackHole.Unity
         private static string CountOf(long count) => Count((int)count);
 
         private string Money(long gold) =>
-            "$" + GoldText.Of(gold, _numberFormat);
+            "$" + NumberText.Of(gold, _numberFormat);
 
         // 성장도 막대나 숫자가 아직 올라가는 중인가.
         public bool IsAnimating => _stageFill.IsRunning || _countUp.IsRunning;

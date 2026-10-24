@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using BlackHole.Core;
+using BlackHole.Systems.Numbers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -213,7 +214,7 @@ namespace BlackHole.Unity
         // 글자색은 테마가 정하므로 숫자만 리치 텍스트로 칠한다. 모자람(붉게, 섞임만큼) > 미리보기(황금) > 평소.
         private void WriteGold(long amount, bool preview)
         {
-            string number = GoldText.Of(amount, _numberFormat);
+            string number = NumberText.Of(amount, _numberFormat);
             string text;
 
             if (_goldShortMix > 0)
@@ -830,7 +831,7 @@ namespace BlackHole.Unity
             {
                 NodeState.Owned => Localized(UIText.Node.Maxed),
                 NodeState.Hidden => Localized(UIText.Node.Locked),
-                _ => _pendingCost is long cost ? Localized(UIText.Node.Buy) + " " + GoldText.Of(cost, _numberFormat) : Localized(UIText.Node.Buy),
+                _ => _pendingCost is long cost ? Localized(UIText.Node.Buy) + " " + NumberText.Of(cost, _numberFormat) : Localized(UIText.Node.Buy),
             };
 
             _buyButton.interactable = interactable;

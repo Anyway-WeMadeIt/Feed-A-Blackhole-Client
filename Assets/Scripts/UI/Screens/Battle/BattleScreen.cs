@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using BlackHole.Core;
+using BlackHole.Systems.Numbers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -282,7 +283,7 @@ namespace BlackHole.Unity
                 _earned.text = EarnedText(_shownEarned);
         }
 
-        private string EarnedText(long earnedGold) => Localized(UIText.Battle.Earned, GoldText.Of(earnedGold, _numberFormat));
+        private string EarnedText(long earnedGold) => Localized(UIText.Battle.Earned, NumberText.Of(earnedGold, _numberFormat));
 
         // 남은 시간 글자. 0.1초마다 바뀌므로 흔들림을 줄인다.
         // - 숫자는 칸 폭을 고정한다(<mspace>). 1과 8의 폭이 달라 가운데 정렬에서 숫자 묶음이 좌우로 움직이지 않게 한다.
