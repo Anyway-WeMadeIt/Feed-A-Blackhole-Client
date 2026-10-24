@@ -1,6 +1,6 @@
 # 밝은 UI 그림(크림 #F3F1E8 바탕, 먹 #202124 선, 초록 강조)에서 다크 테마 그림을 만든다.
 # - 무채색은 밝기를 뒤집어 아이보리 ↔ 어두운 표면 사이로 옮기고, 유채색(초록·빨강 등)은 그대로 둔다. 알파는 유지한다.
-# - 출력: Assets/BlackHoleGUI/PNG/Dark/<원본 상대 경로>, 배경은 Assets/UI/Backgrounds/<이름>_Dark.png
+# - 출력: Assets/Art/GUI/Dark/<원본 상대 경로>, 배경은 Assets/Art/Backgrounds/<이름>_Dark.png
 # - .meta는 원본의 임포트 설정(9-slice 테두리 포함)을 복사하고 guid·spriteID만 새로 만든다. 이미 있으면 guid를 유지한다.
 # 실행: python Tools/UI/build_dark_sprites.py  (저장소 루트에서, Pillow 필요)
 import os, re, sys, uuid, json
@@ -13,18 +13,18 @@ BACKDROP = (20, 23, 28)     # 화면 배경 그림의 바탕(전투 배경 키�
 LIGHT_MIN, LIGHT_MAX = 32, 243   # 먹 ~ 크림
 
 SOURCES = [
-    'BlackHoleGUI/PNG/Buttons/circle_normal', 'BlackHoleGUI/PNG/Buttons/circle_hover', 'BlackHoleGUI/PNG/Buttons/circle_pressed', 'BlackHoleGUI/PNG/Buttons/circle_disabled',
-    'BlackHoleGUI/PNG/Buttons/rect_normal', 'BlackHoleGUI/PNG/Buttons/rect_hover', 'BlackHoleGUI/PNG/Buttons/rect_pressed', 'BlackHoleGUI/PNG/Buttons/rect_disabled',
-    'BlackHoleGUI/PNG/Buttons/square_normal', 'BlackHoleGUI/PNG/Buttons/square_hover', 'BlackHoleGUI/PNG/Buttons/square_pressed', 'BlackHoleGUI/PNG/Buttons/square_disabled',
-    'BlackHoleGUI/PNG/Buttons/hexagon_normal', 'BlackHoleGUI/PNG/Buttons/hexagon_hover', 'BlackHoleGUI/PNG/Buttons/hexagon_pressed', 'BlackHoleGUI/PNG/Buttons/hexagon_disabled',
-] + [f'BlackHoleGUI/PNG/Buttons/Ready/{n}_{s}' for n in ('back','exit','home','play','restart','settings','upgrade_tree') for s in ('normal','hover','pressed','disabled')] + [
-    'BlackHoleGUI/PNG/Controls/panel', 'BlackHoleGUI/PNG/Controls/tooltip',
-    'BlackHoleGUI/PNG/Controls/slider_track', 'BlackHoleGUI/PNG/Controls/slider_knob', 'BlackHoleGUI/PNG/Controls/slider_fill',
-    'BlackHoleGUI/PNG/Controls/toggle_off', 'BlackHoleGUI/PNG/Controls/toggle_on', 'BlackHoleGUI/PNG/Controls/checkbox_off', 'BlackHoleGUI/PNG/Controls/checkbox_on',
-    'BlackHoleGUI/PNG/Settlement/Components/bar_track',
-    'UI/Backgrounds/Background_Arcs', 'UI/Backgrounds/Background_Warm',
-] + sorted(p[len(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Assets') + os.sep):-4].replace(os.sep, '/') for p in __import__('glob').glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Assets', 'BlackHoleGUI', 'PNG', 'Nodes', '*.png')))
-RIM_SOURCES = ['BlackHoleGUI/PNG/Tokens/blackhole']   # 검정 실루엣: 검정 채움 + 아이보리 테두리
+    'Art/GUI/Buttons/circle_normal', 'Art/GUI/Buttons/circle_hover', 'Art/GUI/Buttons/circle_pressed', 'Art/GUI/Buttons/circle_disabled',
+    'Art/GUI/Buttons/rect_normal', 'Art/GUI/Buttons/rect_hover', 'Art/GUI/Buttons/rect_pressed', 'Art/GUI/Buttons/rect_disabled',
+    'Art/GUI/Buttons/square_normal', 'Art/GUI/Buttons/square_hover', 'Art/GUI/Buttons/square_pressed', 'Art/GUI/Buttons/square_disabled',
+    'Art/GUI/Buttons/hexagon_normal', 'Art/GUI/Buttons/hexagon_hover', 'Art/GUI/Buttons/hexagon_pressed', 'Art/GUI/Buttons/hexagon_disabled',
+] + [f'Art/GUI/Buttons/Ready/{n}_{s}' for n in ('back','exit','home','play','restart','settings','upgrade_tree') for s in ('normal','hover','pressed','disabled')] + [
+    'Art/GUI/Controls/panel', 'Art/GUI/Controls/tooltip',
+    'Art/GUI/Controls/slider_track', 'Art/GUI/Controls/slider_knob', 'Art/GUI/Controls/slider_fill',
+    'Art/GUI/Controls/toggle_off', 'Art/GUI/Controls/toggle_on', 'Art/GUI/Controls/checkbox_off', 'Art/GUI/Controls/checkbox_on',
+    'Art/GUI/Settlement/Components/bar_track',
+    'Art/Backgrounds/Background_Arcs', 'Art/Backgrounds/Background_Warm',
+] + sorted(p[len(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Assets') + os.sep):-4].replace(os.sep, '/') for p in __import__('glob').glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Assets', 'Art', 'GUI', 'Nodes', '*.png')))
+RIM_SOURCES = ['Art/GUI/Tokens/blackhole']   # 검정 실루엣: 검정 채움 + 아이보리 테두리
 
 def lerp(a, b, t): return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
@@ -39,9 +39,9 @@ def remap(px, dark=SURFACE):
     return lerp(IVORY, dark, t) + (a,)
 
 def out_path(rel):
-    if rel.startswith('UI/Backgrounds/'):
+    if rel.startswith('Art/Backgrounds/'):
         return rel + '_Dark'
-    return rel.replace('BlackHoleGUI/PNG/', 'BlackHoleGUI/PNG/Dark/', 1)
+    return rel.replace('Art/GUI/', 'Art/GUI/Dark/', 1)
 
 def write_meta(src_meta, dst_meta):
     s = open(src_meta, encoding='utf-8').read()
@@ -73,7 +73,7 @@ def convert(rel, rim=False):
                 px[x, y] = (0, 0, 0, a) if ip[x, y] > 128 else IVORY + (a,)
     else:
         out = Image.new('RGBA', im.size)
-        dark = BACKDROP if rel.startswith('UI/Backgrounds/') else SURFACE
+        dark = BACKDROP if rel.startswith('Art/Backgrounds/') else SURFACE
         out.putdata([remap(p, dark) for p in im.getdata()])
     dst_rel = out_path(rel)
     dst = os.path.join(ROOT, dst_rel + '.png')
@@ -83,7 +83,7 @@ def convert(rel, rim=False):
     return dst_rel, guid
 
 def ensure_folder_metas():
-    for d in ['BlackHoleGUI/PNG/Dark', 'BlackHoleGUI/PNG/Dark/Buttons', 'BlackHoleGUI/PNG/Dark/Buttons/Ready', 'BlackHoleGUI/PNG/Dark/Controls', 'BlackHoleGUI/PNG/Dark/Settlement', 'BlackHoleGUI/PNG/Dark/Settlement/Components', 'BlackHoleGUI/PNG/Dark/Tokens', 'BlackHoleGUI/PNG/Dark/Nodes']:
+    for d in ['Art/GUI/Dark', 'Art/GUI/Dark/Buttons', 'Art/GUI/Dark/Buttons/Ready', 'Art/GUI/Dark/Controls', 'Art/GUI/Dark/Settlement', 'Art/GUI/Dark/Settlement/Components', 'Art/GUI/Dark/Tokens', 'Art/GUI/Dark/Nodes']:
         p = os.path.join(ROOT, d)
         if not os.path.isdir(p): continue
         m = p + '.meta'
