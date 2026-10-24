@@ -17,15 +17,25 @@ MonoBehaviour:
   - refId: Remaining_Text
     role: 1
     stale: 0
+    fixedSize: 0
+    fixedFont: 0
   - refId: TimeGain_Text
     role: 2
     stale: 0
+    fixedSize: 0
+    fixedFont: 0
   - refId: EarnedGold_Text
     role: 2
     stale: 0
+    fixedSize: 0
+    fixedFont: 0
   - refId: PauseBtn_Text
     role: 3
     stale: 0
+    fixedSize: 0
+    fixedFont: 0
   - refId: EndBtn_Text
     role: 3
     stale: 0
+    fixedSize: 0
+    fixedFont: 0

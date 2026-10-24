@@ -3,7 +3,6 @@ using System.Globalization;
 using BlackHole.Core;
 using TMPro;
 using UnityEngine;
-using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -127,7 +126,7 @@ namespace BlackHole.Unity
         private readonly Vector3[] _corners = new Vector3[4];
 
         private TMP_Text _result;
-        private RectTransform _stageFill;
+        private RectTransform _stageFillRect;
         private TMP_Text _stageText;
         private TMP_Text _totalLabel;
         private TMP_Text _earned;
@@ -201,54 +200,37 @@ namespace BlackHole.Unity
         public event Action UpgradeClicked;
         public event Action ContinueClicked;
 
-        #region 0부터 일정시간동안 증가시키는 방식
-        // 증가 순서
-        private enum MatterType { Asteroid, Planet, Star, Earned, Total, Done }
-        private MatterType _matterType;
-
-        // Stage바 증가
-        private float _stageFillTarget;
-        private float _stageFillTimer;
+        // 연출: 이정표 막대 채움과 물질·Gold 숫자 올리기. 화면 어디든 누르면 끝까지 간다(SkipAnimation).
+        // 숫자는 소행성 → 행성 → 별 → 총 Gold 순서(합계 줄은 숨겨 두고 값만 총 Gold의 시작점에 쓴다). 막대는 앞의 셋이 오르는 동안 찬다.
+        private readonly FillTween _stageFill = new();
+        private readonly CountUpSequence _countUp = new();
         private const float DefaultDuration = 1.0f;
-        private float _stageFillDuration = DefaultDuration;
-        private bool _isShowingStage;
-
-        // 행성 파괴
+        private const float MatterStepCount = 4;
+        private const float StageFillSteps = 3;
+        // 연출을 위한 목표값. 건너뛰기와 숫자 표기 다시 쓰기에 쓴다.
         private int _asteroidTarget;
         private int _planetTarget;
         private int _starTarget;
-
-        // 획득 보상
         private long _earnedTarget;
         private long _totalBegin;
         private long _totalTarget;
-
-        // 타이머
-        private float _matterTimer;
-        private float _matterDuration = DefaultDuration;
-        private bool _isShowMatter;
-
-        // 확대 효과 (강조 표시를 위해 짠 하고 나타나는 효과
-        private readonly Dictionary<TMP_Text, int> _previousKills = new();
-        private readonly Dictionary<TMP_Text, long> _previousGolds = new();
-        private TMP_Text _scaleTarget;
-        private float _scaleTimer;
-
-        // 물질 단계 수: 소행성·행성·별·총 골드(합계 단계는 뛰어넘는다 — 데이터는 두고 표시만 않는다). 막대는 앞의 셋이 올라가는 동안 찬다.
-        private const float MatterStepCount = 4;
-        private const float StageFillSteps = 3;
+        // 값이 바뀐 글자를 잠깐 키우는 강조 효과. 한 번에 하나.
         private const float ScaleDuration = 0.15f;
         private const float HighlightScale = 1.2f;
-        private bool _isScaleEffect;
-        #endregion
+        private TMP_Text _scaleTarget;
+        private float _scaleTimer;
 
         protected override void OnInitialize()
         {
             _result = View.Text(Refs.Result_Text);
-            _stageFill = View.Rect(Refs.StageFill_Image);
+            _stageFillRect = View.Rect(Refs.StageFill_Image);
             _stageFillImage = View.Image(Refs.StageFill_Image);
             if (_stageFillImage != null)
                 _stageFillColor = _stageFillImage.color;
+
+            _stageFill.Completed += HandleStageFillCompleted;
+            _countUp.Completed += HandleCountUpCompleted;
+            _countUp.ValueChanged += PlayScaleEffect;
             _stageText = View.Text(Refs.Stage_Text);
             _totalLabel = View.Text(Refs.TotalLabel_Text);
             _earned = View.Text(Refs.EarnedGold_Text);
@@ -348,21 +330,16 @@ namespace BlackHole.Unity
         {
             _stageReached = reached;
 
-            if (_stageFill != null)
+            if (_stageFillRect != null)
             {
-                _stageFillTarget = reached ? 1 : Mathf.Clamp01(levelFraction);
-                _stageFillTimer = 0f;
-                _isShowingStage = true;
-                _stageFill.anchorMax = new Vector2(0f, _stageFill.anchorMax.y);
-
                 if (_stageFillImage != null)
                     _stageFillImage.color = _stageFillColor;
 
                 // 슬라이더 SFX 길이에 맞춰 물질 단계 셋이 올라가는 동안 막대가 찬다.
                 float length = _sounds?.SliderLength ?? 0f;
                 float total = length > 0f ? length : DefaultDuration;
-                _matterDuration = total / MatterStepCount;
-                _stageFillDuration = _matterDuration * StageFillSteps;
+                _countUp.StepSeconds = total / MatterStepCount;
+                _stageFill.Start(_stageFillRect, reached ? 1 : levelFraction, _countUp.StepSeconds * StageFillSteps);
                 _sounds?.PlaySlider();
             }
 
@@ -383,33 +360,18 @@ namespace BlackHole.Unity
                 _stageText.text = Localized(UIText.Settlement.MilestoneLast, current);
         }
 
-        // 막대가 다 찼다: 결과 색으로.
-        private void FinishStageFill()
-        {
-            if (_stageFillImage != null)
-                _stageFillImage.color = _stageReached ? StageReachedColor : StageShortColor;
-        }
-
         // 물질 행: 물질별 처치 수. 판 기록에 종류별 Gold가 생기면 Gold로 바꾼다.
         public void ShowMatter(int asteroids, int planets, int stars)
         {
-            // 타겟값 저장 (증가 연출을 위해)
             _asteroidTarget = asteroids;
             _planetTarget = planets;
             _starTarget = stars;
 
-            _matterTimer = 0f;
-            _matterType = MatterType.Asteroid;
-            _isShowMatter = true;
-            
-            if (_asteroidText != null)
-                _asteroidText.text = Count(0);
-
-            if (_planetText != null)
-                _planetText.text = Count(0);
-
-            if (_starText != null)
-                _starText.text = Count(0);
+            // 숫자 연출을 처음부터: 물질 셋을 넣고, 총 Gold는 ShowGold가 뒤에 붙인다.
+            _countUp.Clear();
+            _countUp.Add(_asteroidText, 0, asteroids, CountOf);
+            _countUp.Add(_planetText, 0, planets, CountOf);
+            _countUp.Add(_starText, 0, stars, CountOf);
         }
 
         // earned: 이 판이 번 Gold. settled: 결산이 더한 Gold(이정표로 끝났으면 목표 잔액까지의 차액). total: 결산 뒤 진행 상태의 Gold.
@@ -435,8 +397,8 @@ namespace BlackHole.Unity
                 _earned.gameObject.SetActive(false);
             }
 
-            if (_totalGold != null)
-                _totalGold.text = Money(_totalBegin);
+            // 총 Gold는 결산 전 잔액에서 결산 뒤 잔액으로 오른다. 물질 셋 다음 차례.
+            _countUp.Add(_totalGold, _totalBegin, total, Money);
         }
 
         // 오른쪽 통계 칸: 스킬별 피해·수집 통계(판 기록)와 종류별 처치 수(물질 행과 같은 값). 증가 연출 없이 바로 보인다.
@@ -539,12 +501,10 @@ namespace BlackHole.Unity
         public void SetNumberFormat(NumberFormat format)
         {
             _numberFormat = format;
+            _countUp.Rewrite();
 
-            foreach (KeyValuePair<TMP_Text, long> pair in _previousGolds)
-            {
-                if (pair.Key != null)
-                    pair.Key.text = Money(pair.Value);
-            }
+            if (_earned != null && _shownReward.HasValue)
+                _earned.text = Money(_earnedTarget);
         }
 
         private string Localized(string key, params object[] args) =>
@@ -595,12 +555,13 @@ namespace BlackHole.Unity
 
         private static string Whole(int count) => count.ToString(CultureInfo.InvariantCulture);
 
+        private static string CountOf(long count) => Count((int)count);
+
         private string Money(long gold) =>
             "$" + GoldText.Of(gold, _numberFormat);
 
-        // MonoBehavior
         // 성장도 막대나 숫자가 아직 올라가는 중인가.
-        public bool IsAnimating => _isShowingStage || _isShowMatter;
+        public bool IsAnimating => _stageFill.IsRunning || _countUp.IsRunning;
 
         private void Update()
         {
@@ -611,247 +572,69 @@ namespace BlackHole.Unity
                 return;
             }
 
-            if (_isShowingStage)
-                ShowingStage();
-
-            if (_isShowMatter)
-                ShowMatter();
-
-            UpdateScaleEffect();
+            _stageFill.Tick(Time.deltaTime);
+            _countUp.Tick(Time.deltaTime);
+            TickScaleEffect();
         }
 
-        // 연출을 끝까지 돌린 것과 같은 상태로 만든다: 막대·숫자 다 최종값, 타이머·확대 효과 꺼짐, 슬라이더 소리 멈추고 종료음.
-        // Update의 상태 머신만 쓰므로 코루틴·비동기와 겹칠 것이 없다. 연출 중이 아니면 아무것도 하지 않는다.
+        // 연출을 끝까지 돌린 것과 같은 상태로 만든다: 막대·숫자 다 최종값, 강조 효과 끔, 슬라이더 소리 멈추고 종료음. 연출 중이 아니면 아무것도 하지 않는다.
         public void SkipAnimation()
         {
             if (!IsAnimating)
                 return;
 
-            _isShowingStage = false;
-            if (_stageFill != null)
-                _stageFill.anchorMax = new Vector2(_stageFillTarget, _stageFill.anchorMax.y);
-            FinishStageFill();
+            _stageFill.Finish();
+            _countUp.Finish();
 
-            _isShowMatter = false;
-            _matterType = MatterType.Done;
-            _matterTimer = 0f;
-            WriteFinal(_asteroidText, _asteroidTarget);
-            WriteFinal(_planetText, _planetTarget);
-            WriteFinal(_starText, _starTarget);
-            WriteFinal(_earned, _earnedTarget);
-            WriteFinal(_totalGold, _totalTarget);
+            if (_earned != null)
+                _earned.text = Money(_earnedTarget);
 
-            // 확대 중이던 글자를 원래 크기로 되돌린다.
-            if (_scaleTarget != null)
-                _scaleTarget.transform.localScale = Vector3.one;
-            _scaleTarget = null;
-            _isScaleEffect = false;
-
+            StopScaleEffect();
             _sounds?.StopSlider();
             _sounds?.PlayClosing();
         }
 
-        private void WriteFinal(TMP_Text text, int target)
+        // 막대가 다 찼다: 결과 색으로.
+        private void HandleStageFillCompleted()
         {
-            if (text == null) return;
-            text.text = Count(target);
-            _previousKills[text] = target;
+            if (_stageFillImage != null)
+                _stageFillImage.color = _stageReached ? StageReachedColor : StageShortColor;
         }
 
-        private void WriteFinal(TMP_Text text, long target)
-        {
-            if (text == null) return;
-            text.text = Money(target);
-            _previousGolds[text] = target;
-        }
+        // 숫자가 다 올랐다: 종료음.
+        private void HandleCountUpCompleted() => _sounds?.PlayClosing();
 
-        /// <summary>
-        /// 결과값 증가하는 연출 메서드
-        /// </summary>
-        private void ShowingStage()
-        {
-            _stageFillTimer += Time.deltaTime;
-
-            float t = Mathf.Clamp01(_stageFillTimer / _stageFillDuration);
-
-            // 부드럽게 증가
-            t = Mathf.SmoothStep(0f, 1f, t);
-
-            float currentFill =
-                Mathf.Lerp(0f, _stageFillTarget, t);
-
-            if (_stageFill != null)
-                _stageFill.anchorMax = new Vector2(currentFill, _stageFill.anchorMax.y);
-
-            if (t >= 1f)
-            {
-                _isShowingStage = false;
-
-                // 최종값 보정
-                if (_stageFill != null)
-                    _stageFill.anchorMax = new Vector2(_stageFillTarget, _stageFill.anchorMax.y);
-
-                FinishStageFill();
-            }
-        }
-        private void ShowMatter()
-        {
-            _matterTimer += Time.deltaTime;
-
-            float t = Mathf.Clamp01(_matterTimer / _matterDuration);
-
-            // 부드럽게 증가
-            t = Mathf.SmoothStep(0f, 1f, t);
-
-            // 순서대로 증가 연출
-            switch (_matterType)
-            {
-                case MatterType.Asteroid:
-                    IncreaseResult(_asteroidText, _asteroidTarget, t); break;
-                case MatterType.Planet:
-                    IncreaseResult(_planetText, _planetTarget, t); break;
-                case MatterType.Star:
-                    IncreaseResult(_starText, _starTarget, t); break;
-                case MatterType.Earned:
-                    IncreaseResult(_earned, _earnedTarget, t); break;
-                case MatterType.Total:
-                    IncreaseResult(_totalGold, _totalTarget, t); break;
-            }
-        }
-
-        /// <summary>
-        /// 각 텍스트 UI를 0부터 현재 값까지 증가
-        /// </summary>
-        /// <param name="_text">TMP_Text UI</param>
-        /// <param name="_target">각 결과값</param>
-        /// <param name="t">lerp 타이머</param>
-        private void IncreaseResult(TMP_Text _text, int _target, float t)
-        {
-            // 값이 있을때만 증가 연출
-            // (그렇지 않으면 0도 증가하는 연출이 발생해서 기다리는데 지장이 있다)
-            //if (_target == 0) t = 1f;
-
-            int value = IncreaseLerp(_target, t);
-            if (_text != null)
-            {
-                _text.text = Count(value);
-
-                if (!_previousKills.TryGetValue(_text, out int previous) || previous != value)
-                {
-                    PlayScaleEffect(_text);
-                    _previousKills[_text] = value;
-                }
-            }
-
-            if (t >= 1f)
-            {
-                _text.text = Count(_target);
-
-                _matterTimer = 0f;
-
-                switch(_matterType)
-                {
-                    case MatterType.Asteroid:
-                        _matterType = MatterType.Planet; break;
-                    case MatterType.Planet:
-                        _matterType = MatterType.Star; break;
-                    case MatterType.Star:
-                        // 합계(Earned) 단계는 뛰어넘는다 — 값은 _earnedTarget에 두고 표시만 않는다.
-                        _matterType = MatterType.Total; break;
-                }
-            }
-        }
-        private void IncreaseResult(TMP_Text _text, long _target, float t)
-        {
-            // 값이 있을때만 증가 연출
-            // (그렇지 않으면 0도 증가하는 연출이 발생해서 기다리는데 지장이 있다)
-            //if (_target == 0) t = 1f;
-
-            // Total은 이번판에 얻은 Gold를 더해서 결산
-            long value = _matterType.Equals(MatterType.Total) ?
-                LerpLong(_totalBegin, _target, t) : LerpLong(_target, t);
-            if (_text != null)
-            {
-                _text.text = Money(value);
-
-                if (!_previousGolds.TryGetValue(_text, out long previous) || previous != value)
-                {
-                    PlayScaleEffect(_text);
-                    _previousGolds[_text] = value;
-                }
-            }
-
-            if (t >= 1f)
-            {
-                _text.text = Money(_target);
-
-                _matterTimer = 0f;
-
-                switch (_matterType)
-                {
-                    case MatterType.Earned:
-                        _matterType = MatterType.Total; break;
-                    case MatterType.Total:
-                        _matterType = MatterType.Done;
-                        _isShowMatter = false;
-                        _sounds?.PlayClosing(); break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 부드러운 효과
-        /// </summary>
-        /// <param name="_target">설정값</param>
-        /// <param name="t">타이머</param>
-        /// <returns>0~100% 값</returns>
-        private int IncreaseLerp(int _target, float t) => Mathf.RoundToInt(Mathf.Lerp(0, _target, t));
-        private long LerpLong(long target, float t) => (long)((double)target * t);
-        private long LerpLong(long start, long target, float t) => start + (long)((double)(target - start) * t);
-
-        // 확대 효과
+        // 값이 바뀐 글자를 잠깐 키운다. 다른 글자가 커지는 중이었으면 그것은 원래 크기로.
         private void PlayScaleEffect(TMP_Text text)
         {
-            // 기존 효과가 남아있으면 원상복구
+            StopScaleEffect();
+            _scaleTarget = text;
+            _scaleTimer = 0f;
+        }
+
+        private void StopScaleEffect()
+        {
             if (_scaleTarget != null)
                 _scaleTarget.transform.localScale = Vector3.one;
 
-            _scaleTarget = text;
-            _scaleTimer = 0f;
-            _isScaleEffect = true;
+            _scaleTarget = null;
         }
-        private void UpdateScaleEffect()
+
+        // 앞 절반은 HighlightScale까지 커지고 뒤 절반은 1로 돌아온다.
+        private void TickScaleEffect()
         {
-            if (!_isScaleEffect || _scaleTarget == null) return;
+            if (_scaleTarget == null)
+                return;
 
             _scaleTimer += Time.deltaTime;
-
             float t = _scaleTimer / ScaleDuration;
-
-            if (t <= 0.5f)
-            {
-                float scaleT = t * 2f;
-
-                _scaleTarget.transform.localScale =
-                    Vector3.Lerp(
-                        Vector3.one, Vector3.one * HighlightScale,
-                        scaleT);
-            }
-            else
-            {
-                float scaleT = (t - 0.5f) * 2f;
-
-                _scaleTarget.transform.localScale =
-                    Vector3.Lerp(
-                        Vector3.one * HighlightScale, Vector3.one,
-                        scaleT);
-            }
+            float scale = t <= 0.5f
+                ? Mathf.Lerp(1f, HighlightScale, t * 2f)
+                : Mathf.Lerp(HighlightScale, 1f, (t - 0.5f) * 2f);
+            _scaleTarget.transform.localScale = Vector3.one * scale;
 
             if (t >= 1f)
-            {
-                _scaleTarget = null;
-                _isScaleEffect = false;
-            }
+                StopScaleEffect();
         }
     }
 }
