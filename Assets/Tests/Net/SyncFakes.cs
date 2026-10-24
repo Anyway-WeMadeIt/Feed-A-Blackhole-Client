@@ -6,7 +6,7 @@ using BlackHole.Sync;
 
 namespace BlackHole.Net.Tests
 {
-    // 동기화 테스트(SyncSenderTests, SyncApiTests, ScreenFlowLogOrderTests)가 함께 쓰는 가짜들.
+    // 동기화 테스트(SyncSenderTests, SyncApiTests)가 함께 쓰는 가짜들.
 
     // 넣어 둔 결과를 순서대로 돌려주고, 받은 로그 묶음을 그때의 사본으로 기록한다.
     internal sealed class FakeSyncApi : ISyncApi
