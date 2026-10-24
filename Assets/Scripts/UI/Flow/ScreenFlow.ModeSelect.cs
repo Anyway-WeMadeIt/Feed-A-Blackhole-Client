@@ -13,8 +13,8 @@ namespace BlackHole.Unity
         {
             new ModeSelectPanel.ModeItem(
                 NormalModeId,
-                _localizer.Get("mode.normal.title"),
-                _localizer.Get("mode.normal.description"),
+                _localizer.Get(UIText.Mode.NormalTitle),
+                _localizer.Get(UIText.Mode.NormalDescription),
                 NormalModeColor,
                 canContinue: _progressStore.CanContinue),
         };
@@ -52,10 +52,10 @@ namespace BlackHole.Unity
         {
             if (_progressStore.CanContinue)
                 OpenConfirm(
-                    _localizer.Get("confirm.newGame.title"),
-                    _localizer.Get("confirm.newGame.body"),
-                    _localizer.Get("confirm.newGame.confirm"),
-                    _localizer.Get("confirm.cancel"),
+                    _localizer.Get(UIText.Confirm.NewGameTitle),
+                    _localizer.Get(UIText.Confirm.NewGameBody),
+                    _localizer.Get(UIText.Confirm.NewGameConfirm),
+                    _localizer.Get(UIText.Confirm.Cancel),
                     StartNewGame);
             else
                 StartNewGame();

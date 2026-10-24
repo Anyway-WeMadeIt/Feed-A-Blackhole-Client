@@ -78,7 +78,7 @@ namespace BlackHole.Unity
 
             string text = outdated
                 ? _localizer.Get(RejectionKinds.ContentOutdatedKey)
-                : _localizer.Format("sync.rejection", _localizer.Get(RejectionKinds.TextKeyOf(rejection.type)), rejection.code);
+                : _localizer.Format(UIText.Sync.Rejection, _localizer.Get(RejectionKinds.TextKeyOf(rejection.type)), rejection.code);
 
             EnsureNotice().Show(text, outdated ? ContentOutdatedHoldSeconds : WarningHoldSeconds);
             _progressStore.MarkLastRejectionShown();

@@ -221,7 +221,7 @@ namespace BlackHole.Unity
                 return id;
 
             string statId = StatIdOf(node.RankAt(1).Effects[0].Stat);
-            return statId != null && _localizer.TryGet($"stat.{statId}.name", out string name) ? name : id;
+            return statId != null && _localizer.TryGet(UIText.Stat.Name(statId), out string name) ? name : id;
         }
 
         // 툴팁 본문: 산 Rank, 다음 Rank의 효과(지금 값 → 산 뒤 값), 다음 비용, Gold가 모자라면 모자란 만큼.
@@ -239,7 +239,7 @@ namespace BlackHole.Unity
             if (NodePurchase.StateOf(_progress, _tree, id) == NodeState.Hidden)
             {
                 string hiddenStat = StatIdOf(node.RankAt(1).Effects[0].Stat);
-                return hiddenStat != null && _localizer.TryGet($"stat.{hiddenStat}.desc", out string hiddenDescription)
+                return hiddenStat != null && _localizer.TryGet(UIText.Stat.Description(hiddenStat), out string hiddenDescription)
                     ? hiddenDescription
                     : string.Empty;
             }
@@ -253,11 +253,11 @@ namespace BlackHole.Unity
             var text = new StringBuilder();
 
             string titleStat = StatIdOf(node.RankAt(1).Effects[0].Stat);
-            if (titleStat != null && _localizer.TryGet($"stat.{titleStat}.desc", out string description))
+            if (titleStat != null && _localizer.TryGet(UIText.Stat.Description(titleStat), out string description))
                 text.Append(description).Append('\n');
 
             if (node.MaxRank > 1)
-                text.Append(_localizer.Format("node.rank", rank, node.MaxRank)).Append('\n');
+                text.Append(_localizer.Format(UIText.Node.Rank, rank, node.MaxRank)).Append('\n');
 
             // 설명과 효과 사이 빈 줄 하나.
             text.Append('\n');
@@ -275,7 +275,7 @@ namespace BlackHole.Unity
 
                 if (maxed)
                 {
-                    text.Append("<nobr>").Append(_localizer.Format("node.now", NumberText.Value(now) + unit)).Append("</nobr>");
+                    text.Append("<nobr>").Append(_localizer.Format(UIText.Node.Now, NumberText.Value(now) + unit)).Append("</nobr>");
                 }
                 else
                 {
@@ -306,13 +306,13 @@ namespace BlackHole.Unity
             bool maxed = rank >= node.MaxRank;
 
             if (maxed)
-                return _localizer.Get("node.maxed");
+                return _localizer.Get(UIText.Node.Maxed);
 
             long cost = node.RankAt(rank + 1).Cost;
-            string text = _localizer.Format("node.cost", NumberText.Compact(cost));
+            string text = _localizer.Format(UIText.Node.Cost, NumberText.Compact(cost));
 
             if (_progress.Gold < cost)
-                text += "\n" + _localizer.Format("node.short", NumberText.Compact(cost - _progress.Gold));
+                text += "\n" + _localizer.Format(UIText.Node.Short, NumberText.Compact(cost - _progress.Gold));
 
             return text;
         }
@@ -326,7 +326,7 @@ namespace BlackHole.Unity
 
         // 수치 이름: 번역표 stat.{StatId}.name. 표에 없으면 StatId 그대로.
         private string StatName(string statId) =>
-            _localizer.TryGet($"stat.{statId}.name", out string name) ? name : statId;
+            _localizer.TryGet(UIText.Stat.Name(statId), out string name) ? name : statId;
 
         // UpgradeStat → 시트의 StatId("timer"). 정의가 없으면 null.
         private string StatIdOf(UpgradeStat stat) =>

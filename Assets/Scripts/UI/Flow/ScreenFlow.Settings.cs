@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace BlackHole.Unity
 {
@@ -72,7 +71,7 @@ namespace BlackHole.Unity
 
         // 표의 setting.{ID}. 없으면 영어 원문.
         private string SettingLabel(GameSettings.Definition definition) =>
-            _localizer.TryGet("setting." + definition.Id, out string label) ? label : definition.Label;
+            _localizer.TryGet(UIText.Setting.Label(definition.Id), out string label) ? label : definition.Label;
 
         // 표의 setting.{ID}.{번호}. 없으면 원문 — 숫자·퍼센트·언어 이름은 표에 넣지 않는다.
         private IReadOnlyList<string> SettingOptions(GameSettings.Definition definition)
@@ -82,13 +81,9 @@ namespace BlackHole.Unity
                 return options;
 
             var shown = new string[options.Count];
-            string prefix = "setting." + definition.Id + ".";
 
             for (int i = 0; i < options.Count; i++)
-            {
-                string key = prefix + i.ToString(CultureInfo.InvariantCulture);
-                shown[i] = _localizer.TryGet(key, out string option) ? option : options[i];
-            }
+                shown[i] = _localizer.TryGet(UIText.Setting.Option(definition.Id, i), out string option) ? option : options[i];
 
             return shown;
         }

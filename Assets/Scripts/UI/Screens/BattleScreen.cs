@@ -153,7 +153,7 @@ namespace BlackHole.Unity
 
         // 은하 이름(색): battle.galaxy.<색 등급>. 번역표에 없으면 battle.galaxy.
         private string GalaxyName(int tier) =>
-            _localizer != null && _localizer.TryGet($"battle.galaxy.{tier}", out string name) ? name : Localized("battle.galaxy");
+            _localizer != null && _localizer.TryGet(UIText.Battle.Galaxy(tier), out string name) ? name : Localized(UIText.Battle.GalaxyFallback);
 
         // 이정표 달성 연출 중인가. 끝날 때까지 GameHost가 결산 전환을 미루고, 이 화면은 버튼을 받지 않는다.
         public bool IsCelebratingMilestone => _milestones != null && _milestones.IsCelebrating;
@@ -289,7 +289,7 @@ namespace BlackHole.Unity
                 _earned.text = EarnedText(_shownEarned);
         }
 
-        private string EarnedText(long earnedGold) => Localized("battle.earned", GoldText.Of(earnedGold));
+        private string EarnedText(long earnedGold) => Localized(UIText.Battle.Earned, GoldText.Of(earnedGold));
 
         // 남은 시간 글자. 0.1초마다 바뀌므로 흔들림을 줄인다.
         // - 숫자는 칸 폭을 고정한다(<mspace>). 1과 8의 폭이 달라 가운데 정렬에서 숫자 묶음이 좌우로 움직이지 않게 한다.
@@ -390,7 +390,7 @@ namespace BlackHole.Unity
                 _remaining.rectTransform.localScale = Vector3.one;
         }
 
-        private string PauseLabel(bool paused) => Localized(paused ? "battle.resume" : "battle.pause");
+        private string PauseLabel(bool paused) => Localized(paused ? UIText.Battle.Resume : UIText.Battle.Pause);
 
         private string Localized(string key, params object[] args) =>
             _localizer != null ? _localizer.Format(key, args) : key;

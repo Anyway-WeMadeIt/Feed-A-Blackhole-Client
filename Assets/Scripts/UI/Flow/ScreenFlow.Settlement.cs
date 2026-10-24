@@ -10,7 +10,7 @@ namespace BlackHole.Unity
         // tutorial: 튜토리얼 판의 결과. 진행 상태에 결산하지 않았으므로 단계는 "튜토리얼 → 첫 단계"로 보이고 막대는 가득 찬다.
         private void ShowSettlement(BattleRawData raw, bool tutorial = false)
         {
-            string stageName = tutorial ? _localizer.Get("milestone.tutorial.name") : MilestoneName(raw.Stage);
+            string stageName = tutorial ? _localizer.Get(UIText.Milestone.TutorialName) : MilestoneName(raw.Stage);
             string nextName = tutorial
                 ? MilestoneName(HqGrowthDefinition.StartStage)
                 : raw.Stage < _growth.MaxStage ? MilestoneName(raw.Stage + 1) : null;
@@ -57,7 +57,7 @@ namespace BlackHole.Unity
 
         // 이정표 이름(번역표 milestone.<n>.name). 표에 없으면 번호.
         private string MilestoneName(int stage) =>
-            _localizer.TryGet($"milestone.{stage}.name", out string name) ? name : stage.ToString();
+            _localizer.TryGet(UIText.Milestone.Name(stage), out string name) ? name : stage.ToString();
 
         // 이번 판이 시작 체크포인트에서 목표 이정표까지 간 몫(0 ~ 1): 오른 Level 수 + 다음 Level까지의 몫, 목표까지의 Level 수로 나눈다.
         // 목표가 없으면(마지막 이정표 뒤) 1.

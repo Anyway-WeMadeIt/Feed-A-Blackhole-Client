@@ -288,13 +288,13 @@ namespace BlackHole.Unity
 
             // 물질 행 셋: 올리면 툴팁. 통계 칸(BindStat)과 같은 방식이다.
             ButtonFeedback.Bind(_asteroidRow,
-                onHover: () => ShowTooltip(_asteroidRow, Localized("settlement.row.asteroid")),
+                onHover: () => ShowTooltip(_asteroidRow, Localized(UIText.Settlement.RowAsteroid)),
                 onLeave: () => HideTooltip(_asteroidRow));
             ButtonFeedback.Bind(_planetRow,
-                onHover: () => ShowTooltip(_planetRow, Localized("settlement.row.planet")),
+                onHover: () => ShowTooltip(_planetRow, Localized(UIText.Settlement.RowPlanet)),
                 onLeave: () => HideTooltip(_planetRow));
             ButtonFeedback.Bind(_starRow,
-                onHover: () => ShowTooltip(_starRow, Localized("settlement.row.star")),
+                onHover: () => ShowTooltip(_starRow, Localized(UIText.Settlement.RowStar)),
                 onLeave: () => HideTooltip(_starRow));
 
             ButtonFeedback.Bind(_upgradeButton, () => UpgradeClicked?.Invoke());
@@ -303,20 +303,20 @@ namespace BlackHole.Unity
             _skillStats = ObjectOf(View.Rect(Refs.SkillStats));
             _countStats = ObjectOf(View.Rect(Refs.CountStats));
             _statsDivider = ObjectOf(View.Rect(Refs.StatsDivider));
-            _electricStarDamage = BindStat(Refs.ElectricStarDamage_Button, Refs.ElectricStarDamage_Text, "settlement.stat.electricStarDamage");
-            _laserDamage = BindStat(Refs.LaserDamage_Button, Refs.LaserDamage_Text, "settlement.stat.laserDamage");
-            _supernovaDamage = BindStat(Refs.SupernovaDamage_Button, Refs.SupernovaDamage_Text, "settlement.stat.supernovaDamage");
-            _goldenAsteroidGold = BindStat(Refs.GoldenAsteroidGold_Button, Refs.GoldenAsteroidGold_Text, "settlement.stat.goldenAsteroidGold");
-            _electricAsteroidDamage = BindStat(Refs.ElectricAsteroidDamage_Button, Refs.ElectricAsteroidDamage_Text, "settlement.stat.electricAsteroidDamage");
-            _breakerDamage = BindStat(Refs.BreakerDamage_Button, Refs.BreakerDamage_Text, "settlement.stat.breakerDamage");
-            _breakerCritDamage = BindStat(Refs.BreakerCritDamage_Button, Refs.BreakerCritDamage_Text, "settlement.stat.breakerCritDamage");
-            _breakerClicks = BindStat(Refs.BreakerClicks_Button, Refs.BreakerClicks_Text, "settlement.stat.breakerClicks");
-            _destroyedStars = BindStat(Refs.DestroyedStars_Button, Refs.DestroyedStars_Text, "settlement.stat.destroyedStars");
-            _destroyedPlanets = BindStat(Refs.DestroyedPlanets_Button, Refs.DestroyedPlanets_Text, "settlement.stat.destroyedPlanets");
-            _collectedMoons = BindStat(Refs.CollectedMoons_Button, Refs.CollectedMoons_Text, "settlement.stat.collectedMoons");
-            _collectedComets = BindStat(Refs.CollectedComets_Button, Refs.CollectedComets_Text, "settlement.stat.collectedComets");
-            _destroyedAsteroids = BindStat(Refs.DestroyedAsteroids_Button, Refs.DestroyedAsteroids_Text, "settlement.stat.destroyedAsteroids");
-            _addedTime = BindStat(Refs.AddedTime_Button, Refs.AddedTime_Text, "settlement.stat.addedTime");
+            _electricStarDamage = BindStat(Refs.ElectricStarDamage_Button, Refs.ElectricStarDamage_Text, UIText.Settlement.Stat.ElectricStarDamage);
+            _laserDamage = BindStat(Refs.LaserDamage_Button, Refs.LaserDamage_Text, UIText.Settlement.Stat.LaserDamage);
+            _supernovaDamage = BindStat(Refs.SupernovaDamage_Button, Refs.SupernovaDamage_Text, UIText.Settlement.Stat.SupernovaDamage);
+            _goldenAsteroidGold = BindStat(Refs.GoldenAsteroidGold_Button, Refs.GoldenAsteroidGold_Text, UIText.Settlement.Stat.GoldenAsteroidGold);
+            _electricAsteroidDamage = BindStat(Refs.ElectricAsteroidDamage_Button, Refs.ElectricAsteroidDamage_Text, UIText.Settlement.Stat.ElectricAsteroidDamage);
+            _breakerDamage = BindStat(Refs.BreakerDamage_Button, Refs.BreakerDamage_Text, UIText.Settlement.Stat.BreakerDamage);
+            _breakerCritDamage = BindStat(Refs.BreakerCritDamage_Button, Refs.BreakerCritDamage_Text, UIText.Settlement.Stat.BreakerCritDamage);
+            _breakerClicks = BindStat(Refs.BreakerClicks_Button, Refs.BreakerClicks_Text, UIText.Settlement.Stat.BreakerClicks);
+            _destroyedStars = BindStat(Refs.DestroyedStars_Button, Refs.DestroyedStars_Text, UIText.Settlement.Stat.DestroyedStars);
+            _destroyedPlanets = BindStat(Refs.DestroyedPlanets_Button, Refs.DestroyedPlanets_Text, UIText.Settlement.Stat.DestroyedPlanets);
+            _collectedMoons = BindStat(Refs.CollectedMoons_Button, Refs.CollectedMoons_Text, UIText.Settlement.Stat.CollectedMoons);
+            _collectedComets = BindStat(Refs.CollectedComets_Button, Refs.CollectedComets_Text, UIText.Settlement.Stat.CollectedComets);
+            _destroyedAsteroids = BindStat(Refs.DestroyedAsteroids_Button, Refs.DestroyedAsteroids_Text, UIText.Settlement.Stat.DestroyedAsteroids);
+            _addedTime = BindStat(Refs.AddedTime_Button, Refs.AddedTime_Text, UIText.Settlement.Stat.AddedTime);
         }
 
         // 화면이 닫힐 때 툴팁도 닫는다. 다시 열 때 남아 있지 않게 한다.
@@ -341,7 +341,7 @@ namespace BlackHole.Unity
             _shownMilestone = milestone;
 
             if (_result != null)
-                _result.text = Localized(milestone ? "settlement.result.milestone" : "settlement.result.over");
+                _result.text = Localized(milestone ? UIText.Settlement.ResultMilestone : UIText.Settlement.ResultOver);
         }
 
         // 이정표 막대: 이번 판에 시작 체크포인트에서 목표 이정표까지 얼마나 갔는가(levelFraction 0 ~ 1). 물질 집계가 올라가는 동안 차오르고,
@@ -378,11 +378,11 @@ namespace BlackHole.Unity
                 return;
 
             if (reached && goal != null)
-                _stageText.text = Localized("settlement.milestone.reached", goal);
+                _stageText.text = Localized(UIText.Settlement.MilestoneReached, goal);
             else if (goal != null)
-                _stageText.text = Localized("settlement.milestone", current, goal);
+                _stageText.text = Localized(UIText.Settlement.Milestone, current, goal);
             else
-                _stageText.text = Localized("settlement.milestone.last", current);
+                _stageText.text = Localized(UIText.Settlement.MilestoneLast, current);
         }
 
         // 막대가 다 찼다: 결과 색으로.
@@ -427,7 +427,7 @@ namespace BlackHole.Unity
             // 합계 줄은 데이터만 두고 보이지 않는다(값은 _earnedTarget·_totalBegin에 남아 총 골드 연출의 시작점이 된다).
             if (_totalLabel != null)
             {
-                _totalLabel.text = Localized(milestone ? "settlement.reward" : "settlement.total");
+                _totalLabel.text = Localized(milestone ? UIText.Settlement.Reward : UIText.Settlement.Total);
                 _totalLabel.gameObject.SetActive(false);
             }
 
@@ -501,8 +501,8 @@ namespace BlackHole.Unity
             if (_upgradeLabel != null)
             {
                 _upgradeLabel.text = purchasable > 0
-                    ? Localized("settlement.upgrade.count", purchasable.ToString(CultureInfo.InvariantCulture))
-                    : Localized("settlement.upgrade");
+                    ? Localized(UIText.Settlement.UpgradeCount, purchasable.ToString(CultureInfo.InvariantCulture))
+                    : Localized(UIText.Settlement.Upgrade);
             }
         }
 
@@ -520,7 +520,7 @@ namespace BlackHole.Unity
                 WriteStageText(current, goal, reached);
 
             if (_shownReward is bool reward && _totalLabel != null)
-                _totalLabel.text = Localized(reward ? "settlement.reward" : "settlement.total");
+                _totalLabel.text = Localized(reward ? UIText.Settlement.Reward : UIText.Settlement.Total);
 
             if (_shownPurchasable is int purchasable)
                 ShowUpgradeCount(purchasable);

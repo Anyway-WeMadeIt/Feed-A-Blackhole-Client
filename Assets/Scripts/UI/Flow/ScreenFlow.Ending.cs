@@ -15,12 +15,7 @@ namespace BlackHole.Unity
     // 엔딩 뒤 이어하기는 마지막 이정표 뒤의 판(성장도 = MaxStage, 은하는 보라로 고정, 더 이상 이정표 없음)이다.
     internal sealed partial class ScreenFlow
     {
-        // 엔딩 글자 번역표 키. 줄·크레딧 묶음은 1부터 번호가 끊길 때까지 읽는다.
-        private const string EndingLineKey = "ending.line.";
-        private const string EndingCreditsTitleKey = "ending.credits.title";
-        private const string EndingCreditKey = "ending.credits.";
-        private const string EndingThanksKey = "ending.thanks";
-        private const string EndingPromptKey = "ending.prompt";
+        // 엔딩 글자(UIText.Ending). 줄·크레딧 묶음은 1부터 번호가 끊길 때까지 읽는다.
         // 크레딧 이름 칸 안에서 사람을 나누는 글자(한 줄에 한 사람).
         private const char EndingNameSeparator = '|';
         private const int EndingMaxRows = 64;
@@ -137,7 +132,7 @@ namespace BlackHole.Unity
         {
             var lines = new List<string>();
 
-            for (int i = 1; i <= EndingMaxRows && _localizer.TryGet(EndingLineKey + i, out string line); i++)
+            for (int i = 1; i <= EndingMaxRows && _localizer.TryGet(UIText.Ending.Line(i), out string line); i++)
             {
                 if (!string.IsNullOrWhiteSpace(line))
                     lines.Add(line);
@@ -145,11 +140,11 @@ namespace BlackHole.Unity
 
             var credits = new List<EndingCredit>();
 
-            for (int i = 1; i <= EndingMaxRows && _localizer.TryGet($"{EndingCreditKey}{i}.role", out string role); i++)
+            for (int i = 1; i <= EndingMaxRows && _localizer.TryGet(UIText.Ending.CreditRole(i), out string role); i++)
             {
                 var names = new List<string>();
 
-                if (_localizer.TryGet($"{EndingCreditKey}{i}.names", out string cell))
+                if (_localizer.TryGet(UIText.Ending.CreditNames(i), out string cell))
                 {
                     foreach (string name in cell.Split(EndingNameSeparator))
                     {
@@ -164,10 +159,10 @@ namespace BlackHole.Unity
             return new EndingTexts
             {
                 Lines = lines,
-                CreditsTitle = _localizer.TryGet(EndingCreditsTitleKey, out string title) ? title : "",
+                CreditsTitle = _localizer.TryGet(UIText.Ending.CreditsTitle, out string title) ? title : "",
                 Credits = credits,
-                Thanks = _localizer.Get(EndingThanksKey),
-                Prompt = _localizer.Get(EndingPromptKey),
+                Thanks = _localizer.Get(UIText.Ending.Thanks),
+                Prompt = _localizer.Get(UIText.Ending.Prompt),
             };
         }
     }

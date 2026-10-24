@@ -226,7 +226,7 @@ namespace BlackHole.Unity
                 text = preview ? $"<color={PreviewGoldColor}>{number}</color>" : number;
             }
 
-            _gold.text = Localized("upgrade.gold", text);
+            _gold.text = Localized(UIText.Upgrade.Gold, text);
         }
 
         // 사려 했지만 Gold가 모자란 상태로 들어가거나(on) 나온다(off). 골드 숫자 색·살짝 커짐, 구매 탭 색을 함께 바꾼다.
@@ -339,7 +339,7 @@ namespace BlackHole.Unity
 
             if (!string.IsNullOrEmpty(_shownRegion))
             {
-                _hq.text = Localized("node.region." + _shownRegion);
+                _hq.text = Localized(UIText.Node.Region(_shownRegion));
                 return;
             }
 
@@ -347,10 +347,10 @@ namespace BlackHole.Unity
                 return;
 
             // 이정표 이름으로: "소행성대 → 행성계 (목표 Lv 10)". 마지막 이정표 뒤면 이름 하나.
-            string current = Localized($"milestone.{stage}.name");
+            string current = Localized(UIText.Milestone.Name(stage));
             _hq.text = goalLevel > 0
-                ? Localized("upgrade.hq.goal", current, Localized($"milestone.{stage + 1}.name"), goalLevel.ToString(CultureInfo.InvariantCulture))
-                : Localized("upgrade.hq.last", current);
+                ? Localized(UIText.Upgrade.HqGoal, current, Localized(UIText.Milestone.Name(stage + 1)), goalLevel.ToString(CultureInfo.InvariantCulture))
+                : Localized(UIText.Upgrade.HqLast, current);
         }
 
         // 마지막으로 보인 Gold·블랙홀 글자를 지금 언어로 다시 쓴다. 노드 툴팁은 닫는다(다시 올리면 새 언어로 뜬다).
@@ -822,9 +822,9 @@ namespace BlackHole.Unity
             bool interactable = _pinnedState == NodeState.Purchasable;
             string text = _pinnedState switch
             {
-                NodeState.Owned => Localized("node.maxed"),
-                NodeState.Hidden => Localized("node.locked"),
-                _ => _pendingCost is long cost ? Localized("node.buy") + " " + GoldText.Of(cost) : Localized("node.buy"),
+                NodeState.Owned => Localized(UIText.Node.Maxed),
+                NodeState.Hidden => Localized(UIText.Node.Locked),
+                _ => _pendingCost is long cost ? Localized(UIText.Node.Buy) + " " + GoldText.Of(cost) : Localized(UIText.Node.Buy),
             };
 
             _buyButton.interactable = interactable;

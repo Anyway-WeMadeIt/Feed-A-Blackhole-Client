@@ -16,7 +16,6 @@ namespace BlackHole.Unity
     {
         public const float IdleSeconds = 10f;
 
-        private const string TextKey = "tutorial.hint.hold";
         private const float FadeSeconds = 0.4f;
         // 원이 대상 반지름의 RingFrom배에서 RingTo배까지 조여드는 한 주기(초). 조일수록 진해졌다가 끝에서 사라진다.
         private const float PulseSeconds = 1.2f;
@@ -113,7 +112,7 @@ namespace BlackHole.Unity
             if (_target != target || _shown <= 0)
             {
                 // 새로 나타날 때 지금 언어로 글자를 쓴다(판 중에 언어를 바꿔도 다음 안내부터 맞는다).
-                _text.text = _localizer.Get(TextKey);
+                _text.text = _localizer.Get(UIText.Tutorial.HintHold);
                 _time = 0;
             }
 
