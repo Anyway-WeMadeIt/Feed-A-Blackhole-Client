@@ -53,7 +53,7 @@ public sealed class UIResolver
             _context.LocaleId,
             _context.ThemeId);
         resolved.Layout?.BuildPatches(patches);
-        resolved.ImageTheme?.BuildPatches(patches);
+        resolved.ImageTheme?.BuildPatches(patches, Assets.Sprites, _context.ThemeId);
         // Code-registered elements (UIStyledElements) get the same theme, with or without a ThemeSpec.
         patches.Add(new UIStyledElementsPatch(resolved.Theme, Assets, _context.TextScale, _context.LocaleId, _context.ThemeId));
         trace?.Add($"[Patches] {patches.Count}");

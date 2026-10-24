@@ -45,8 +45,9 @@ public sealed class UIImageThemeSpec : ScriptableObject
         return false;
     }
 
-    public void BuildPatches(List<IUIPatch> patches)
+    // sprites/themeId: the global sprite variants, used for an entry that names no sprite of its own.
+    public void BuildPatches(List<IUIPatch> patches, UISpriteSet sprites = null, string themeId = null)
     {
-        patches.Add(new UIImageThemePatch(this));
+        patches.Add(new UIImageThemePatch(this, sprites, themeId));
     }
 }

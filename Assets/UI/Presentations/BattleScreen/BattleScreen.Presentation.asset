@@ -16,21 +16,7 @@ MonoBehaviour:
   baseTheme: {fileID: 11400000, guid: 789d2b0684ba00aecc73b1f161aab1f3, type: 2}
   baseLayout: {fileID: 0}
   baseImageTheme: {fileID: 11400000, guid: 7ccc6a8739f62c57463c86ca60f048e8, type: 2}
+  imageThemes:
+  - {fileID: 11400000, guid: 50d47aa084ae4bbebc14b76ad5b9d520, type: 2}
   textBindings: {fileID: 11400000, guid: 5515b4ff7d538c923758b8ce113de04f, type: 2}
-  variants:
-  - variantId: Dark
-    priority: 10
-    condition:
-      themeId: Dark
-      localeId: 
-      usePlatform: 0
-      platform: 0
-      useLayoutClass: 0
-      layoutClass: 0
-      useAspectRatio: 0
-      aspectRule: 0
-      aspectMin: 1.5
-      aspectMax: 2.5
-    overrideTheme: {fileID: 0}
-    overrideLayout: {fileID: 0}
-    overrideImageTheme: {fileID: 11400000, guid: 50d47aa084ae4bbebc14b76ad5b9d520, type: 2}
+  variants: []
