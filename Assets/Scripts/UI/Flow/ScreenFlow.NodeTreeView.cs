@@ -99,7 +99,7 @@ namespace BlackHole.Unity
 
             if (result == PurchaseResult.Purchased)
             {
-                SoundManager.Instance?.PlayNodeUpgrade();
+                _sounds.PlayNodeUpgrade();
                 _recorder.Purchase(id, _progress.RankOf(id), cost);
             }
 

@@ -51,7 +51,7 @@ namespace BlackHole.Unity
         // 업그레이드: 업그레이드 화면으로.
         private void HandleSettlementUpgradeClicked()
         {
-            SoundManager.Instance.PlaySwitchingScreens();
+            _sounds.PlaySwitchingScreens();
             GoToUpgrade();
         }
 

@@ -70,7 +70,7 @@ namespace BlackHole.Unity
         {
             // 덮이는 동안 지금 판이 흐르지 않게 멈춘다. 흐르다 시간이 끝나면 끝내기 전환(RequestEnd)이 이 전환을 덮어쓴다.
             _battle.SetPaused(true);
-            SoundManager.Instance?.PlaySwitchingScreens();
+            _sounds.PlaySwitchingScreens();
 
             _transition.Play(async () =>
             {

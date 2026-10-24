@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class SettlementScreen : UIRoot<SettlementScreen.Refs>, ILocalizedView, IStyleView, INumberFormatView
+    public sealed class SettlementScreen : UIRoot<SettlementScreen.Refs>, ILocalizedView, IStyleView, INumberFormatView, IUISoundView
     {
         public enum Refs
         {
@@ -190,6 +190,8 @@ namespace BlackHole.Unity
 
         // 언어가 바뀌면 다시 쓸 마지막 값. 아직 보이지 않았으면 null.
         private Localizer _localizer;
+        // 슬라이더·결산 소리. GameBootstrap이 넣는다. 없으면 소리 없이 진행한다.
+        private UISounds _sounds;
         private readonly StyledTexts _styled = new();
         // 테마 색: 화면 바탕색과 구분선.
         private readonly ThemedImages _themed = new();
@@ -455,11 +457,11 @@ namespace BlackHole.Unity
                     _stageFillImage.color = _stageFillColor;
 
                 // 슬라이더 SFX 길이에 맞춰 물질 단계 셋이 올라가는 동안 막대가 찬다.
-                float length = SoundManager.Instance != null ? SoundManager.Instance.SliderLength : 0f;
+                float length = _sounds?.SliderLength ?? 0f;
                 float total = length > 0f ? length : DefaultDuration;
                 _matterDuration = total / MatterStepCount;
                 _stageFillDuration = _matterDuration * StageFillSteps;
-                SoundManager.Instance?.PlaySlider();
+                _sounds?.PlaySlider();
             }
 
             _shownStage = (current, goal, reached);
@@ -623,6 +625,12 @@ namespace BlackHole.Unity
         // 글자 크기·언어별 글꼴. TextBindings에 등록되지 않은 글자만 여기서 맞춘다(등록된 글자는 Theme가 맞춘다).
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
+        public void SetSounds(UISounds sounds)
+        {
+            _sounds = sounds;
+            ButtonAnimation.SetSounds(this, sounds);
+        }
+
         public void ApplyStyle(in UIStyle style)
         {
             Ambient?.Apply(style.ThemeId);
@@ -740,8 +748,8 @@ namespace BlackHole.Unity
             _scaleTarget = null;
             _isScaleEffect = false;
 
-            SoundManager.Instance?.StopSlider();
-            SoundManager.Instance?.PlayClosing();
+            _sounds?.StopSlider();
+            _sounds?.PlayClosing();
         }
 
         private void WriteFinal(TMP_Text text, int target)
@@ -887,7 +895,7 @@ namespace BlackHole.Unity
                     case MatterType.Total:
                         _matterType = MatterType.Done;
                         _isShowMatter = false;
-                        SoundManager.Instance?.PlayClosing(); break;
+                        _sounds?.PlayClosing(); break;
                 }
             }
         }

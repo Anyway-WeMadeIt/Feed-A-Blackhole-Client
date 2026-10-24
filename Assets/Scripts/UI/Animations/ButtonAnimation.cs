@@ -35,6 +35,16 @@ namespace BlackHole.Unity
         private bool _hovered;
         private bool _pressed;
 
+        // 올림·누름 소리. 화면이 IUISoundView.SetSounds에서 넣는다(SetSounds). 없으면 소리 없이 움직인다.
+        public UISounds Sounds { get; set; }
+
+        // root 아래 모든 버튼 연출에 소리를 넣는다. 화면의 IUISoundView.SetSounds가 부른다.
+        public static void SetSounds(Component root, UISounds sounds)
+        {
+            foreach (ButtonAnimation animation in root.GetComponentsInChildren<ButtonAnimation>(true))
+                animation.Sounds = sounds;
+        }
+
         // 버튼의 연출. 프리팹에 없으면 기본값으로 붙인다(BindEvent가 UI_EventHandler를 붙이는 것과 같다).
         public static ButtonAnimation Of(Selectable button)
         {
@@ -53,7 +63,7 @@ namespace BlackHole.Unity
             if (!IsInteractable())
                 return;
 
-            SoundManager.Instance?.PlayHover();
+            Sounds?.PlayHover();
             _hovered = true;
             Play();
         }
@@ -71,7 +81,7 @@ namespace BlackHole.Unity
             if (!IsInteractable())
                 return;
 
-            SoundManager.Instance?.PlayClick();
+            Sounds?.PlayClick();
             _pressed = true;
             Play();
         }

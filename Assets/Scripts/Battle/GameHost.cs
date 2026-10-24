@@ -18,6 +18,7 @@ namespace BlackHole.Unity
         private readonly HqView _hqView;
         private readonly CameraShake _cameraShake;
         private readonly GameSettings _settings;
+        private readonly BattleSounds _sounds;
         // 이정표에 닿아 판이 끝났고, 전투 화면의 달성 연출이 끝나기를 기다리는 중. 끝나면 한 번만 결산 전환을 요청한다.
         private bool _endAwaitsMilestoneEffect;
         // 이 판의 은하(체력바가 따라가는 적). 죽은 뒤에도 남겨 0이 된 막대를 보인다. 판이 바뀌면 다시 찾는다.
@@ -35,7 +36,8 @@ namespace BlackHole.Unity
             DeathEffectView deathEffectView,
             HqView hqView,
             CameraShake cameraShake,
-            GameSettings settings)
+            GameSettings settings,
+            BattleSounds sounds)
         {
             _ui = ui;
             _battle = battle;
@@ -48,6 +50,7 @@ namespace BlackHole.Unity
             _hqView = hqView;
             _cameraShake = cameraShake;
             _settings = settings;
+            _sounds = sounds;
         }
 
         public void Start() => _screens.GoToTitle();
@@ -66,7 +69,7 @@ namespace BlackHole.Unity
                 if (_settings.IsOn(GameSettings.ScreenShake))
                     _cameraShake.Play();
 
-                SoundManager.Instance.PlayLevelUp();
+                _sounds.PlayLevelUp();
             }
 
             // 화면을 먼저 맞춘다 — 판이 끝난 프레임이면 끝난 상태(10칸)를 보인 뒤에 연출·전환을 결정한다.
@@ -79,6 +82,8 @@ namespace BlackHole.Unity
 
             _screens.TickEnding();
 
+            // 이 프레임의 타격·파괴 요청을 소리로 낸다(같은 프레임이면 파괴음만).
+            _sounds.FlushFrame();
             RefreshCursor();
         }
 

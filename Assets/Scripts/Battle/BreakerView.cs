@@ -58,6 +58,7 @@ namespace BlackHole.Unity
 
         private readonly Transform _root;
         private readonly BreakerLook _look;
+        private readonly BattleSounds _sounds;
         private readonly Mesh _quad;
         private readonly MaterialPropertyBlock _properties = new();
         // 칸마다 구체 종류(MoonKind·CometKind). 매 프레임 채워 셰이더에 넘긴다(길이는 늘 MaxOrbs).
@@ -90,11 +91,12 @@ namespace BlackHole.Unity
             public int SoundedBuff;
         }
 
-        public BreakerView(Transform parent, BreakerLook look)
+        public BreakerView(Transform parent, BreakerLook look, BattleSounds sounds)
         {
             _root = new GameObject("Breaker View").transform;
             _root.SetParent(parent, false);
             _look = look;
+            _sounds = sounds;
             _quad = QuadRenderers.CreateMesh();
         }
 
@@ -186,8 +188,8 @@ namespace BlackHole.Unity
                     continue;
 
                 // 맞췄으면 타격음, 못 맞췄으면 헛침 소리
-                if (tick.HitCount > 0) SoundManager.Instance?.RequestHitSound();
-                else SoundManager.Instance.PlayWhiff();
+                if (tick.HitCount > 0) _sounds.RequestHit();
+                else _sounds.PlayWhiff();
 
                     float strength = tick.HitCount > 0 ? 1 : _look.MissStrength;
 
@@ -346,7 +348,7 @@ namespace BlackHole.Unity
 
             if (latest > ring.SoundedBuff)
             {
-                SoundManager.Instance?.PlayMoonComet();
+                _sounds.PlayMoonComet();
                 ring.SoundedBuff = latest;
             }
         }

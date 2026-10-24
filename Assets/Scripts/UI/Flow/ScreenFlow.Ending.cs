@@ -90,7 +90,7 @@ namespace BlackHole.Unity
 
         private void HandleEndingFinished()
         {
-            SoundManager.Instance.PlaySwitchingScreens();
+            _sounds.PlaySwitchingScreens();
             _transition.Play(FinishEndingAsync);
         }
 

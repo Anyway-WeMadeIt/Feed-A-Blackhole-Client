@@ -29,6 +29,10 @@ namespace BlackHole.Unity
         [SerializeField] private CometLook _cometLook;
         [SerializeField] private GameObject _blackHole;
 
+        // 소리를 내는 씬 객체(SoundManager 프리팹). 비우면 소리 없이 실행한다.
+        [Header("Sound")]
+        [SerializeField] private SoundPlayer _sound;
+
         // 전투 배경의 밝기 테마(설정 Dark Mode). 메뉴 Tools/Black Hole/Battle Background/Install in Open Scene이 연결한다. 비우면 씬에 놓인 그대로.
         [Header("Battle Background")]
         [SerializeField] private BattleBackgroundTheme _battleBackground;
@@ -132,14 +136,20 @@ namespace BlackHole.Unity
                 _battleBackground.Bind(_settings);
             _frameRate = new FrameRateLimiter(_settings);
 
+            if (_sound == null)
+                Debug.LogWarning("[소리] GameBootstrap에 SoundPlayer를 연결하지 않아 소리 없이 실행한다.", this);
+
+            BattleSounds battleSounds = new(_sound);
+            UISounds uiSounds = new(_sound);
+
             Camera battleCamera = Camera.main;
             CameraShake cameraShake = battleCamera.GetComponent<CameraShake>();
             BattleCameraFit cameraFit = GetOrAdd<BattleCameraFit>(battleCamera.gameObject);
 
             EnemyLooks enemyLooks = new(_content.Enemies.Kinds());
-            EnemyView enemyView = new(transform, enemyLooks, _breakerLook, _cometLook, _settings);
-            BreakerView breakerView = new(transform, _breakerLook);
-            DeathEffectView deathEffectView = new(transform, _lightningLook, _starLightningLook, _explosionLook, _laserLook);
+            EnemyView enemyView = new(transform, enemyLooks, _breakerLook, _cometLook, _settings, battleSounds);
+            BreakerView breakerView = new(transform, _breakerLook, battleSounds);
+            DeathEffectView deathEffectView = new(transform, _lightningLook, _starLightningLook, _explosionLook, _laserLook, battleSounds);
             HqView hqView = new(transform, _blackHole, battleCamera, _settings, FindShockwaveFeature());
 
             _progress = new ProgressState();
@@ -163,10 +173,17 @@ namespace BlackHole.Unity
                 deathEffectView,
                 hqView,
                 _tutorialHint,
-                cameraFit);
+                cameraFit,
+                battleSounds);
             AimInput aim = new(battle);
 
             UIManager ui = CreateUI();
+            // 프리팹 화면에 UI 소리를 넣는다. 화면은 등록할 때 초기화되어 버튼 연출이 이미 붙어 있다.
+            foreach (UIBase view in _views)
+            {
+                if (view is IUISoundView sounded)
+                    sounded.SetSounds(uiSounds);
+            }
             // 화면을 등록한 뒤에 프리팹 글자를 지금 언어로 바꾼다. 언어가 바뀌면 다시 바꾼다.
             _viewTexts = new ViewTexts(_views, localizer);
             // 언어·글자 크기 설정을 UIContext와 화면 글자(크기·글꼴)에 넣는다. 설정이 바뀌면 다시 넣는다.
@@ -190,6 +207,7 @@ namespace BlackHole.Unity
                 transition,
                 keyInput,
                 recorder,
+                uiSounds,
                 _auth);
 
             // 거부를 받으면 알림을 띄운다(W3-5). 화면이 아직 없는 시작 동기화 중이면 타이틀에 들어갈 때 보인다. 전송기는 Dispose에서 구독을 푼다.
@@ -207,7 +225,8 @@ namespace BlackHole.Unity
                 deathEffectView,
                 hqView,
                 cameraShake,
-                _settings);
+                _settings,
+                battleSounds);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             PlaytestPanel panel = GetOrAdd<PlaytestPanel>(gameObject);
@@ -262,7 +281,9 @@ namespace BlackHole.Unity
             _loggingIn = false;
 
             _host.Start();
-            SoundManager.Instance.Bind(_settings);
+
+            if (_sound != null)
+                _sound.Bind(_settings);
         }
 
         private void Update()

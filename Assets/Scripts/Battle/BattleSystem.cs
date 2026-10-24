@@ -49,6 +49,7 @@ namespace BlackHole.Unity
         private readonly HqView _hqView;
         private readonly TutorialHintView _tutorialHint;
         private readonly BattleCameraFit _cameraFit;
+        private readonly BattleSounds _sounds;
         private State _state = State.Idle;
         // 다음 판에 쓸 시드. 테스트 도구만 정한다(UseSeedForNextBattle). 없으면 시각으로 정한다.
         private int? _nextSeed;
@@ -97,7 +98,8 @@ namespace BlackHole.Unity
             DeathEffectView deathEffectView,
             HqView hqView,
             TutorialHintView tutorialHint,
-            BattleCameraFit cameraFit)
+            BattleCameraFit cameraFit,
+            BattleSounds sounds)
         {
             _content = content;
             _progress = progress;
@@ -107,6 +109,7 @@ namespace BlackHole.Unity
             _hqView = hqView;
             _tutorialHint = tutorialHint;
             _cameraFit = cameraFit;
+            _sounds = sounds;
         }
 
         public bool TryStart(UpgradeStatValues upgrades) => TryStart(upgrades, tutorial: false);
@@ -339,7 +342,7 @@ namespace BlackHole.Unity
             if (t >= 1 && !_collapseBurst)
             {
                 _collapseBurst = true;
-                SoundManager.Instance?.PlaySuperNova();
+                _sounds.PlaySuperNova();
             }
         }
 

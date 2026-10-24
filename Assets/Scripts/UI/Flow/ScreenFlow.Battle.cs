@@ -33,7 +33,7 @@ namespace BlackHole.Unity
         // 시작: 덮인 뒤 판을 조립·시작하고 전투 화면으로 바꾼다. 덮이는 동안 판이 흐르지 않는다.
         private void RequestStart()
         {
-            SoundManager.Instance.PlaySwitchingScreens();
+            _sounds.PlaySwitchingScreens();
             _transition.Play(StartBattle);
         }
 

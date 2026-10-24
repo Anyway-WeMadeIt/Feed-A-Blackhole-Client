@@ -1765,6 +1765,7 @@ MonoBehaviour:
   _laserLook: {fileID: 11400000, guid: 32a1337bdde84db4a41284691967baf1, type: 2}
   _cometLook: {fileID: 11400000, guid: 3d1f6b7a8c2e4a5f9b0c1d2e3f405162, type: 2}
   _blackHole: {fileID: 1528454173}
+  _sound: {fileID: 1602022945}
   _battleBackground: {fileID: 465615260}
   _rootLayer: {fileID: 238476925}
   _panelLayer: {fileID: 1238912222}
@@ -2401,6 +2402,17 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1602022945 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3966935500291151445, guid: 8fcc8e782e30f8e459be118d653ad5e8, type: 3}
+  m_PrefabInstance: {fileID: 566433867}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fb558220c4af1d43b34e77a17fc755b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SoundManager
 --- !u!1001 &1732142111
 PrefabInstance:
   m_ObjectHideFlags: 0

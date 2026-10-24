@@ -125,6 +125,7 @@ namespace BlackHole.Unity
         private readonly float[] _moonKinds = new float[MaxOrbs];
         private readonly EnemyHitParticles _hitParticles;
         private readonly EnemyGoldText _goldText;
+        private readonly BattleSounds _sounds;
         private readonly EnemyDamageText _damageText;
         private readonly Dictionary<EnemyId, EnemyVisual> _visuals = new Dictionary<EnemyId, EnemyVisual>();
         // 붙잡힘 떨림이 흐르는 시간(초). 일시정지 중에는 멈춘다.
@@ -154,7 +155,7 @@ namespace BlackHole.Unity
 
         // breakerLook: 달의 외형(머티리얼·색·간격·기본 공전 속도)을 Breaker 달과 같게 맞추려고 받는다.
         // cometLook: 혜성(픽업)의 외형. 혜성의 화면은 CometView가 맡는다.
-        public EnemyView(Transform parent, EnemyLooks looks, BreakerLook breakerLook, CometLook cometLook, GameSettings settings)
+        public EnemyView(Transform parent, EnemyLooks looks, BreakerLook breakerLook, CometLook cometLook, GameSettings settings, BattleSounds sounds)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _root = new GameObject("Enemy View").transform;
@@ -165,6 +166,7 @@ namespace BlackHole.Unity
             _quad = QuadRenderers.CreateMesh();
             _hitParticles = _root.gameObject.AddComponent<EnemyHitParticles>();
             _goldText = new EnemyGoldText(_root);
+            _sounds = sounds;
             _damageText = new EnemyDamageText(_root);
 
             Shader shadeShader = Shader.Find(ShadeShaderName);
@@ -355,7 +357,7 @@ namespace BlackHole.Unity
             }
 
             if (anyNew)
-                SoundManager.Instance?.RequestDestroyed();
+                _sounds.RequestDestroyed();
         }
 
         // 판이 바뀌거나 판을 정리할 때 모든 적 스프라이트를 지운다. 정리는 처치가 아니므로 연출도 없다.

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, IStyleView, INumberFormatView
+    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, IStyleView, INumberFormatView, IUISoundView
     {
         public enum Refs
         {
@@ -374,6 +374,8 @@ namespace BlackHole.Unity
 
         // 글자 크기·언어별 글꼴. TextBindings에 등록되지 않은 글자만 여기서 맞춘다(등록된 글자는 Theme가 맞춘다).
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
+
+        public void SetSounds(UISounds sounds) => ButtonAnimation.SetSounds(this, sounds);
 
         public void ApplyStyle(in UIStyle style)
         {
