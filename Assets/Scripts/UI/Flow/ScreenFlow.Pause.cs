@@ -65,8 +65,7 @@ namespace BlackHole.Unity
 
             if (await _battle.TryAbandonAsync())
             {
-                // 포기는 결산 로그가 없다. 서버는 다음 판 시작에서 열린 판을 포기로 닫는다.
-                _runId = null;
+                _recorder.Abandon();
                 ShowTitle();
             }
         }

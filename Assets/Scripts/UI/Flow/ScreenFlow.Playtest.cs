@@ -33,7 +33,7 @@ namespace BlackHole.Unity
                 if (warnings.Count > 0)
                     Debug.LogWarning($"[테스트] 시나리오 '{scenario.name}'을 맞춰 넣었다.\n  {string.Join("\n  ", warnings)}");
 
-                _progressStore.EnterTestSession();
+                _recorder.StopSaving();
 
                 if (seed.HasValue)
                     _battle.UseSeedForNextBattle(seed.Value);
@@ -55,7 +55,7 @@ namespace BlackHole.Unity
         }
 
         // 이번 실행은 더 저장하지 않는다. 테스트 도구가 저장 파일을 지운 뒤 장면을 다시 부르기 전에 부른다.
-        internal void StopSaving() => _progressStore.EnterTestSession();
+        internal void StopSaving() => _recorder.StopSaving();
 
         // 진행 중인 판을 지금 끝내고 결산한다(시간 종료와 같은 길).
         internal void EndBattleNow()
@@ -79,7 +79,7 @@ namespace BlackHole.Unity
                 _ui.PopAllPanels(Unbind);
 
                 if (await _battle.TryAbandonAsync())
-                    _runId = null;
+                    _recorder.Abandon();
 
                 if (!prepare())
                 {

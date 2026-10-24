@@ -100,8 +100,7 @@ namespace BlackHole.Unity
             if (result == PurchaseResult.Purchased)
             {
                 SoundManager.Instance?.PlayNodeUpgrade();
-                int rank = _progress.RankOf(id);
-                _progressStore.Commit(seq => _syncLogs.NodePurchase(seq, id, rank, cost));
+                _recorder.Purchase(id, _progress.RankOf(id), cost);
             }
 
             RefreshUpgrade();

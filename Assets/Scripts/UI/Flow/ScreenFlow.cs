@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using BlackHole.Core;
 using BlackHole.Net;
-using BlackHole.Sync;
 using UnityEngine;
 
 namespace BlackHole.Unity
@@ -24,10 +23,8 @@ namespace BlackHole.Unity
         private readonly ScreenTransition _transition;
         private readonly KeyInput _keyInput;
         private readonly IAuthSession _auth;// 서버 로그인 세션. 타이틀의 연결 결과 알림이 상태를 읽는다.
-        private readonly SyncLogFactory _syncLogs;// 판 시작·결산, 노드 구매, 새 게임을 서버 동기화 로그로 만든다.
+        private readonly ProgressRecorder _recorder;// 새 게임, 판 시작·결산, 노드 구매를 서버 동기화 로그로 남기고 저장한다.
         private readonly Dictionary<UIBase, List<Action>> _cleanupByScreen = new();
-        // 지금 진행 중인 판의 runId(소문자 UUID). 판 시작 로그를 남긴 판만 가진다. 결산 로그가 같은 값을 싣는다.
-        private string _runId;
 
         public ScreenFlow(
             UIManager ui,
@@ -44,7 +41,7 @@ namespace BlackHole.Unity
             UIFontSet fonts,
             ScreenTransition transition,
             KeyInput keyInput,
-            SyncLogFactory syncLogs,
+            ProgressRecorder recorder,
             IAuthSession auth)
         {
             _ui = ui;
@@ -61,7 +58,7 @@ namespace BlackHole.Unity
             _fonts = fonts;
             _transition = transition;
             _keyInput = keyInput;
-            _syncLogs = syncLogs;
+            _recorder = recorder;
             _auth = auth;
 
             _keyInput.ContinuePressed += HandleKeyActionSpace;

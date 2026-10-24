@@ -16,7 +16,7 @@ namespace BlackHole.Unity
     // 서버 동기화(저장 포맷 2): 진행도와 로그 장부(SyncLedger)를 한 파일에 한 번의 원자적 쓰기로 저장한다.
     // 진행도를 바꾸는 일(노드 구매, 판 시작·결산, 새 게임)은 Commit(StartNew)으로 로그를 더하며 저장하므로,
     // 진행도만 저장되고 로그가 빠지는 일이 없다. 서버 응답은 ISyncStore.ApplyResponse로 반영한다.
-    public sealed class ProgressStore : ISyncStore
+    public sealed class ProgressStore : ISyncStore, IProgressCommitter
     {
         private readonly ProgressSaveFile _file;
         private readonly ProgressState _progress;

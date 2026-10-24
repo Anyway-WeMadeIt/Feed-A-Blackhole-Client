@@ -151,6 +151,7 @@ namespace BlackHole.Unity
             CreateServerSession(saveDirectory, profileApplied);
             // 서버 동기화 로그를 만든다. 로그는 빌드 버전과 이 콘텐츠의 서버 콘텐츠 버전을 싣는다.
             SyncLogFactory syncLogs = new(new UnityJsonSerializer(), Application.version, loaded.ServerContentVersion, () => DateTime.UtcNow);
+            ProgressRecorder recorder = new(_progressStore, syncLogs);
             Localizer localizer = Localizer.Create(_texts, _settings);
             _tutorialHint = new TutorialHintView(transform, localizer);
 
@@ -188,7 +189,7 @@ namespace BlackHole.Unity
                 _fonts,
                 transition,
                 keyInput,
-                syncLogs,
+                recorder,
                 _auth);
 
             // 거부를 받으면 알림을 띄운다(W3-5). 화면이 아직 없는 시작 동기화 중이면 타이틀에 들어갈 때 보인다. 전송기는 Dispose에서 구독을 푼다.

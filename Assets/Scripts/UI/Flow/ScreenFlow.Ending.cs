@@ -80,7 +80,7 @@ namespace BlackHole.Unity
                 BattleRawData raw = await _battle.TryEndAsync();
 
                 if (raw != null)
-                    CommitSettlement(raw);
+                    _recorder.Settle(raw);
             }
             catch (Exception error)
             {
