@@ -1,5 +1,3 @@
-using System;
-using System.Text;
 using BlackHole.Core;
 using UnityEngine;
 
@@ -183,7 +181,7 @@ namespace BlackHole.Unity
             }
 
             NodeStatus status = NodePurchase.StatusOf(_progress, _tree, id);
-            root.PinNodeTooltip(rect, page.IconOf(id), NodeTooltipTitle(id), NodeTooltipBody(id, withCost: false), status.State);
+            root.PinNodeTooltip(rect, page.IconOf(id), _nodeTooltip.Title(id), _nodeTooltip.Body(id, _progress, withCost: false), status.State);
 
             // 비용은 골드 칩 옆에 "-70"으로. 다음 Rank가 없거나(최대) 아직 닿지 않은 노드면 없다.
             root.ShowPendingCost(status.State != NodeState.Hidden ? status.NextCost : null);
@@ -201,118 +199,11 @@ namespace BlackHole.Unity
             }
         }
 
-        // 툴팁은 호스트(업그레이드 화면)가 띄운다. 제목은 노드 ID, 본문은 Rank·효과·비용이다.
-        // 열린 구역의 자물쇠 노드(Hidden)는 제목(이름)만 보인다. 먼 구역의 점은 트리 보기가 올림을 알리지 않는다.
-        // [임시] 수치의 표시 이름이 정해지면 StatId 대신 쓴다.
+        // 올림 툴팁은 호스트(업그레이드 화면)가 띄운다. 글은 NodeTooltipText가 만든다. 먼 구역의 점은 트리 보기가 올림을 알리지 않는다.
         private void HandleNodeTreeNodeHovered(string id, RectTransform node)
         {
             if (_ui.CurrentRoot is UpgradeScreen root)
-                root.ShowNodeTooltip(node, NodeTooltipTitle(id), NodeTooltipBody(id, withCost: true));
-        }
-
-        private string NodeTooltipTitle(string id)
-        {
-            if (!_tree.TryGet(id, out NodeDefinition node))
-                return id;
-
-            string statId = StatIdOf(node.RankAt(1).Effects[0].Stat);
-            return statId != null && _localizer.TryGet(UIText.Stat.Name(statId), out string name) ? name : id;
-        }
-
-        // 툴팁 본문: 산 Rank, 다음 Rank의 효과(지금 값 → 산 뒤 값), 다음 비용, Gold가 모자라면 모자란 만큼.
-        // 마지막 Rank까지 샀으면 마지막 Rank의 효과와 지금 값. 아직 닿지 않은 노드(자물쇠)는 비운다(이름만).
-        // 효과 줄에서 산 뒤 수치의 색(연한 녹색). 팔레트에 이 역할이 없어 상수로 둔다.
-        private const string AfterValueColor = "#8FC8A0";
-
-        // 툴팁 본문: 설명·Rank·효과. 올림 툴팁은 비용까지(withCost), 고정 패널은 비용을 따로 받는다(NodeTooltipCost).
-        private string NodeTooltipBody(string id, bool withCost)
-        {
-            if (!_tree.TryGet(id, out NodeDefinition node))
-                return string.Empty;
-
-            NodeStatus status = NodePurchase.StatusOf(_progress, _tree, id);
-
-            // 아직 닿지 않은 노드(자물쇠): 수치·비용 없이 무엇을 주는지 한 줄만(새 요소를 미리 알 수 있게). 설명이 없으면 이름만.
-            if (status.State == NodeState.Hidden)
-            {
-                string hiddenStat = StatIdOf(node.RankAt(1).Effects[0].Stat);
-                return hiddenStat != null && _localizer.TryGet(UIText.Stat.Description(hiddenStat), out string hiddenDescription)
-                    ? hiddenDescription
-                    : string.Empty;
-            }
-
-            int rank = status.Rank;
-            bool maxed = status.NextCost == null;
-            NodeRankDefinition shown = node.RankAt(maxed ? node.MaxRank : rank + 1);
-            UpgradeStatValues values = NodePurchase.StatsFor(_progress, _tree);
-            // 효과 이름은 효과가 둘 이상일 때만(하나면 제목과 같은 이름이 반복된다).
-            bool named = shown.Effects.Count > 1;
-            var text = new StringBuilder();
-
-            string titleStat = StatIdOf(node.RankAt(1).Effects[0].Stat);
-            if (titleStat != null && _localizer.TryGet(UIText.Stat.Description(titleStat), out string description))
-                text.Append(description).Append('\n');
-
-            if (node.MaxRank > 1)
-                text.Append(_localizer.Format(UIText.Node.Rank, rank, node.MaxRank)).Append('\n');
-
-            // 설명과 효과 사이 빈 줄 하나.
-            text.Append('\n');
-
-            // 효과마다 두 줄: "[이름] +50%" 그리고 "140% → 190%"(산 뒤 수치만 녹색). 수치 줄은 안에서 줄바꿈되지 않게 <nobr>.
-            // 마지막 Rank까지 샀으면 증가량은 뜻이 없으니 "[이름] 현재 190%" 한 줄만.
-            foreach (NodeEffect effect in shown.Effects)
-            {
-                UpgradeStatDefinition stat = values.DefinitionOf(effect.Stat);
-                string unit = stat.Unit == UpgradeStatUnit.Percent ? "%" : string.Empty;
-                float now = values.ValueOf(effect.Stat);
-
-                if (named)
-                    text.Append(StatName(stat.StatId)).Append(' ');
-
-                if (maxed)
-                {
-                    text.Append("<nobr>").Append(_localizer.Format(UIText.Node.Now, NumberText.Value(now) + unit)).Append("</nobr>");
-                }
-                else
-                {
-                    text.Append(NumberText.Signed(effect.Value)).Append(unit).Append('\n');
-                    float after = Math.Min(stat.Max, Math.Max(stat.Min, now + effect.Value));
-                    text.Append("<nobr>").Append(NumberText.Value(now)).Append(unit)
-                        .Append("  →  <color=").Append(AfterValueColor).Append('>').Append(NumberText.Value(after)).Append(unit).Append("</color></nobr>");
-                }
-
-                text.Append('\n');
-            }
-
-            if (!withCost)
-                return text.ToString().TrimEnd('\n');
-
-            // 설명·효과와 비용 사이 빈 줄 하나(가독성).
-            text.Append('\n').Append(NodeTooltipCost(id));
-            return text.ToString();
-        }
-
-        // 비용 줄: "비용 70" / "최대", Gold가 모자라면 모자란 만큼을 한 줄 더. 아직 닿지 않은 노드는 빈 글자.
-        private string NodeTooltipCost(string id)
-        {
-            if (!_tree.TryGet(id, out _))
-                return string.Empty;
-
-            NodeStatus status = NodePurchase.StatusOf(_progress, _tree, id);
-
-            if (status.State == NodeState.Hidden)
-                return string.Empty;
-
-            if (status.NextCost is not long cost)
-                return _localizer.Get(UIText.Node.Maxed);
-
-            string text = _localizer.Format(UIText.Node.Cost, NumberText.Compact(cost));
-
-            if (_progress.Gold < cost)
-                text += "\n" + _localizer.Format(UIText.Node.Short, NumberText.Compact(cost - _progress.Gold));
-
-            return text;
+                root.ShowNodeTooltip(node, _nodeTooltip.Title(id), _nodeTooltip.Body(id, _progress, withCost: true));
         }
 
         // 올림이 벗어났다. 고정 툴팁(터치)은 올림으로 닫지 않는다 — 터치 노트북에서 마우스가 지나가도 남는다.
@@ -321,13 +212,5 @@ namespace BlackHole.Unity
             if (_ui.CurrentRoot is UpgradeScreen root && !root.IsTooltipPinned)
                 root.HideNodeTooltip();
         }
-
-        // 수치 이름: 번역표 stat.{StatId}.name. 표에 없으면 StatId 그대로.
-        private string StatName(string statId) =>
-            _localizer.TryGet(UIText.Stat.Name(statId), out string name) ? name : statId;
-
-        // UpgradeStat → 시트의 StatId("timer"). 정의가 없으면 null.
-        private string StatIdOf(UpgradeStat stat) =>
-            NodePurchase.StatsFor(_progress, _tree).DefinitionOf(stat)?.StatId;
     }
 }
