@@ -76,7 +76,7 @@ namespace BlackHole.Unity
         private const int PercentStep = 10;
         private static readonly string[] PercentOptions = Percents();
         private const int DefaultPercentIndex = (100 - PercentMin) / PercentStep;
-        // Gold 숫자 표기. 번호는 NumberFormat 열거형의 순서와 같다(GoldText).
+        // Gold 숫자 표기. 번호는 NumberFormat 열거형의 순서와 같다(NumberText).
         private static readonly string[] NumberFormatOptions = { "Short (1.2M)", "Scientific (1.2e6)" };
 
         // 설정 창에 보이는 순서. 이름과 선택지는 영어 원문이다 — 설정 창은 UI 글자 표(setting.{ID}, setting.{ID}.{번호})의
@@ -139,7 +139,7 @@ namespace BlackHole.Unity
         public float TextScale => PercentOf(TextSize);
 
         // 고른 Gold 숫자 표기.
-        public BlackHole.Unity.NumberFormat NumberFormatValue => (BlackHole.Unity.NumberFormat)IndexOf(NumberFormat);
+        public BlackHole.Systems.Numbers.NumberFormat NumberFormatValue => (BlackHole.Systems.Numbers.NumberFormat)IndexOf(NumberFormat);
 
         public void SetOn(string id, bool on) => Set(id, on ? 1 : 0);
         public void SetLevel(string id, float level) => Set(id, level);

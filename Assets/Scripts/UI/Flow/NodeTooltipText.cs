@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using BlackHole.Core;
+using BlackHole.Systems.Numbers;
 
 namespace BlackHole.Unity
 {
