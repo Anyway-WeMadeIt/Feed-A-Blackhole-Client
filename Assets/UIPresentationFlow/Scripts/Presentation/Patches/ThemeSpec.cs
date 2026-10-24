@@ -5,13 +5,13 @@ using UnityEngine;
 public class ThemeSpec : ScriptableObject
 {
     [Header("Base Colors")]
-    // Colors by theme (UIContext.ThemeId), shared by every screen's theme. Empty = the two colors below for every theme.
+    // Override for this screen only. Empty = the shared palette (UIThemeAssets); without that, the two colors below.
     public UIPalette palette;
     public Color textMainColor = Color.white;
     public Color textWeakColor = Color.gray;
 
     [Header("Typography")]
-    // Fonts by locale and role, shared by every screen's theme. Empty = keep the authored fonts.
+    // Override for this screen only. Empty = the shared font set (UIThemeAssets); without that, keep the authored fonts.
     public UIFontSet fonts;
     public int titleSize = 28;
     public int bodySize = 16;
@@ -23,6 +23,7 @@ public class ThemeSpec : ScriptableObject
     public void BuildPatches(
         List<IUIPatch> patches,
         UITextBindingCatalog textBindings,
+        UIThemeAssets assets,
         float textScale = 1f,
         string localeId = null,
         string themeId = null)
@@ -30,6 +31,12 @@ public class ThemeSpec : ScriptableObject
         if (textBindings == null)
             return;
 
-        patches.Add(new ThemeSpecPatch(this, textBindings, textScale, localeId, themeId));
+        patches.Add(new ThemeSpecPatch(this, textBindings, assets, textScale, localeId, themeId));
     }
+
+    // The font set this screen uses: its own override, else the shared one. Null = keep authored fonts.
+    public UIFontSet FontsOr(UIThemeAssets assets) => fonts != null ? fonts : assets?.Fonts;
+
+    // The palette this screen uses: its own override, else the shared one. Null = the spec's own two colors.
+    public UIPalette PaletteOr(UIThemeAssets assets) => palette != null ? palette : assets?.Palette;
 }

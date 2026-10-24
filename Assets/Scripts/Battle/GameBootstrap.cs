@@ -334,7 +334,7 @@ namespace BlackHole.Unity
         {
             // 시작할 때의 테마·언어·글자 배율. 실행 중에 바뀌면 UISettingsSync가 새 UIContext로 바꿔 끼운다.
             UIContext uiContext = UISettingsSync.ContextFor(_settings);
-            UIResolver uiResolver = new(uiContext);
+            UIResolver uiResolver = new(uiContext, new UIThemeAssets(_fonts, _palette, _sprites));
             UIPresentationApplier presentationApplier = new();
 
             UIManager ui = new(

@@ -5,6 +5,7 @@ public sealed class ThemeSpecPatch : IUIPatch
 {
     private readonly ThemeSpec _theme;
     private readonly UITextBindingCatalog _textBindings;
+    private readonly UIFontSet _fonts;
     private readonly float _textScale;
     private readonly string _localeId;
     private readonly Color _textMain;
@@ -13,17 +14,20 @@ public sealed class ThemeSpecPatch : IUIPatch
     public ThemeSpecPatch(
         ThemeSpec theme,
         UITextBindingCatalog textBindings,
+        UIThemeAssets assets,
         float textScale = 1f,
         string localeId = null,
         string themeId = null)
     {
         _theme = theme;
         _textBindings = textBindings;
+        _fonts = theme != null ? theme.FontsOr(assets) : null;
         _textScale = textScale > 0f ? textScale : 1f;
         _localeId = localeId;
 
         // Colors come from the palette row of the current theme; without a palette, from the spec itself.
-        UIPalette.ThemeColors colors = theme != null && theme.palette != null ? theme.palette.Get(themeId) : null;
+        UIPalette palette = theme != null ? theme.PaletteOr(assets) : null;
+        UIPalette.ThemeColors colors = palette != null ? palette.Get(themeId) : null;
         _textMain = colors != null ? colors.textMain : (theme != null ? theme.textMainColor : Color.white);
         _textWeak = colors != null ? colors.textWeak : (theme != null ? theme.textWeakColor : Color.gray);
     }
@@ -76,9 +80,9 @@ public sealed class ThemeSpecPatch : IUIPatch
     // The font comes from the font set by the current locale and the role (fixedFont entries keep theirs).
     private void ApplyTextTheme(TMP_Text text, UITextRole role, float scale, bool setFont)
     {
-        if (setFont && _theme.fonts != null)
+        if (setFont && _fonts != null)
         {
-            TMP_FontAsset font = _theme.fonts.Get(_localeId, role);
+            TMP_FontAsset font = _fonts.Get(_localeId, role);
             if (font != null)
                 text.font = font;
         }

@@ -12,7 +12,7 @@ public sealed class UIPresentationApplier
         UIPresentationBaseline baseline = GetBaseline(view);
 
         baseline.RestoreOwned(view);
-        baseline.CaptureAndOwn(view, result.Resolved);
+        baseline.CaptureAndOwn(view, result.Resolved, result.Assets);
 
         foreach (IUIPatch patch in result.Patches)
             patch?.Apply(view);
@@ -63,13 +63,15 @@ public sealed class UIPresentationApplier
 
         public void CaptureAndOwn(
             IUIPresentationRefProvider refs,
-            ResolvedUIPresentation resolved)
+            ResolvedUIPresentation resolved,
+            UIThemeAssets assets)
         {
             CaptureLayout(refs, resolved?.Layout);
             CaptureTheme(
                 refs,
                 resolved?.Theme,
-                resolved?.TextBindings);
+                resolved?.TextBindings,
+                assets);
             CaptureImageTheme(refs, resolved?.ImageTheme);
         }
 
@@ -105,7 +107,8 @@ public sealed class UIPresentationApplier
         private void CaptureTheme(
             IUIPresentationRefProvider refs,
             ThemeSpec theme,
-            UITextBindingCatalog textBindings)
+            UITextBindingCatalog textBindings,
+            UIThemeAssets assets)
         {
             if (theme == null
                 || textBindings == null
@@ -139,7 +142,7 @@ public sealed class UIPresentationApplier
                     _texts.Add(refId, baseline);
                 }
 
-                baseline.CaptureAndOwn(text, theme.fonts != null && !entry.fixedFont);
+                baseline.CaptureAndOwn(text, theme.FontsOr(assets) != null && !entry.fixedFont);
             }
         }
 

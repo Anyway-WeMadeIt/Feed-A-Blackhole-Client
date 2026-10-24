@@ -2,6 +2,9 @@ public sealed partial class UIManager
 {
     public UIContext Context => _resolver.Context;
 
+    // Shared design assets (fonts, palette, sprite variants). Screens built in code read fonts from here.
+    public UIThemeAssets Assets => _resolver.Assets;
+
     // Swap the user context (theme, locale, text size) and re-apply what is visible.
     // Hidden views pick it up when they are shown next.
     public void SetContext(in UIContext context)

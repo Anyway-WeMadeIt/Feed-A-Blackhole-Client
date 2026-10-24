@@ -14,13 +14,17 @@ public sealed class UIResolver
     private readonly UIVariantResolver _variantResolver = new();
     private UIContext _context;
 
+    // Shared design assets (fonts, palette, sprite variants). Never null; None when the app has no shared assets.
+    public UIThemeAssets Assets { get; }
+
     // When true, each Resolve records how the variant was chosen (UIResolveResult.Trace).
     // Off by default: the trace builds strings on every resolve and nothing reads it in a shipped game.
     public bool TraceEnabled { get; set; }
 
-    public UIResolver(UIContext context)
+    public UIResolver(UIContext context, UIThemeAssets assets = null)
     {
         _context = context;
+        Assets = assets ?? UIThemeAssets.None;
     }
 
     public UIContext Context => _context;
@@ -44,6 +48,7 @@ public sealed class UIResolver
         resolved.Theme?.BuildPatches(
             patches,
             resolved.TextBindings,
+            Assets,
             _context.TextScale,
             _context.LocaleId,
             _context.ThemeId);
@@ -51,6 +56,6 @@ public sealed class UIResolver
         resolved.ImageTheme?.BuildPatches(patches);
         trace?.Add($"[Patches] {patches.Count}");
 
-        return new UIResolveResult(resolved, patches, trace);
+        return new UIResolveResult(resolved, patches, trace, Assets);
     }
 }
