@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlackHole.CelestialBattle
+namespace BlackHole.Unity
 {
     // Instance-owned UI material: aspect-correct rotation, unscaled time and background cover.
     [DisallowMultipleComponent]

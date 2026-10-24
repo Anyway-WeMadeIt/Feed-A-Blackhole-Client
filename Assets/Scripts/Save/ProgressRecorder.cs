@@ -2,7 +2,7 @@ using System;
 using BlackHole.Core;
 using BlackHole.Sync;
 
-namespace BlackHole.Unity
+namespace BlackHole.Save
 {
     // 진행 상태의 변화(새 게임, 판 시작·결산, 노드 구매)를 서버 동기화 로그로 남기고 저장한다.
     // 서버에 무엇을 어떤 순서로 알리는지가 여기에 모여 있다(계약 5.2, 5.5):

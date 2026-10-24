@@ -6,7 +6,7 @@ using BlackHole.Net;
 using BlackHole.Sync;
 using UnityEngine;
 
-namespace BlackHole.Unity
+namespace BlackHole.Save
 {
     // 진행 저장의 창구. 앱 시작 때 콘텐츠를 불러온 뒤 한 번 불러 검사한다.
     // 불러오기: 본 파일 → 읽지 못하거나 깨졌으면 보관하고 직전 저장 → 그것도 그렇으면 보관하고 이어 할 저장이 없다.

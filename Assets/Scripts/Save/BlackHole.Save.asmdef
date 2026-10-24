@@ -1,6 +1,6 @@
 {
   "name": "BlackHole.Save",
-  "rootNamespace": "BlackHole.Unity",
+  "rootNamespace": "BlackHole.Save",
   "references": [
     "BlackHole.Core.Common",
     "BlackHole.Core.Hq",

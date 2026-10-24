@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using BlackHole.Core;
 
-namespace BlackHole.Authoring
+namespace BlackHole.EditorTools
 {
     // 노드 도구의 편집 규칙. 배치의 저작 형식(NodeTreeData)을 고친다. 엔진을 모르고, 게임 빌드에는 들어가지 않는다(에디터 전용 어셈블리).
     //

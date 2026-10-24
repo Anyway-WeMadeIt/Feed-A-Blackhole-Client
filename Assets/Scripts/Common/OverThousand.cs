@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace BlackHole.Core
+namespace BlackHole.Unity
 {
     public class OverThousand
     {

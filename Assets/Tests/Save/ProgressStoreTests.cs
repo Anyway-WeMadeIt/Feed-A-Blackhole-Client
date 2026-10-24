@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using BlackHole.Core;
 using BlackHole.Net;
-using BlackHole.Unity;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
