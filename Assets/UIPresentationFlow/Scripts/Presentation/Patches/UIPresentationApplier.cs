@@ -146,7 +146,7 @@ public sealed class UIPresentationApplier
                     _texts.Add(refId, baseline);
                 }
 
-                baseline.CaptureAndOwn(text, theme.FontsOr(assets) != null && !entry.fixedFont);
+                baseline.CaptureAndOwn(text, assets?.Fonts != null && !entry.fixedFont);
             }
         }
 

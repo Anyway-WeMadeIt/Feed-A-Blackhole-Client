@@ -7,7 +7,7 @@ public sealed partial class UIManager
 
     // The shared assets as the current context sees them (fonts by locale, colors by theme, text scale).
     // For screens built without a prefab or presentation. Views that have one receive theirs in OnPresented.
-    public UIAppliedTheme Theme => _resolver.AppliedThemeOf(null);
+    public UIAppliedTheme Theme => _resolver.AppliedTheme;
 
     // Swap the user context (theme, locale, text size) and re-apply what is visible.
     // Hidden views pick it up when they are shown next.

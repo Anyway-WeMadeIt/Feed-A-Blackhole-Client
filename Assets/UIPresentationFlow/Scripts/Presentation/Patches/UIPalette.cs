@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-// Colors by theme. Every ThemeSpec points at one shared palette, so a theme's colors
+// Colors by theme. One shared palette for the app (UIThemeAssets), so a theme's colors
 // change in one place instead of in every screen's theme (same idea as UIFontSet for fonts).
 //
 // Lookup (pure, no Unity state): the row whose themeId equals UIContext.ThemeId; if none, the first row.

@@ -12,10 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d44d6a720befb38479b06611a8157ad4, type: 3}
   m_Name: SettlementScreen.Theme
   m_EditorClassIdentifier: UIPresentationFlow.Runtime::ThemeSpec
-  palette: {fileID: 11400000, guid: a18ac4e32e664af58b6332ea4a5e8bb5, type: 2}
-  textMainColor: {r: 0.125, g: 0.129, b: 0.141, a: 1}
-  textWeakColor: {r: 0.42, g: 0.435, b: 0.424, a: 1}
-  fonts: {fileID: 11400000, guid: 940c8ce4f1344ac29c2671ed2f23fd5a, type: 2}
   titleSize: 64
   bodySize: 40
   captionSize: 28

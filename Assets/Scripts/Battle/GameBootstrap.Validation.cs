@@ -123,21 +123,6 @@ namespace BlackHole.Unity
             if (_sound == null)
                 warnings.Add("SoundPlayer가 없어 소리 없이 실행한다.");
 
-            // Theme가 다른 글꼴 묶음·팔레트를 가리키면 같은 화면 안에서 TextBindings 글자와 나머지 글자가 갈린다.
-            if (_presentations != null && _fonts != null && _palette != null)
-            {
-                var others = new List<string>();
-
-                foreach (ThemeSpec theme in _presentations.Themes())
-                {
-                    if (theme != null && (theme.fonts != _fonts || theme.palette != _palette) && !others.Contains(theme.name))
-                        others.Add(theme.name);
-                }
-
-                if (others.Count > 0)
-                    warnings.Add($"이 Theme들은 GameBootstrap과 다른 글꼴 묶음 또는 팔레트를 가리킨다: {string.Join(", ", others)}. 같은 UIFontSet·UIPalette를 연결한다.");
-            }
-
             return warnings;
         }
     }

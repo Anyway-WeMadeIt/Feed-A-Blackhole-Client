@@ -6,15 +6,15 @@ using UnityEngine.UI;
 // - texts: font by locale and role, size by the entry's policy × text scale, color by role
 // - images: sprite variant for the theme (sprite set) and/or palette color by role (alpha kept)
 // Catalog entries (TextBindings, Image Themes) are handled by ThemeSpecPatch and UIImageThemePatch;
-// this patch covers everything the View registered in code. Without a ThemeSpec only the Prefab size
-// policy and the shared assets apply.
+// this patch covers everything the View registered in code. Without a ThemeSpec the Role size policy
+// falls back to Prefab (there is no role size to use).
 public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
 {
     private readonly ThemeSpec _theme;
     private readonly UIAppliedTheme _applied;
 
-    // theme: the screen's ThemeSpec (role sizes, fallback text colors); null when the presentation has none.
-    // applied: the fonts, colors and sprites chosen for the user context (UIResolver.AppliedThemeOf).
+    // theme: the screen's ThemeSpec (role sizes); null when the presentation has none.
+    // applied: the fonts, colors and sprites chosen for the user context (UIResolver.AppliedTheme).
     public UIStyledElementsPatch(ThemeSpec theme, in UIAppliedTheme applied)
     {
         _theme = theme;
@@ -48,14 +48,14 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
         TMP_FontAsset font = _applied.FontFor(entry.Role);
         text.font = font != null ? font : entry.Baseline.Font;
 
-        Color color = TextColorFor(entry.Role) ?? entry.Baseline.Color;
+        Color color = _applied.TextColorFor(entry.Role) ?? entry.Baseline.Color;
         color.a = entry.Baseline.Color.a;
         text.color = color;
 
         switch (entry.SizePolicy)
         {
             case UITextSizePolicy.Role when _theme != null:
-                float size = RoleSize(entry.Role) * _applied.TextScale;
+                float size = _theme.SizeOf(entry.Role) * _applied.TextScale;
                 if (text.enableAutoSizing)
                     text.fontSizeMax = size;
                 text.fontSize = size;
@@ -108,25 +108,6 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
             color.a = entry.Baseline.Color.a;
             image.color = color;
         }
-    }
-
-    private float RoleSize(UITextRole role) => role switch
-    {
-        UITextRole.Title => _theme.titleSize,
-        UITextRole.Caption => _theme.captionSize,
-        _ => _theme.bodySize,
-    };
-
-    // Palette color by role; without a palette, the ThemeSpec's own two colors.
-    private Color? TextColorFor(UITextRole role)
-    {
-        if (_applied.HasColors)
-            return _applied.TextColorFor(role);
-
-        if (_theme != null)
-            return role == UITextRole.Caption ? _theme.textWeakColor : _theme.textMainColor;
-
-        return null;
     }
 
     private Sprite SpriteFor(Sprite sprite) => _applied.SpriteFor(sprite);

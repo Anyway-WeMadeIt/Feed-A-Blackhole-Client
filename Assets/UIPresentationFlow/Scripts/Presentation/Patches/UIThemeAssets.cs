@@ -1,6 +1,5 @@
 // The design assets every screen shares, handed to the UIResolver once: fonts by locale and role,
-// colors by theme, and sprite variants by theme. A ThemeSpec may still point at its own font set or
-// palette to override these for one screen; most screens leave those empty.
+// colors by theme, and sprite variants by theme. A screen's ThemeSpec holds only its role sizes.
 public sealed class UIThemeAssets
 {
     public static readonly UIThemeAssets None = new(null, null, null);
