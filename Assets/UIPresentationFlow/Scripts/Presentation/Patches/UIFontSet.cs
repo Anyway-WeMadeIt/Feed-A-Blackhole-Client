@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-// Fonts by locale and text role. Every ThemeSpec points at one shared set, so a font
+// Fonts by locale and text role. One shared set for the app (UIThemeAssets), so a font
 // changes in one place instead of in every screen's theme.
 //
 // Lookup (pure, no Unity state):

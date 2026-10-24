@@ -21,28 +21,19 @@ namespace BlackHole.Unity
 
         private void ApplyBindings(TitleScreen root)
         {
+            // 시작은 타이틀 위에 모드 선택 창을 연다. 모드를 고른 뒤 판으로 간다.
             AddBinding(root,
-                r => r.StartClicked += HandleTitleStartClicked,
-                r => r.StartClicked -= HandleTitleStartClicked);
+                r => r.StartClicked += OpenModeSelect,
+                r => r.StartClicked -= OpenModeSelect);
 
             AddBinding(root,
-                r => r.SettingsClicked += HandleTitleSettingsClicked,
-                r => r.SettingsClicked -= HandleTitleSettingsClicked);
+                r => r.SettingsClicked += OpenSettings,
+                r => r.SettingsClicked -= OpenSettings);
 
             AddBinding(root,
-                r => r.QuitClicked += HandleTitleQuitClicked,
-                r => r.QuitClicked -= HandleTitleQuitClicked);
+                r => r.QuitClicked += QuitGame,
+                r => r.QuitClicked -= QuitGame);
         }
-
-        // 시작은 타이틀 위에 모드 선택 창을 연다. 모드를 고른 뒤 업그레이드 화면으로 간다.
-        private void HandleTitleStartClicked()
-        {
-            OpenModeSelect();
-        }
-
-        private void HandleTitleSettingsClicked() => OpenSettings();
-
-        private static void HandleTitleQuitClicked() => QuitGame();
 
         // 앱을 끝낸다. 에디터에서는 플레이를 멈춘다.
         private static void QuitGame()

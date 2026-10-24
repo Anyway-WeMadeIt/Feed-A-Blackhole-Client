@@ -13,6 +13,10 @@ public sealed class UIPresentationSpec : ScriptableObject
     public ThemeSpec baseTheme;                 // nullable
     public LayoutPatchSpec baseLayout;          // nullable: base = View as authored
     public UIImageThemeSpec baseImageTheme;     // nullable: base = authored Sprite
+    // Image Themes by theme id (each spec carries its themeId). The one matching UIContext.ThemeId replaces
+    // baseImageTheme; a variant rule that overrides the image theme still wins. Global sprite variants
+    // (UIThemeAssets.Sprites) cover images these do not list.
+    public UIImageThemeSpec[] imageThemes;      // nullable
     public UITextBindingCatalog textBindings;   // nullable: View text semantics
     public UIVariantRule[] variants;             // nullable
 }

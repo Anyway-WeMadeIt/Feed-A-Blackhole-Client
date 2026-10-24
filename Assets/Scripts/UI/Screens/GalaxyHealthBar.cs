@@ -35,7 +35,7 @@ namespace BlackHole.Unity
     // - 막대 안에 남은 체력 / 최대 체력. 깎인 몫은 흰 꼬리가 잠깐 남았다가 따라 줄어든다(줄을 넘으면 새 줄 전체에서 다시). 맞은 순간 막대가 잠깐 밝아진다.
     // - 나타날 때 아래에서 살짝 떠오르며 보이고, 은하가 죽으면 x0이 된 뒤 잠시 있다가 흐려진다.
     // - 판(Session)을 모른다. BattleScreen이 상태(GalaxyHealthState)를 넘기고 Tick으로 연출을 흘린다(실제 시간).
-    // - 이름·줄 수 글자는 StyledTexts가 테마(글꼴·크기·색)를 맞춘다. 막대 안 수치는 막대 위에 읽히도록 흰 글자 + 그림자로 고정하고 글꼴·크기만 따른다.
+    // - 이름·줄 수 글자와 바탕·홈은 화면의 Styled가 테마(글꼴·크기·색)를 맞춘다. 막대 안 수치는 막대 위에 읽히도록 흰 글자 + 그림자로 고정하고 글꼴·크기만 따른다.
     internal sealed class GalaxyHealthBar
     {
         // 색(색 등급)별 줄 수 [임시]: 빨강 → 보라.
@@ -99,7 +99,7 @@ namespace BlackHole.Unity
         private float _sinceDeath = float.NaN;
         private bool _active;
 
-        public GalaxyHealthBar(RectTransform parent, TMP_FontAsset font, StyledTexts texts, ThemedImages images)
+        public GalaxyHealthBar(RectTransform parent, TMP_FontAsset font, UIStyledElements styled)
         {
             _baseFont = font;
 
@@ -116,7 +116,7 @@ namespace BlackHole.Unity
 
             Image panel = NewImage("Panel", _root, new Color(1, 1, 1, 0.82f));
             Stretch(panel.rectTransform);
-            images.AddColor(panel, UIColorRole.Surface);
+            styled.AddImageColor(panel, UIColorRole.Surface);
 
             // 막대 홈: 왼쪽 여백부터 줄 수 칸 앞까지.
             RectTransform track = NewRect("Track", _root);
@@ -128,7 +128,7 @@ namespace BlackHole.Unity
             Image trackImage = track.gameObject.AddComponent<Image>();
             trackImage.raycastTarget = false;
             trackImage.color = new Color(1, 1, 1, 0.35f);
-            images.AddColor(trackImage, UIColorRole.Line);
+            styled.AddImageColor(trackImage, UIColorRole.Line);
 
             _under = NewImage("Next Line", track, Color.white);
             Stretch(_under.rectTransform);
@@ -164,21 +164,21 @@ namespace BlackHole.Unity
             countRect.sizeDelta = new Vector2(CountWidth - 8, TrackHeight + 16);
             countRect.anchoredPosition = new Vector2(-Padding, TrackBottom + TrackHeight * 0.5f);
 
-            texts.Add(_name, UITextRole.Body);
-            texts.Add(_count, UITextRole.Title);
+            styled.AddText(_name, UITextRole.Body, UITextSizePolicy.Prefab);
+            styled.AddText(_count, UITextRole.Title, UITextSizePolicy.Prefab);
 
             _root.gameObject.SetActive(false);
         }
 
-        // 막대 안 수치의 글꼴·크기(색은 흰색 고정). BattleScreen.ApplyStyle이 넘긴다.
-        public void ApplyStyle(in UIStyle style)
+        // 막대 안 수치의 글꼴·크기(색은 흰색 고정). BattleScreen.OnPresented가 넘긴다.
+        public void ApplyTheme(in UIAppliedTheme theme)
         {
-            TMP_FontAsset font = style.FontFor(UITextRole.Caption);
+            TMP_FontAsset font = theme.FontFor(UITextRole.Caption);
 
             foreach (TMP_Text text in new[] { _health, _healthShadow })
             {
                 text.font = font != null ? font : _baseFont;
-                text.fontSize = HealthSize * style.Scale;
+                text.fontSize = HealthSize * theme.TextScale;
             }
         }
 

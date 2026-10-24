@@ -78,7 +78,7 @@ namespace BlackHole.Unity
 
             string text = outdated
                 ? _localizer.Get(RejectionKinds.ContentOutdatedKey)
-                : _localizer.Format("sync.rejection", _localizer.Get(RejectionKinds.TextKeyOf(rejection.type)), rejection.code);
+                : _localizer.Format(UIText.Sync.Rejection, _localizer.Get(RejectionKinds.TextKeyOf(rejection.type)), rejection.code);
 
             EnsureNotice().Show(text, outdated ? ContentOutdatedHoldSeconds : WarningHoldSeconds);
             _progressStore.MarkLastRejectionShown();
@@ -89,15 +89,13 @@ namespace BlackHole.Unity
             if (_notice != null)
                 return _notice;
 
-            var style = new UIStyle(_settings.TextScale, _fonts, _settings.LanguageLocale.ToId(), null, null, null);
-            Transform canvas = _transition.transform.parent;
+            UIAppliedTheme theme = _ui.Theme;
 
-            // 엔딩 화면과 같이 화면 전환 덮개 바로 아래에 둔다.
             _notice = FloatingNotice.Create(
-                canvas,
-                _transition.transform.GetSiblingIndex(),
-                style.FontFor(UITextRole.Body),
-                style.Scale);
+                CodeScreenParent(),
+                CodeScreenSiblingIndex(),
+                theme.FontFor(UITextRole.Body),
+                theme.TextScale);
 
             return _notice;
         }

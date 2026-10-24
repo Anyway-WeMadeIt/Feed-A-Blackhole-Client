@@ -11,7 +11,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace BlackHole.Unity
 {
-    public sealed class GameBootstrap : MonoBehaviour
+    public sealed partial class GameBootstrap : MonoBehaviour
     {
         [Header("Content")]
         [SerializeField] private GameContentSetup _content;
@@ -28,6 +28,10 @@ namespace BlackHole.Unity
         [SerializeField] private LaserLook _laserLook;
         [SerializeField] private CometLook _cometLook;
         [SerializeField] private GameObject _blackHole;
+
+        // 소리를 내는 씬 객체(SoundManager 프리팹). 비우면 소리 없이 실행한다.
+        [Header("Sound")]
+        [SerializeField] private SoundPlayer _sound;
 
         // 전투 배경의 밝기 테마(설정 Dark Mode). 메뉴 Tools/Black Hole/Battle Background/Install in Open Scene이 연결한다. 비우면 씬에 놓인 그대로.
         [Header("Battle Background")]
@@ -72,19 +76,6 @@ namespace BlackHole.Unity
         [SerializeField] private PlaytestLibrary _playtest;
 #pragma warning restore CS0169
 
-        private static readonly Type[] RequiredViews =
-        {
-            typeof(TitleScreen),
-            typeof(UpgradeScreen),
-            typeof(BattleScreen),
-            typeof(SettlementScreen),
-            typeof(NodeTreeView),
-            typeof(ModeSelectPanel),
-            typeof(SettingsPanel),
-            typeof(PausePanel),
-            typeof(ConfirmPanel),
-        };
-
         private ProgressState _progress;
         private ProgressStore _progressStore;
         private GameSettings _settings;
@@ -118,8 +109,14 @@ namespace BlackHole.Unity
             if (loaded != null)
                 Debug.Log($"[콘텐츠] 서버 콘텐츠 버전: {loaded.ServerContentVersion}");
 
-            if (loaded == null || !HasConfiguredLooks() || !HasConfiguredUI())
+            // 연결이 빠졌으면 돌리지 않는다. 빠진 칸은 에디터에서 고칠 때 바로 보인다(OnValidate, GameBootstrap.Validation).
+            List<string> missing = MissingLinks();
+
+            if (loaded == null || missing.Count > 0)
             {
+                if (missing.Count > 0)
+                    Debug.LogError("[조립] GameBootstrap에 연결하지 않은 것이 있다:\n- " + string.Join("\n- ", missing), this);
+
                 enabled = false;
                 return;
             }
@@ -132,14 +129,20 @@ namespace BlackHole.Unity
                 _battleBackground.Bind(_settings);
             _frameRate = new FrameRateLimiter(_settings);
 
+            if (_sound == null)
+                Debug.LogWarning("[소리] GameBootstrap에 SoundPlayer를 연결하지 않아 소리 없이 실행한다.", this);
+
+            BattleSounds battleSounds = new(_sound);
+            UISounds uiSounds = new(_sound);
+
             Camera battleCamera = Camera.main;
             CameraShake cameraShake = battleCamera.GetComponent<CameraShake>();
             BattleCameraFit cameraFit = GetOrAdd<BattleCameraFit>(battleCamera.gameObject);
 
             EnemyLooks enemyLooks = new(_content.Enemies.Kinds());
-            EnemyView enemyView = new(transform, enemyLooks, _breakerLook, _cometLook, _settings);
-            BreakerView breakerView = new(transform, _breakerLook);
-            DeathEffectView deathEffectView = new(transform, _lightningLook, _starLightningLook, _explosionLook, _laserLook);
+            EnemyView enemyView = new(transform, enemyLooks, _breakerLook, _cometLook, _settings, battleSounds);
+            BreakerView breakerView = new(transform, _breakerLook, battleSounds);
+            DeathEffectView deathEffectView = new(transform, _lightningLook, _starLightningLook, _explosionLook, _laserLook, battleSounds);
             HqView hqView = new(transform, _blackHole, battleCamera, _settings, FindShockwaveFeature());
 
             _progress = new ProgressState();
@@ -151,6 +154,7 @@ namespace BlackHole.Unity
             CreateServerSession(saveDirectory, profileApplied);
             // 서버 동기화 로그를 만든다. 로그는 빌드 버전과 이 콘텐츠의 서버 콘텐츠 버전을 싣는다.
             SyncLogFactory syncLogs = new(new UnityJsonSerializer(), Application.version, loaded.ServerContentVersion, () => DateTime.UtcNow);
+            ProgressRecorder recorder = new(_progressStore, syncLogs);
             Localizer localizer = Localizer.Create(_texts, _settings);
             _tutorialHint = new TutorialHintView(transform, localizer);
 
@@ -162,14 +166,17 @@ namespace BlackHole.Unity
                 deathEffectView,
                 hqView,
                 _tutorialHint,
-                cameraFit);
+                cameraFit,
+                battleSounds);
             AimInput aim = new(battle);
 
             UIManager ui = CreateUI();
+            // UI 소리의 출처를 캔버스 루트에 둔다. 그 아래의 버튼 배선(ButtonFeedback)과 화면이 찾아 쓴다.
+            GetOrAdd<UISoundSource>(CanvasRoot().gameObject).Sounds = uiSounds;
             // 화면을 등록한 뒤에 프리팹 글자를 지금 언어로 바꾼다. 언어가 바뀌면 다시 바꾼다.
             _viewTexts = new ViewTexts(_views, localizer);
-            // 언어·글자 크기 설정을 UIContext와 화면 글자(크기·글꼴)에 넣는다. 설정이 바뀌면 다시 넣는다.
-            _uiSettings = new UISettingsSync(ui, _views, _settings, _fonts, _palette, _sprites);
+            // 다크 모드·언어·글자 크기 설정을 UIContext에 넣고, Gold 표기 설정을 숫자 화면에 넣는다. 설정이 바뀌면 다시 넣는다.
+            _uiSettings = new UISettingsSync(ui, _views, _settings);
             ScreenTransition transition = CreateScreenTransition();
             KeyInput keyInput = GetOrAdd<KeyInput>(gameObject);
 
@@ -185,10 +192,10 @@ namespace BlackHole.Unity
                 loaded.Content.Growth,
                 _settings,
                 localizer,
-                _fonts,
                 transition,
                 keyInput,
-                syncLogs,
+                recorder,
+                uiSounds,
                 _auth);
 
             // 거부를 받으면 알림을 띄운다(W3-5). 화면이 아직 없는 시작 동기화 중이면 타이틀에 들어갈 때 보인다. 전송기는 Dispose에서 구독을 푼다.
@@ -206,7 +213,8 @@ namespace BlackHole.Unity
                 deathEffectView,
                 hqView,
                 cameraShake,
-                _settings);
+                _settings,
+                battleSounds);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             PlaytestPanel panel = GetOrAdd<PlaytestPanel>(gameObject);
@@ -261,7 +269,9 @@ namespace BlackHole.Unity
             _loggingIn = false;
 
             _host.Start();
-            SoundManager.Instance.Bind(_settings);
+
+            if (_sound != null)
+                _sound.Bind(_settings);
         }
 
         private void Update()
@@ -319,7 +329,7 @@ namespace BlackHole.Unity
         {
             // 시작할 때의 테마·언어·글자 배율. 실행 중에 바뀌면 UISettingsSync가 새 UIContext로 바꿔 끼운다.
             UIContext uiContext = UISettingsSync.ContextFor(_settings);
-            UIResolver uiResolver = new(uiContext);
+            UIResolver uiResolver = new(uiContext, new UIThemeAssets(_fonts, _palette, _sprites));
             UIPresentationApplier presentationApplier = new();
 
             UIManager ui = new(
@@ -343,164 +353,19 @@ namespace BlackHole.Unity
             return ui;
         }
 
-        private ScreenTransition CreateScreenTransition()
+        private ScreenTransition CreateScreenTransition() =>
+            ScreenTransition.Create(CanvasRoot(), _screenTransitionLook);
+
+        // UI 캔버스의 루트. 캔버스를 못 찾으면 화면 층의 부모.
+        private Transform CanvasRoot()
         {
             Canvas canvas = _rootLayer.GetComponentInParent<Canvas>();
-            Transform transitionParent = canvas != null
-                ? canvas.rootCanvas.transform
-                : _rootLayer.parent;
-
-            return ScreenTransition.Create(transitionParent, _screenTransitionLook);
+            return canvas != null ? canvas.rootCanvas.transform : _rootLayer.parent;
         }
 
         // 에디터의 GetComponent는 없을 때 가짜 null을 돌려줘 ??로는 거를 수 없다. TryGetComponent로 본다.
         private static T GetOrAdd<T>(GameObject owner) where T : Component =>
             owner.TryGetComponent(out T component) ? component : owner.AddComponent<T>();
-
-        private bool HasConfiguredLooks()
-        {
-            bool configured = true;
-
-            if (_breakerLook == null
-                || _breakerLook.Material == null
-                || _breakerLook.OrbMaterial == null
-                || _breakerLook.CometAuraMaterial == null)
-            {
-                Debug.LogError(
-                    "[외형] GameBootstrap에 Breaker 외형(BreakerLook)을," +
-                    " Breaker 외형에 링·버프 구체·혜성 배경 원 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_explosionLook == null
-                || _explosionLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 폭발 외형(ExplosionLook)을," +
-                               " 폭발 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_cometLook == null || _cometLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 혜성 외형(CometLook)을, " +
-                               "혜성 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_lightningLook == null || _lightningLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 번개 외형(LightningLook)을," +
-                               " 번개 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_starLightningLook == null || _starLightningLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 전기 별 번개 외형(StarLightningLook)을," +
-                               " 그 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_laserLook == null || _laserLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 레이저 외형(LaserLook)을," +
-                               " 그 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            return configured;
-        }
-
-        // Theme가 다른 글꼴 묶음을 가리키면 같은 화면 안에서 TextBindings 글자와 나머지 글자의 글꼴이 갈린다.
-        private void WarnOtherFontSets()
-        {
-            var others = new List<string>();
-
-            foreach (ThemeSpec theme in _presentations.Themes())
-            {
-                if (theme != null && (theme.fonts != _fonts || theme.palette != _palette) && !others.Contains(theme.name))
-                    others.Add(theme.name);
-            }
-
-            if (others.Count > 0)
-            {
-                Debug.LogWarning(
-                    $"[UI] 이 Theme들은 GameBootstrap과 다른 글꼴 묶음 또는 팔레트를 가리킨다: {string.Join(", ", others)}." +
-                    " 같은 UIFontSet·UIPalette를 연결한다.", this);
-            }
-        }
-
-        private bool HasConfiguredUI()
-        {
-            bool configured = true;
-
-            if (_screenTransitionLook == null
-                || _screenTransitionLook.Material == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 화면 전환 외형(ScreenTransitionLook)을," +
-                               " 화면 전환 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_rootLayer == null
-                || _panelLayer == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 Root Layer와 Panel Layer를 연결해야 한다.", this);
-                configured = false;
-            }
-
-            var missingViews = new List<string>();
-
-            foreach (Type type in RequiredViews)
-            {
-                if (_views == null
-                    || !Array.Exists(_views, view => view != null && view.GetType() == type))
-                    missingViews.Add(type.Name);
-            }
-
-            if (missingViews.Count > 0)
-            {
-                Debug.LogError(
-                    $"[UI] GameBootstrap의 Registered Views에 빠진 화면이 있다: {string.Join(", ", missingViews)}.", this);
-                configured = false;
-            }
-
-            if (_presentations == null)
-            {
-                Debug.LogError(
-                    "[UI] GameBootstrap에 화면 Presentation 묶음(ScreenPresentations)을 연결해야 한다.", this);
-                configured = false;
-            }
-            else
-            {
-                IReadOnlyList<string> missing = _presentations.MissingReferences();
-
-                if (missing.Count > 0)
-                {
-                    Debug.LogError(
-                        $"[UI] 화면 Presentation 묶음에 연결하지 않은 칸이 있다: {string.Join(", ", missing)}.", _presentations);
-                    configured = false;
-                }
-            }
-
-            if (_fonts == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 글꼴 묶음(UIFontSet)을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_palette == null || _sprites == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 팔레트(UIPalette)와 그림 짝(UISpriteSet)을 연결해야 한다.", this);
-                configured = false;
-            }
-            else if (_presentations != null)
-            {
-                WarnOtherFontSets();
-            }
-
-            return configured;
-        }
 
         private ScriptableRendererFeature FindShockwaveFeature()
         {

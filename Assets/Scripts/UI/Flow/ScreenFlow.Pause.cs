@@ -13,45 +13,41 @@ namespace BlackHole.Unity
                 if (!_battle.CanPause)
                     return;
 
-                SetBattlePaused(true);
+                _battle.SetPaused(true);
             }
 
             _ui.PushPanel<PausePanel>(
                 _presentations.Pause,
                 afterPresented: panel => BindView(panel, ApplyBindings),
                 afterClosed: Unbind);
-
-            _pauseOpen = true;
         }
 
         private void ApplyBindings(PausePanel panel)
         {
             AddBinding(panel,
-                p => p.ResumeClicked += HandlePauseResumeClicked,
-                p => p.ResumeClicked -= HandlePauseResumeClicked);
+                p => p.ResumeClicked += ResumeFromPause,
+                p => p.ResumeClicked -= ResumeFromPause);
 
+            // 설정: 일시 정지 창 위에 설정 창을 쌓는다. 설정 창을 닫으면 일시 정지 창으로 돌아온다.
             AddBinding(panel,
-                p => p.SettingsClicked += HandlePauseSettingsClicked,
-                p => p.SettingsClicked -= HandlePauseSettingsClicked);
+                p => p.SettingsClicked += OpenSettings,
+                p => p.SettingsClicked -= OpenSettings);
 
             AddBinding(panel,
                 p => p.MainMenuClicked += HandlePauseMainMenuClicked,
                 p => p.MainMenuClicked -= HandlePauseMainMenuClicked);
 
             AddBinding(panel,
-                p => p.QuitClicked += HandlePauseQuitClicked,
-                p => p.QuitClicked -= HandlePauseQuitClicked);
+                p => p.QuitClicked += QuitGame,
+                p => p.QuitClicked -= QuitGame);
         }
 
-        private void HandlePauseResumeClicked()
+        // 일시 정지 창을 닫고 판을 다시 움직인다. 판이 없으면(결산·업그레이드) 창만 닫는다.
+        private void ResumeFromPause()
         {
             _ui.PopPanel(Unbind);
-            SetBattlePaused(false);
-            _pauseOpen = false;
+            _battle.SetPaused(false);
         }
-
-        // 설정: 일시 정지 창 위에 설정 창을 쌓는다. 설정 창을 닫으면 일시 정지 창으로 돌아온다.
-        private void HandlePauseSettingsClicked() => OpenSettings();
 
         private void HandlePauseMainMenuClicked() => _transition.Play(LeaveToTitleAsync);
 
@@ -60,8 +56,6 @@ namespace BlackHole.Unity
         private async Task LeaveToTitleAsync()
         {
             _ui.PopAllPanels(Unbind);
-            _pauseOpen = false;
-            _settingsOpen = false;
 
             if (_battle.Session == null)
             {
@@ -71,15 +65,9 @@ namespace BlackHole.Unity
 
             if (await _battle.TryAbandonAsync())
             {
-                // 포기는 결산 로그가 없다. 서버는 다음 판 시작에서 열린 판을 포기로 닫는다.
-                _runId = null;
+                _recorder.Abandon();
                 ShowTitle();
             }
         }
-
-        private static void HandlePauseQuitClicked() => QuitGame();
-
-        // 판을 멈추거나 다시 움직인다. 판이 없거나 이미 그 상태면 그대로 둔다.
-        private void SetBattlePaused(bool paused) => _battle.SetPaused(paused);
     }
 }

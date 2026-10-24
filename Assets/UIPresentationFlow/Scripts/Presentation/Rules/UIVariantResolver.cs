@@ -27,7 +27,7 @@ public sealed class UIVariantResolver
     {
         ThemeSpec theme = spec.baseTheme;
         LayoutPatchSpec layout = spec.baseLayout;
-        UIImageThemeSpec imageTheme = spec.baseImageTheme;
+        UIImageThemeSpec imageTheme = ImageThemeFor(spec, ui.ThemeId) ?? spec.baseImageTheme;
         List<string> matchedRules = new(4);
 
         trace?.Add(
@@ -125,6 +125,21 @@ public sealed class UIVariantResolver
             layout,
             imageTheme,
             matchedRules);
+    }
+
+    // The presentation's image theme for the UI theme, if it lists one. Null = use the base.
+    private static UIImageThemeSpec ImageThemeFor(UIPresentationSpec spec, string themeId)
+    {
+        if (spec.imageThemes == null || string.IsNullOrEmpty(themeId))
+            return null;
+
+        foreach (UIImageThemeSpec candidate in spec.imageThemes)
+        {
+            if (candidate != null && string.Equals(candidate.themeId, themeId, System.StringComparison.Ordinal))
+                return candidate;
+        }
+
+        return null;
     }
 
     private static List<(UIVariantRule rule, int index)> OrderByPriority(UIVariantRule[] rules)

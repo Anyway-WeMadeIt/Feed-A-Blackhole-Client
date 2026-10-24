@@ -14,9 +14,17 @@ public sealed class UIResolver
     private readonly UIVariantResolver _variantResolver = new();
     private UIContext _context;
 
-    public UIResolver(UIContext context)
+    // Shared design assets (fonts, palette, sprite variants). Never null; None when the app has no shared assets.
+    public UIThemeAssets Assets { get; }
+
+    // When true, each Resolve records how the variant was chosen (UIResolveResult.Trace).
+    // Off by default: the trace builds strings on every resolve and nothing reads it in a shipped game.
+    public bool TraceEnabled { get; set; }
+
+    public UIResolver(UIContext context, UIThemeAssets assets = null)
     {
         _context = context;
+        Assets = assets ?? UIThemeAssets.None;
     }
 
     public UIContext Context => _context;
@@ -32,7 +40,7 @@ public sealed class UIResolver
         UIPresentationSpec spec,
         in DisplayContext display)
     {
-        var trace = new UIResolveTrace();
+        UIResolveTrace trace = TraceEnabled ? new UIResolveTrace() : null;
         ResolvedUIPresentation resolved =
             _variantResolver.Resolve(spec, _context, display, trace);
 
@@ -40,13 +48,21 @@ public sealed class UIResolver
         resolved.Theme?.BuildPatches(
             patches,
             resolved.TextBindings,
+            Assets,
             _context.TextScale,
             _context.LocaleId,
             _context.ThemeId);
         resolved.Layout?.BuildPatches(patches);
-        resolved.ImageTheme?.BuildPatches(patches);
-        trace.Add($"[Patches] {patches.Count}");
+        resolved.ImageTheme?.BuildPatches(patches, Assets.Sprites, _context.ThemeId);
+        // Code-registered elements (UIStyledElements) get the same theme, with or without a ThemeSpec.
+        UIAppliedTheme applied = AppliedTheme;
+        patches.Add(new UIStyledElementsPatch(resolved.Theme, applied));
+        trace?.Add($"[Patches] {patches.Count}");
 
-        return new UIResolveResult(resolved, patches, trace);
+        return new UIResolveResult(resolved, patches, trace, Assets, applied);
     }
+
+    // The shared assets as the current context sees them: fonts by locale, colors by theme, sprite variants.
+    public UIAppliedTheme AppliedTheme => new(_context, Assets.Fonts, Assets.Palette, Assets.Sprites);
+
 }

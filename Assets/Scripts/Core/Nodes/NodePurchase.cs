@@ -32,14 +32,65 @@ namespace BlackHole.Core
 
         public static NodeState StateOf(ProgressState progress, NodeTree tree, string nodeId)
         {
-            switch (Check(progress, tree, nodeId))
+            PurchaseResult result = Check(progress, tree, nodeId);
+
+            if (result == PurchaseResult.UnknownNode)
+                throw new ArgumentException($"트리에 없는 노드다: '{nodeId}'.", nameof(nodeId));
+
+            return StateOf(result);
+        }
+
+        // 구매 판정 → 보이는 상태. UnknownNode는 부르는 쪽이 먼저 걸러야 한다.
+        private static NodeState StateOf(PurchaseResult result) => result switch
+        {
+            PurchaseResult.MaxRankReached => NodeState.Owned,
+            PurchaseResult.Hidden => NodeState.Hidden,
+            PurchaseResult.Purchased => NodeState.Purchasable,
+            _ => NodeState.Revealed,
+        };
+
+        private static NodeStatus StatusOf(ProgressState progress, NodeTree tree, NodeDefinition node)
+        {
+            NodeRankDefinition next = NextRankOf(progress, node);
+            return new NodeStatus(node.Id, StateOf(Check(progress, tree, node)), progress.RankOf(node.Id), next?.Cost);
+        }
+
+        // 노드 하나의 상태·산 Rank·다음 비용을 한 번에. 트리에 없는 노드면 예외.
+        public static NodeStatus StatusOf(ProgressState progress, NodeTree tree, string nodeId)
+        {
+            Verify(progress, tree);
+
+            if (!tree.TryGet(nodeId, out NodeDefinition node))
+                throw new ArgumentException($"트리에 없는 노드다: '{nodeId}'.", nameof(nodeId));
+
+            return StatusOf(progress, tree, node);
+        }
+
+        // 트리의 모든 노드 상태(트리 순서).
+        public static List<NodeStatus> StatusesOf(ProgressState progress, NodeTree tree)
+        {
+            Verify(progress, tree);
+            var statuses = new List<NodeStatus>(tree.Nodes.Count);
+
+            foreach (NodeDefinition node in tree.Nodes)
+                statuses.Add(StatusOf(progress, tree, node));
+
+            return statuses;
+        }
+
+        // 그 상태의 노드 수(예: 지금 살 수 있는 노드 수).
+        public static int CountOf(ProgressState progress, NodeTree tree, NodeState state)
+        {
+            Verify(progress, tree);
+            int count = 0;
+
+            foreach (NodeDefinition node in tree.Nodes)
             {
-                case PurchaseResult.UnknownNode: throw new ArgumentException($"트리에 없는 노드다: '{nodeId}'.", nameof(nodeId));
-                case PurchaseResult.MaxRankReached: return NodeState.Owned;
-                case PurchaseResult.Hidden: return NodeState.Hidden;
-                case PurchaseResult.Purchased: return NodeState.Purchasable;
-                default: return NodeState.Revealed;
+                if (StateOf(Check(progress, tree, node)) == state)
+                    count++;
             }
+
+            return count;
         }
 
         // 다음에 살 Rank의 비용. 마지막 Rank까지 샀거나 트리에 없는 노드면 false.

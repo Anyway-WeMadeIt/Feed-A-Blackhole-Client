@@ -20,7 +20,7 @@ public sealed partial class UIManager
         {
             UIBase previousRoot = CurrentRoot;
 
-            ClosePage(previousRoot, afterClosed);
+            ClosePage(previousRoot);
 
             SetVisible(previousRoot, false);
 

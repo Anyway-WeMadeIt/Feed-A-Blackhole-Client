@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace BlackHole.Unity
 {
@@ -15,8 +14,6 @@ namespace BlackHole.Unity
                     panel.Build(SettingItems());
                 },
                 afterClosed: Unbind);
-
-            _settingsOpen = true;
         }
 
         private void ApplyBindings(SettingsPanel panel)
@@ -56,7 +53,6 @@ namespace BlackHole.Unity
         {
             _settings.Save();
             _ui.PopPanel(Unbind);
-            _settingsOpen = false;
         }
 
         // 설정 정의와 지금 값을 설정 창의 행으로 바꾼다. 이름·선택지는 지금 언어로.
@@ -75,7 +71,7 @@ namespace BlackHole.Unity
 
         // 표의 setting.{ID}. 없으면 영어 원문.
         private string SettingLabel(GameSettings.Definition definition) =>
-            _localizer.TryGet("setting." + definition.Id, out string label) ? label : definition.Label;
+            _localizer.TryGet(UIText.Setting.Label(definition.Id), out string label) ? label : definition.Label;
 
         // 표의 setting.{ID}.{번호}. 없으면 원문 — 숫자·퍼센트·언어 이름은 표에 넣지 않는다.
         private IReadOnlyList<string> SettingOptions(GameSettings.Definition definition)
@@ -85,13 +81,9 @@ namespace BlackHole.Unity
                 return options;
 
             var shown = new string[options.Count];
-            string prefix = "setting." + definition.Id + ".";
 
             for (int i = 0; i < options.Count; i++)
-            {
-                string key = prefix + i.ToString(CultureInfo.InvariantCulture);
-                shown[i] = _localizer.TryGet(key, out string option) ? option : options[i];
-            }
+                shown[i] = _localizer.TryGet(UIText.Setting.Option(definition.Id, i), out string option) ? option : options[i];
 
             return shown;
         }

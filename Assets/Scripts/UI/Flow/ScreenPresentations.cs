@@ -34,33 +34,6 @@ namespace BlackHole.Unity
         public UIPresentationSpec Pause => _pause;
         public UIPresentationSpec Confirm => _confirm;
 
-        // 모든 Presentation의 기본 Theme와 변형(Variant) Theme. 비어 있는 칸은 건너뛴다.
-        internal IEnumerable<ThemeSpec> Themes()
-        {
-            UIPresentationSpec[] specs =
-            {
-                _title, _upgrade, _battle, _settlement, _nodeTree, _modeSelect, _settings, _pause, _confirm,
-            };
-
-            foreach (UIPresentationSpec spec in specs)
-            {
-                if (spec == null)
-                    continue;
-
-                if (spec.baseTheme != null)
-                    yield return spec.baseTheme;
-
-                if (spec.variants == null)
-                    continue;
-
-                foreach (UIVariantRule rule in spec.variants)
-                {
-                    if (rule?.overrideTheme != null)
-                        yield return rule.overrideTheme;
-                }
-            }
-        }
-
         // 연결하지 않은 칸. 비어 있어야 화면 흐름을 조립한다(GameBootstrap).
         internal IReadOnlyList<string> MissingReferences()
         {

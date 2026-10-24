@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using BlackHole.Core;
 using BlackHole.Unity;
@@ -13,6 +14,7 @@ namespace BlackHole.EditorTools
     // - 키: 비었거나 두 번 나오는가
     // - 칸: 언어 칸이 비었는가(비면 실행 중에는 영어로 보인다)
     // - 화면 키({화면 타입 이름}.{Ref 이름}): 그 화면 타입이 있고, 그 Refs에 그 이름이 있는가
+    // - 코드 키(UIText의 상수): 표에 있는가. 번호·ID가 들어가는 키(UIText의 함수)는 검사하지 않는다
     // - {0} 자리: 언어마다 같은 번호를 쓰는가
     internal static class UITextTableCheck
     {
@@ -33,7 +35,7 @@ namespace BlackHole.EditorTools
                 return;
             }
 
-            List<string> problems = Inspect(table.text, ViewRefs());
+            List<string> problems = Inspect(table.text, ViewRefs(), CodeKeys());
 
             if (problems.Count == 0)
                 Debug.Log($"[글자 검사] {TablePath}: 문제 없음.", table);
@@ -41,8 +43,9 @@ namespace BlackHole.EditorTools
                 Debug.LogWarning($"[글자 검사] {TablePath}: {problems.Count}건\n- " + string.Join("\n- ", problems), table);
         }
 
-        // refsByView: 화면 타입 이름 → 그 Refs 이름들.
-        internal static List<string> Inspect(string text, IReadOnlyDictionary<string, HashSet<string>> refsByView)
+        // refsByView: 화면 타입 이름 → 그 Refs 이름들. codeKeys: 코드가 쓰는 고정 키(UIText 상수). null이면 검사하지 않는다.
+        internal static List<string> Inspect(
+            string text, IReadOnlyDictionary<string, HashSet<string>> refsByView, IReadOnlyCollection<string> codeKeys = null)
         {
             var problems = new List<string>();
             List<string[]> rows = Csv.Parse(text ?? string.Empty);
@@ -110,7 +113,36 @@ namespace BlackHole.EditorTools
                 CheckPlaceholders(key, cells, columns, problems);
             }
 
+            if (codeKeys != null)
+            {
+                foreach (string key in codeKeys)
+                {
+                    if (!firstLine.ContainsKey(key))
+                        problems.Add($"코드 키 '{key}'(UIText)가 표에 없다.");
+                }
+            }
+
             return problems;
+        }
+
+        // UIText와 그 안의 중첩 클래스에 있는 public const string 전부.
+        internal static List<string> CodeKeys()
+        {
+            var keys = new List<string>();
+            Collect(typeof(UIText), keys);
+            return keys;
+        }
+
+        private static void Collect(Type type, List<string> keys)
+        {
+            foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.Static))
+            {
+                if (field.IsLiteral && field.FieldType == typeof(string))
+                    keys.Add((string)field.GetRawConstantValue());
+            }
+
+            foreach (Type nested in type.GetNestedTypes(BindingFlags.Public))
+                Collect(nested, keys);
         }
 
         // 대문자로 시작하는 키는 화면 키다(코드 키는 소문자로 시작한다).
@@ -184,23 +216,12 @@ namespace BlackHole.EditorTools
                 if (type.IsAbstract || type.IsGenericType)
                     continue;
 
-                Type refs = RefsTypeOf(type);
+                Type refs = UIRefCheck.RefsTypeOf(type);
                 if (refs != null)
                     refsByView[type.Name] = new HashSet<string>(Enum.GetNames(refs), StringComparer.Ordinal);
             }
 
             return refsByView;
-        }
-
-        private static Type RefsTypeOf(Type type)
-        {
-            for (Type current = type; current != null && current != typeof(object); current = current.BaseType)
-            {
-                if (current.IsGenericType && current.GetGenericTypeDefinition() == typeof(UIBase<>))
-                    return current.GetGenericArguments()[0];
-            }
-
-            return null;
         }
 
         private static int ColumnOf(string[] header, string name) =>

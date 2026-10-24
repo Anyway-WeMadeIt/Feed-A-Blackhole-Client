@@ -115,19 +115,22 @@ namespace BlackHole.Core
             if (World.Hq.ReachedMilestone)
             {
                 End();
-                return new AdvanceResult(0, true);
+                return new AdvanceResult(0, BattleEndReason.MilestoneReached);
             }
 
             // 시간 제한이 없는 판은 시간을 더하지도, 시간으로 끝나지도 않는다.
             if (IsTimeless)
-                return new AdvanceResult(raised, false);
+                return new AdvanceResult(raised, null);
 
             ExtendTimeLimit(raised);
 
             if (_timeLimit.HasExpired(Elapsed))
+            {
                 End();
+                return new AdvanceResult(raised, BattleEndReason.TimeExpired);
+            }
 
-            return new AdvanceResult(raised, _ended);
+            return new AdvanceResult(raised, null);
         }
 
         public void End()

@@ -13,8 +13,8 @@ namespace BlackHole.Unity
         {
             new ModeSelectPanel.ModeItem(
                 NormalModeId,
-                _localizer.Get("mode.normal.title"),
-                _localizer.Get("mode.normal.description"),
+                _localizer.Get(UIText.Mode.NormalTitle),
+                _localizer.Get(UIText.Mode.NormalDescription),
                 NormalModeColor,
                 canContinue: _progressStore.CanContinue),
         };
@@ -52,45 +52,37 @@ namespace BlackHole.Unity
         {
             if (_progressStore.CanContinue)
                 OpenConfirm(
-                    _localizer.Get("confirm.newGame.title"),
-                    _localizer.Get("confirm.newGame.body"),
-                    _localizer.Get("confirm.newGame.confirm"),
-                    _localizer.Get("confirm.cancel"),
+                    _localizer.Get(UIText.Confirm.NewGameTitle),
+                    _localizer.Get(UIText.Confirm.NewGameBody),
+                    _localizer.Get(UIText.Confirm.NewGameConfirm),
+                    _localizer.Get(UIText.Confirm.Cancel),
                     StartNewGame);
             else
                 StartNewGame();
         }
 
-        // 계속: 저장으로 진행 상태를 되살린다(이번 실행에서 이미 진행 중이면 그대로).
+        // 계속: 저장으로 진행 상태를 되살리고 곧바로 판을 시작한다(이번 실행에서 이미 진행 중이면 그대로).
+        // 업그레이드 화면은 첫 판의 결산 뒤에 처음 연다.
         private void HandleModeSelectContinueClicked(string modeId)
         {
             _progressStore.Continue(_progress);
-            EnterMode();
+            _transition.Play(() => LeavePanelsAnd(StartBattle));
         }
 
         // 진행 상태를 처음으로 되돌리고 새 게임 로그와 함께 바로 저장한 뒤 튜토리얼 판으로 들어간다.
         private void StartNewGame()
         {
-            _progressStore.StartNew(_progress, seq => _syncLogs.Reset(seq));
-            _transition.Play(StartTutorialFromModeSelect);
+            _recorder.StartNewGame(_progress);
+            _transition.Play(() => LeavePanelsAnd(StartTutorial));
         }
 
         private void HandleModeSelectBackClicked() => _ui.PopPanel(Unbind);
 
-        // 화면이 다 덮인 뒤 패널을 모두 닫고(바인딩 해제) 곧바로 판을 시작한다(전투 화면). 루트를 바꿔도 패널은 남기 때문이다.
-        // 업그레이드 화면은 첫 판의 결산 뒤에 처음 연다.
-        private void EnterMode() => _transition.Play(StartBattleFromModeSelect);
-
-        private void StartBattleFromModeSelect()
+        // 화면이 다 덮인 뒤 패널을 모두 닫고(바인딩 해제) 판을 시작한다. 루트를 바꿔도 패널은 남기 때문이다.
+        private void LeavePanelsAnd(System.Action start)
         {
             _ui.PopAllPanels(Unbind);
-            StartBattle();
-        }
-
-        private void StartTutorialFromModeSelect()
-        {
-            _ui.PopAllPanels(Unbind);
-            StartTutorial();
+            start();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace BlackHole.Unity
     // 전투 Session을 모른다 — GameHost가 전투 Step 뒤 표시 값을 넘긴다. 진행 중인 판이 없으면 비어 있는 표시(ShowIdle)다.
     // 번 Gold는 이 판의 합계일 뿐이다. 진행 상태의 Gold는 판이 끝난 뒤 결산이 바꾼다.
     // 은하가 나오는 판(블랙홀 구역)에서는 화면 아래 가운데에 은하 체력바(GalaxyHealthBar)를 보인다. GameHost가 ShowGalaxy로 상태를 넘긴다.
-    public sealed class BattleScreen : UIRoot<BattleScreen.Refs>, ILocalizedView, INumberFormatView, IStyleView
+    public sealed class BattleScreen : UIRoot<BattleScreen.Refs>, ILocalizedView, INumberFormatView
     {
         public enum Refs
         {
@@ -55,13 +55,13 @@ namespace BlackHole.Unity
         private RectTransform _levelFill;
         private TMP_Text _pauseLabel;
         private MilestoneRow _milestones;
-        // 은하 체력바(코드로 만든다). 글자·바탕은 아래 두 묶음이 테마에 맞춘다.
+        // 은하 체력바(코드로 만든다). 이름·줄 수 글자와 바탕은 Styled에 넣어 테마를 받고, 막대 안 수치는 OnPresented가 넘긴다.
         private GalaxyHealthBar _galaxyBar;
-        private readonly StyledTexts _styledTexts = new();
-        private readonly ThemedImages _themedImages = new();
         private int _galaxyTier = -1;
         private int _shownTenths = -1;
         private long _shownEarned = -1;
+        // Gold 표기(설정). UISettingsSync가 넣는다.
+        private NumberFormat _numberFormat;
         private bool _idle;
         private bool? _shownPaused;
         private Localizer _localizer;
@@ -89,8 +89,6 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _remaining = View.Text(Refs.Remaining_Text);
             _gain = View.Text(Refs.TimeGain_Text);
             ResetGain();
@@ -104,14 +102,11 @@ namespace BlackHole.Unity
                 burstRect != null ? burstRect.GetComponent<UIMilestoneBurst>() : null);
             _milestones.Reset();
 
-            // 은하 체력바의 기준 글꼴은 일시정지 글자의 것(한글이 있는 글꼴). 테마가 바뀌면 StyledTexts가 언어·역할에 맞는 글꼴로 바꾼다.
+            // 은하 체력바의 기준 글꼴은 일시정지 글자의 것(한글이 있는 글꼴). 테마가 들어오면 언어·역할에 맞는 글꼴로 바뀐다.
             RectTransform safeArea = View.Rect(Refs.SafeAreaRoot);
 
             if (safeArea != null)
-            {
-                _galaxyBar = new GalaxyHealthBar(safeArea, _pauseLabel != null ? _pauseLabel.font : null, _styledTexts, _themedImages);
-                _galaxyBar.ApplyStyle(_styledTexts.Style);
-            }
+                _galaxyBar = new GalaxyHealthBar(safeArea, _pauseLabel != null ? _pauseLabel.font : null, Styled);
 
             BindEvent(View.Button(Refs.PauseBtn_Button), HandlePauseClicked);
             BindEvent(View.Button(Refs.EndBtn_Button), HandleEndClicked);
@@ -132,12 +127,8 @@ namespace BlackHole.Unity
             _galaxyBar?.Tick(Time.unscaledDeltaTime);
         }
 
-        public void ApplyStyle(in UIStyle style)
-        {
-            _styledTexts.SetStyle(style);
-            _themedImages.SetStyle(style);
-            _galaxyBar?.ApplyStyle(style);
-        }
+        // 테마가 들어왔다: 은하 체력바의 막대 안 수치 글꼴·크기를 맞춘다(나머지는 Styled가 맞췄다).
+        protected override void OnPresented(in UIAppliedTheme theme) => _galaxyBar?.ApplyTheme(theme);
 
         // 이 판의 은하 상태(GameHost가 매 프레임). 은하가 없는 판이면 null — 막대를 숨긴다.
         internal void ShowGalaxy(GalaxyHealthState? galaxy)
@@ -153,7 +144,7 @@ namespace BlackHole.Unity
 
         // 은하 이름(색): battle.galaxy.<색 등급>. 번역표에 없으면 battle.galaxy.
         private string GalaxyName(int tier) =>
-            _localizer != null && _localizer.TryGet($"battle.galaxy.{tier}", out string name) ? name : Localized("battle.galaxy");
+            _localizer != null && _localizer.TryGet(UIText.Battle.Galaxy(tier), out string name) ? name : Localized(UIText.Battle.GalaxyFallback);
 
         // 이정표 달성 연출 중인가. 끝날 때까지 GameHost가 결산 전환을 미루고, 이 화면은 버튼을 받지 않는다.
         public bool IsCelebratingMilestone => _milestones != null && _milestones.IsCelebrating;
@@ -282,14 +273,16 @@ namespace BlackHole.Unity
                 _galaxyBar?.Rename(GalaxyName(_galaxyTier));
         }
 
-        // Gold 표기 설정이 바뀌었다. 보이는 번 Gold를 다시 쓴다.
-        public void RefreshNumbers()
+        // Gold 표기 설정. 보이는 번 Gold를 새 표기로 다시 쓴다.
+        public void SetNumberFormat(NumberFormat format)
         {
+            _numberFormat = format;
+
             if (_earned != null && _shownEarned >= 0)
                 _earned.text = EarnedText(_shownEarned);
         }
 
-        private string EarnedText(long earnedGold) => Localized("battle.earned", GoldText.Of(earnedGold));
+        private string EarnedText(long earnedGold) => Localized(UIText.Battle.Earned, GoldText.Of(earnedGold, _numberFormat));
 
         // 남은 시간 글자. 0.1초마다 바뀌므로 흔들림을 줄인다.
         // - 숫자는 칸 폭을 고정한다(<mspace>). 1과 8의 폭이 달라 가운데 정렬에서 숫자 묶음이 좌우로 움직이지 않게 한다.
@@ -390,7 +383,7 @@ namespace BlackHole.Unity
                 _remaining.rectTransform.localScale = Vector3.one;
         }
 
-        private string PauseLabel(bool paused) => Localized(paused ? "battle.resume" : "battle.pause");
+        private string PauseLabel(bool paused) => Localized(paused ? UIText.Battle.Resume : UIText.Battle.Pause);
 
         private string Localized(string key, params object[] args) =>
             _localizer != null ? _localizer.Format(key, args) : key;

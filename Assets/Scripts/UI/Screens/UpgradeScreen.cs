@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, IStyleView, INumberFormatView
+    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, INumberFormatView
     {
         public enum Refs
         {
@@ -127,20 +127,19 @@ namespace BlackHole.Unity
 
         // 언어가 바뀌면 다시 쓸 마지막 값. 아직 보이지 않았으면 null.
         private Localizer _localizer;
-        private readonly StyledTexts _styled = new();
-        // 테마 색: 화면 바탕색(배경 그림 뒤).
-        private readonly ThemedImages _themed = new();
+        // 마지막으로 들어온 테마. 코드로 칠하는 패널·구매 탭의 색을 여기서 고른다(OnPresented).
+        private UIAppliedTheme _theme;
         // 노드 툴팁의 프리팹 폭. 글자 크기 설정만큼 넓힌다(원작처럼 상자가 글자를 따라 커진다).
         private float _tooltipWidth;
         private long? _shownGold;
+        // Gold 표기(설정). UISettingsSync가 넣는다.
+        private NumberFormat _numberFormat;
         private (int Stage, int GoalLevel)? _shownHq;
         // 트리에서 보고 있는 구역의 열쇠(번역표 node.region.<열쇠>). 있으면 블랙홀 글자 자리에 구역 이름을 보인다.
         private string _shownRegion;
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _gold = View.Text(Refs.Gold_Text);
             _hq = View.Text(Refs.Hq_Text);
             _tooltip = View.Rect(Refs.NodeTooltip_Image);
@@ -149,8 +148,9 @@ namespace BlackHole.Unity
             _tooltipBody = View.Text(Refs.NodeTooltipBody_Text);
             _hint = View.Text(Refs.Hint_Text);
             CreatePanelParts();
-            _styled.Add(_hint, UITextRole.Caption);
-            _themed.AddColor(GetComponent<Image>(), UIColorRole.Backdrop);
+            // 안내 글자와 화면 바탕색(배경 그림 뒤)은 Styled가 테마에 맞춘다. TextBindings에 등록된 글자는 Theme가 맞춘다.
+            Styled.AddText(_hint, UITextRole.Caption, UITextSizePolicy.Prefab);
+            Styled.AddImageColor(GetComponent<Image>(), UIColorRole.Backdrop);
             _tooltipWidth = _tooltip != null ? _tooltip.sizeDelta.x : 0;
             HideNodeTooltip();
 
@@ -213,7 +213,7 @@ namespace BlackHole.Unity
         // 글자색은 테마가 정하므로 숫자만 리치 텍스트로 칠한다. 모자람(붉게, 섞임만큼) > 미리보기(황금) > 평소.
         private void WriteGold(long amount, bool preview)
         {
-            string number = GoldText.Of(amount);
+            string number = GoldText.Of(amount, _numberFormat);
             string text;
 
             if (_goldShortMix > 0)
@@ -226,7 +226,7 @@ namespace BlackHole.Unity
                 text = preview ? $"<color={PreviewGoldColor}>{number}</color>" : number;
             }
 
-            _gold.text = Localized("upgrade.gold", text);
+            _gold.text = Localized(UIText.Upgrade.Gold, text);
         }
 
         // 사려 했지만 Gold가 모자란 상태로 들어가거나(on) 나온다(off). 골드 숫자 색·살짝 커짐, 구매 탭 색을 함께 바꾼다.
@@ -339,7 +339,7 @@ namespace BlackHole.Unity
 
             if (!string.IsNullOrEmpty(_shownRegion))
             {
-                _hq.text = Localized("node.region." + _shownRegion);
+                _hq.text = Localized(UIText.Node.Region(_shownRegion));
                 return;
             }
 
@@ -347,18 +347,22 @@ namespace BlackHole.Unity
                 return;
 
             // 이정표 이름으로: "소행성대 → 행성계 (목표 Lv 10)". 마지막 이정표 뒤면 이름 하나.
-            string current = Localized($"milestone.{stage}.name");
+            string current = Localized(UIText.Milestone.Name(stage));
             _hq.text = goalLevel > 0
-                ? Localized("upgrade.hq.goal", current, Localized($"milestone.{stage + 1}.name"), goalLevel.ToString(CultureInfo.InvariantCulture))
-                : Localized("upgrade.hq.last", current);
+                ? Localized(UIText.Upgrade.HqGoal, current, Localized(UIText.Milestone.Name(stage + 1)), goalLevel.ToString(CultureInfo.InvariantCulture))
+                : Localized(UIText.Upgrade.HqLast, current);
         }
 
         // 마지막으로 보인 Gold·블랙홀 글자를 지금 언어로 다시 쓴다. 노드 툴팁은 닫는다(다시 올리면 새 언어로 뜬다).
-        // Gold 표기 설정이 바뀌었다. 보이는 Gold를 다시 쓴다.
-        public void RefreshNumbers()
+        // Gold 표기 설정. 보이는 Gold와 구매 탭을 새 표기로 다시 쓴다.
+        public void SetNumberFormat(NumberFormat format)
         {
+            _numberFormat = format;
+
             if (_shownGold is long gold)
                 ShowGold(gold);
+
+            PaintBuyButton();
         }
 
         public void Relocalize(Localizer localizer)
@@ -372,19 +376,18 @@ namespace BlackHole.Unity
             PaintHeader();
         }
 
-        // 글자 크기·언어별 글꼴. TextBindings에 등록되지 않은 글자만 여기서 맞춘다(등록된 글자는 Theme가 맞춘다).
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
-        public void ApplyStyle(in UIStyle style)
+        // 테마가 들어왔다: 문양 머티리얼, 코드로 칠하는 구매 탭·Gold 색을 다시 칠하고 툴팁 폭을 글자 배율만큼 넓힌다.
+        protected override void OnPresented(in UIAppliedTheme theme)
         {
-            Ambient?.Apply(style.ThemeId);
-            _styled.SetStyle(style);
-            _themed.SetStyle(style);
+            _theme = theme;
+            Ambient?.Apply(theme.ThemeId);
             PaintBuyButton();
             PaintGold();
 
             if (_tooltip != null)
-                _tooltip.sizeDelta = new Vector2(_tooltipWidth * style.Scale, _tooltip.sizeDelta.y);
+                _tooltip.sizeDelta = new Vector2(_tooltipWidth * theme.TextScale, _tooltip.sizeDelta.y);
         }
 
         private string Localized(string key, params object[] args) =>
@@ -630,7 +633,7 @@ namespace BlackHole.Unity
 
         private Color PanelBackColor()
         {
-            Color? themed = _themed.Style.ColorFor(UIColorRole.Surface);
+            Color? themed = _theme.ColorFor(UIColorRole.Surface);
 
             if (themed is not Color color)
                 return PanelColor;
@@ -670,9 +673,14 @@ namespace BlackHole.Unity
             _buyPressed = pressed;
 
             if (pressed)
+            {
+                UISoundSource.For(this)?.PlayClick();
                 _buyAnimation.Press();
+            }
             else
+            {
                 _buyAnimation.Release();
+            }
 
             PaintBuyBack();
             PaintGold();
@@ -731,7 +739,7 @@ namespace BlackHole.Unity
         }
 
         // 고정 패널에서만 쓰는 부품을 프리팹 툴팁 아래에 만든다(트리의 노드와 같은 방식). 그림 없이 단색으로 만들고
-        // 테마 색(ThemedImages)과 글꼴(StyledTexts)을 받는다. 올림 툴팁에서는 모두 숨긴다.
+        // 테마 색(_theme)과 글꼴(Styled)을 받는다. 올림 툴팁에서는 모두 숨긴다.
         // - 제목 옆 노드 그림(제목 글자의 왼쪽 여백에 놓는다)
         
         // - 구매 탭: 패널 오른쪽 위 모서리에 걸친 "구매 70". 비용 표시이자 버튼이다. 누르는 즉시 산다(꾹 누름은 노드 쪽이다).
@@ -791,7 +799,7 @@ namespace BlackHole.Unity
                 _buyLabel.font = _tooltipBody.font;
                 _buyLabel.color = _tooltipBody.color;
             }
-            _styled.Add(_buyLabel, UITextRole.Body);
+            Styled.AddText(_buyLabel, UITextRole.Body, UITextSizePolicy.Prefab);
 
             _buyButton = buy.AddComponent<Button>();
             _buyButton.targetGraphic = _buyBack;
@@ -820,9 +828,9 @@ namespace BlackHole.Unity
             bool interactable = _pinnedState == NodeState.Purchasable;
             string text = _pinnedState switch
             {
-                NodeState.Owned => Localized("node.maxed"),
-                NodeState.Hidden => Localized("node.locked"),
-                _ => _pendingCost is long cost ? Localized("node.buy") + " " + GoldText.Of(cost) : Localized("node.buy"),
+                NodeState.Owned => Localized(UIText.Node.Maxed),
+                NodeState.Hidden => Localized(UIText.Node.Locked),
+                _ => _pendingCost is long cost ? Localized(UIText.Node.Buy) + " " + GoldText.Of(cost, _numberFormat) : Localized(UIText.Node.Buy),
             };
 
             _buyButton.interactable = interactable;
@@ -840,15 +848,14 @@ namespace BlackHole.Unity
         // 살 수 있으면 팔레트의 강조색(초록). 아니면 패널 면 색(Surface)을 조금 밝혀 — 글자색(TextMain)을 쓰면 다크 테마에서 흰 상자가 되어 흰 글자가 안 보인다.
         private Color BuyBackColor(bool ready)
         {
-            UIStyle style = _themed.Style;
             Color fallback = ready ? BuyReadyColor : BuyBlockedColor;
-            Color? themed = style.ColorFor(ready ? UIColorRole.Accent : UIColorRole.Surface);
+            Color? themed = _theme.ColorFor(ready ? UIColorRole.Accent : UIColorRole.Surface);
 
             if (themed is not Color color)
                 return fallback;
 
             if (!ready)
-                color = Color.Lerp(color, style.ColorFor(UIColorRole.TextMain) ?? Color.white, 0.12f);
+                color = Color.Lerp(color, _theme.ColorFor(UIColorRole.TextMain) ?? Color.white, 0.12f);
 
             color.a = fallback.a;
             return color;

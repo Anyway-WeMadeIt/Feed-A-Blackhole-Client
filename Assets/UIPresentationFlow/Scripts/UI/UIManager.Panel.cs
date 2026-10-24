@@ -49,7 +49,7 @@ public sealed partial class UIManager
             return null;
 
         UIBase popped = _panelStack.Pop();
-        ClosePage(popped, afterClosed);
+        ClosePage(popped);
 
         _panelPresentations.Remove(popped);
         ApplyPanelState(
@@ -98,7 +98,7 @@ public sealed partial class UIManager
         {
             UIBase popped = _panelStack.Pop();
 
-            ClosePage(popped, afterClosed);
+            ClosePage(popped);
 
             _panelPresentations.Remove(popped);
             ApplyPanelState(

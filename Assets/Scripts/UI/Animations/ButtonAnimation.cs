@@ -4,9 +4,9 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    // 버튼 하나의 연출: 손을 올리면(PC) 살짝 커지고, 누르면 줄었다가, 떼면 튀어오르며 돌아온다. 모바일은 누름·뗌만 온다.
-    // 크기는 이 컴포넌트가, 색·그림은 같은 버튼의 Button 전환(Color Tint·Sprite Swap)이 상태에 맞춰 바꾼다.
-    // 입력을 스스로 받지 않는다 — 화면이 BindEvent로 받은 사건에서 Hover·Leave·Press·Release를 부른다.
+    // 버튼 하나의 크기 연출: 손을 올리면(PC) 살짝 커지고, 누르면 줄었다가, 떼면 튀어오르며 돌아온다. 모바일은 누름·뗌만 온다.
+    // 크기는 이 컴포넌트가, 색·그림은 같은 버튼의 Button 전환(Color Tint·Sprite Swap)이 상태에 맞춰 바꾼다. 소리는 ButtonFeedback이 낸다.
+    // 입력을 스스로 받지 않는다 — ButtonFeedback(또는 화면)이 받은 사건에서 Hover·Leave·Press·Release를 부른다.
     //
     // 움직이는 동안만 코루틴이 돈다. Update가 없어서 가만히 있는 버튼에는 매 프레임 비용이 없다.
     // 꺼지면(화면이 닫히면) ResetAll로 크기·색을 되돌리고 상태를 비운다 — 다시 켜질 때 이전 상태가 남지 않는다.
@@ -53,7 +53,6 @@ namespace BlackHole.Unity
             if (!IsInteractable())
                 return;
 
-            SoundManager.Instance?.PlayHover();
             _hovered = true;
             Play();
         }
@@ -71,7 +70,6 @@ namespace BlackHole.Unity
             if (!IsInteractable())
                 return;
 
-            SoundManager.Instance?.PlayClick();
             _pressed = true;
             Play();
         }

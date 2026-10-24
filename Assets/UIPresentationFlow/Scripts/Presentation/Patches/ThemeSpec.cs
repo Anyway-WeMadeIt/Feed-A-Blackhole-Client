@@ -1,28 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// A screen's typography: the size of each text role. Fonts, colors and sprite variants are not here —
+// they are the shared UIThemeAssets (font set by locale, palette by theme, sprite set), the same for every screen.
+// Catalog texts (TextBindings) get role size × user text scale, the role's font and the palette's text color.
 [CreateAssetMenu(menuName = "UI/ThemeSpec")]
 public class ThemeSpec : ScriptableObject
 {
-    [Header("Base Colors")]
-    // Colors by theme (UIContext.ThemeId), shared by every screen's theme. Empty = the two colors below for every theme.
-    public UIPalette palette;
-    public Color textMainColor = Color.white;
-    public Color textWeakColor = Color.gray;
-
-    [Header("Typography")]
-    // Fonts by locale and role, shared by every screen's theme. Empty = keep the authored fonts.
-    public UIFontSet fonts;
+    [Header("Role Sizes")]
     public int titleSize = 28;
     public int bodySize = 16;
     public int captionSize = 13;
 
-    // textScale: user text size multiplier applied to the role sizes (UIContext.TextScale).
-    // localeId: picks the locale row of the font set (UIContext.LocaleId).
-    // themeId: picks the theme row of the palette (UIContext.ThemeId).
+    public float SizeOf(UITextRole role) => role switch
+    {
+        UITextRole.Title => titleSize,
+        UITextRole.Caption => captionSize,
+        _ => bodySize,
+    };
+
+    // assets: the shared fonts and palette. textScale/localeId/themeId: the user context (UIContext).
     public void BuildPatches(
         List<IUIPatch> patches,
         UITextBindingCatalog textBindings,
+        UIThemeAssets assets,
         float textScale = 1f,
         string localeId = null,
         string themeId = null)
@@ -30,6 +31,6 @@ public class ThemeSpec : ScriptableObject
         if (textBindings == null)
             return;
 
-        patches.Add(new ThemeSpecPatch(this, textBindings, textScale, localeId, themeId));
+        patches.Add(new ThemeSpecPatch(this, textBindings, assets, textScale, localeId, themeId));
     }
 }

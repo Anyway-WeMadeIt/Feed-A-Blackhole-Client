@@ -30,7 +30,7 @@ public static class UITextBindingScanner
 
     public static List<UITextBindingEntry> Scan(UIBase view)
     {
-        Type refsType = FindRefsType(view.GetType());
+        Type refsType = UIRefCheck.RefsTypeOf(view.GetType());
 
         if (refsType == null)
         {
@@ -47,7 +47,7 @@ public static class UITextBindingScanner
             if (!refId.EndsWith("_Text", StringComparison.Ordinal))
                 continue;
 
-            List<GameObject> matches = FindByName(view.transform, refId);
+            List<GameObject> matches = UIBindingEditorUtil.FindByName(view.transform, refId);
 
             if (matches.Count == 0)
             {
@@ -85,39 +85,6 @@ public static class UITextBindingScanner
 
         PrintResult(view, entries);
         return entries;
-    }
-
-    private static Type FindRefsType(Type viewType)
-    {
-        Type current = viewType;
-
-        while (current != null && current != typeof(object))
-        {
-            if (current.IsGenericType
-                && current.GetGenericTypeDefinition() == typeof(UIBase<>))
-            {
-                return current.GetGenericArguments()[0];
-            }
-
-            current = current.BaseType;
-        }
-
-        return null;
-    }
-
-    private static List<GameObject> FindByName(
-        Transform root,
-        string refId)
-    {
-        var matches = new List<GameObject>();
-
-        foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
-        {
-            if (child.name == refId)
-                matches.Add(child.gameObject);
-        }
-
-        return matches;
     }
 
     private static void PrintResult(

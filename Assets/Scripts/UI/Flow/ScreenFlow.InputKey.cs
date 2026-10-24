@@ -2,9 +2,6 @@ namespace BlackHole.Unity
 {
     internal sealed partial class ScreenFlow
     {
-        private bool _pauseOpen; // Pause 패널이 열려있는가
-        private bool _settingsOpen; // Setting 패널이 열려있는가?
-
         /// <summary>
         /// Shift: 결산 화면에서 Upgrade. 창이 열려 있으면 무시한다.
         /// </summary>
@@ -59,11 +56,10 @@ namespace BlackHole.Unity
             }
         }
 
+        // 맨 위 창이 일시 정지면 닫고, 창이 없으면 연다. 설정 창이 맨 위면(일시 정지 위에 쌓임) 무시한다.
         private void TogglePauseByEsc()
         {
-            if (_settingsOpen) return; // 설정 창이 열려 있으면 ESC를 무시한다
-
-            if (_pauseOpen) HandlePauseResumeClicked();
+            if (_ui.TopPanel is PausePanel) ResumeFromPause();
             else if (!_ui.HasPanel) OpenPause();
         }
     }

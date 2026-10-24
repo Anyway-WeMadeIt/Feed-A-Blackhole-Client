@@ -159,6 +159,21 @@ namespace BlackHole.Core
             return (float)Math.Max(0, Math.Min(1, (double)(exp - from.Value) / (next.Value - from.Value)));
         }
 
+        // 성장도 stage의 판이 Level level·누적 EXP exp에 이르렀을 때, 시작 체크포인트에서 목표 이정표까지 간 몫(0 ~ 1):
+        // 오른 Level 수 + 다음 Level까지의 몫을, 목표까지의 Level 수로 나눈다. 목표가 없으면(마지막 이정표 뒤) 1.
+        // ProgressAt은 Level 하나 안의 몫이고, 이것은 판 하나(이정표 구간)의 몫이다.
+        public float StageFractionAt(int stage, int level, long exp)
+        {
+            int start = StartLevelAt(stage);
+            int goal = GoalLevelAt(stage);
+
+            if (goal <= start)
+                return 1;
+
+            double gained = level - start + ProgressAt(level, exp);
+            return (float)Math.Max(0, Math.Min(1, gained / (goal - start)));
+        }
+
         private void RequireStage(int stage)
         {
             if (stage < StartStage || stage > MaxStage)

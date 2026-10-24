@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using BlackHole.Core;
 using BlackHole.Sync;
+using BlackHole.Unity;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -13,13 +14,12 @@ namespace BlackHole.Net.Tests
     // 구매가 먼저 오면 서버는 결산 보상이 반영되기 전의 Gold로 구매를 검사한다 → 구매가 거부되고,
     // 거부 반영(계약 5.7)이 남은 로그(그 판의 결산)를 모두 지우므로 그 판의 보상이 알림 없이 사라진다.
     //
-    // ScreenFlow는 UIManager·BattleSystem 등 Unity 객체가 있어야 만들 수 있어 Editor 테스트에서 직접 띄우지 않는다.
-    // 대신 ScreenFlow가 로그를 남기는 세 지점을 같은 순서·같은 인자로 옮긴 PlayerFlow로 장부(SyncLedger)를 채운다.
-    // ProgressStore.Commit은 장부에 Append한 뒤 저장할 뿐이라 순서는 장부에서 그대로 보인다.
-    //   StartBattle            → ScreenFlow.Battle.StartBattle        (RUN_START)
-    //   EndBattle              → ScreenFlow.Battle.EndBattleAsync     (CommitSettlement → ShowSettlement)
-    //   Buy                    → ScreenFlow.NodeTreeView.HandleNodeTreeNodeClicked (NODE_PURCHASE)
-    // ScreenFlow에서 이 순서가 바뀌면 PlayerFlow도 같이 고쳐야 한다(아래 주석의 근거 줄 참고).
+    // 로그를 만드는 쪽은 실제 코드(ProgressRecorder)다. ScreenFlow는 UIManager·BattleSystem 등 Unity 객체가 있어야 만들 수 있어
+    // 여기서 띄우지 않고, ScreenFlow가 ProgressRecorder를 부르는 순서만 PlayerFlow가 같은 순서로 부른다:
+    //   StartBattle → ScreenFlow.Battle.StartBattle        → recorder.StartRun
+    //   EndBattle   → ScreenFlow.Battle.EndBattleAsync     → recorder.Settle, 그 뒤 ShowSettlement
+    //   Buy         → ScreenFlow.NodeTreeView.Purchase     → recorder.Purchase
+    // 저장소는 파일 대신 장부(SyncLedger)만 가진 가짜(LedgerCommitter)다.
     [TestFixture]
     public class ScreenFlowLogOrderTests
     {
@@ -33,46 +33,62 @@ namespace BlackHole.Net.Tests
 
         // ---------- ScreenFlow의 로그 지점을 옮긴 흐름 ----------
 
+        private sealed class LedgerCommitter : IProgressCommitter
+        {
+            public SyncLedger Ledger { get; } = new();
+            public bool TestSession { get; private set; }
+
+            public void StartNew(ProgressState progress, Func<long, PendingLog> makeLog) => Ledger.Append(makeLog);
+
+            public void Commit(Func<long, PendingLog> makeLog)
+            {
+                if (!TestSession)
+                    Ledger.Append(makeLog);
+            }
+
+            public void EnterTestSession() => TestSession = true;
+        }
+
         private sealed class PlayerFlow
         {
-            private readonly SyncLogFactory _logs = new(new TestJson(), "0.4.0", "4d6c398ad1f5e49c", () => Now);
+            private readonly LedgerCommitter _store = new();
+            private readonly ProgressRecorder _recorder;
             private readonly Dictionary<string, int> _ranks = new(StringComparer.Ordinal);
-            private string _runId;
 
-            public SyncLedger Ledger { get; } = new();
+            public PlayerFlow()
+            {
+                _recorder = new ProgressRecorder(_store, new SyncLogFactory(new TestJson(), "0.4.0", "4d6c398ad1f5e49c", () => Now));
+            }
+
+            public SyncLedger Ledger => _store.Ledger;
             public long Gold { get; private set; }
 
-            // 새 게임: ScreenFlow.ModeSelect → ProgressStore.StartNew(…Reset)
-            public void StartNew() => Ledger.Append(seq => _logs.Reset(seq));
+            // 새 게임: ScreenFlow.ModeSelect.StartNewGame
+            public void StartNew() => _recorder.StartNewGame(new ProgressState());
 
             // ScreenFlow.Battle.StartBattle: 시작 Gold는 판을 시작할 때의 진행도 값.
-            public string StartBattle()
+            public void StartBattle()
             {
-                string runId = Guid.NewGuid().ToString();
-                _runId = runId;
-                long startGold = Gold;
                 var start = new RunStartInfo(123456, 0, 0, 12f, new[] { new SupplyRequest(Asteroid, 20) });
-                Ledger.Append(seq => _logs.RunStart(seq, runId, start, startGold));
-                return runId;
+                _recorder.StartRun(start, Gold);
             }
 
             // ScreenFlow.Battle.EndBattleAsync: TryEndAsync가 진행도에 보상을 더한 뒤
-            // CommitSettlement(결산 로그) → ShowSettlement(업그레이드 버튼이 생기는 화면) 순서.
+            // recorder.Settle(결산 로그) → ShowSettlement(업그레이드 버튼이 생기는 화면) 순서.
             public void EndBattle(long settledGold)
             {
                 Gold += settledGold; // BattleSystem.TryEndAsync의 결산(진행도 반영)
 
-                string runId = _runId;
-                _runId = null;
-                Assert.That(runId, Is.Not.Null, "판 시작 없이 끝낸 판은 테스트 세션이라 로그를 남기지 않는다.");
-                Ledger.Append(seq => _logs.Settlement(seq, runId, Raw(settledGold)));
+                Assert.That(_recorder.HasOpenRun, Is.True, "판 시작 없이 끝낸 판은 테스트 세션이라 로그를 남기지 않는다.");
+                _recorder.Settle(Raw(settledGold));
+                Assert.That(_store.TestSession, Is.False);
 
                 SettlementShown = true; // 이 뒤에야 결산 화면의 업그레이드 버튼을 누를 수 있다.
             }
 
             public bool SettlementShown { get; private set; }
 
-            // ScreenFlow.NodeTreeView.HandleNodeTreeNodeClicked: 비용은 사기 전에 읽고, rank는 산 뒤의 값.
+            // ScreenFlow.NodeTreeView.Purchase: 비용은 사기 전에 읽고, rank는 산 뒤의 값.
             public bool Buy(string nodeId, long cost)
             {
                 if (Gold < cost)
@@ -81,7 +97,7 @@ namespace BlackHole.Net.Tests
                 Gold -= cost;
                 int rank = (_ranks.TryGetValue(nodeId, out int r) ? r : 0) + 1;
                 _ranks[nodeId] = rank;
-                Ledger.Append(seq => _logs.NodePurchase(seq, nodeId, rank, cost));
+                _recorder.Purchase(nodeId, rank, cost);
                 return true;
             }
 
@@ -90,7 +106,6 @@ namespace BlackHole.Net.Tests
                     new[] { new KillBucketCount(new KillBucket(Asteroid, 0, 1, false), (int)Math.Max(1, settled)) },
                     0, 0, 0, settled, 0, settled, 0, 0, null, settled, null);
         }
-
 
         // ---------- 검사 도구 ----------
 

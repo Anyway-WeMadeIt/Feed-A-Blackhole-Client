@@ -86,5 +86,19 @@ namespace BlackHole.Core
             foreach (EnemyKillCount kill in kills)
                 TotalKills += kill.Count;
         }
+
+        // 이 종류의 처치 수. 특수 성질(황금·전기·달·슈퍼노바 …)은 종류가 아니므로 그 종류로 센다. 없으면 0.
+        public int KillsOf(EnemyType type)
+        {
+            int count = 0;
+
+            foreach (EnemyKillCount kill in Kills)
+            {
+                if (kill.Enemy.Type == type)
+                    count += kill.Count;
+            }
+
+            return count;
+        }
     }
 }

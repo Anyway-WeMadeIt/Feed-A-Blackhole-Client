@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class SettingsPanel : UIPanel<SettingsPanel.Refs>, IStyleView
+    public sealed class SettingsPanel : UIPanel<SettingsPanel.Refs>
     {
         public enum Refs
         {
@@ -58,13 +58,8 @@ namespace BlackHole.Unity
 
         private readonly List<SettingRow> _rows = new List<SettingRow>();
         private readonly List<Button> _options = new List<Button>();
-        // 글자 크기·언어별 글꼴. 행과 펼침 목록은 복제로 만들므로 만들 때 넣고 지울 때 비운다(틀은 넣지 않는다).
-        private readonly StyledTexts _rowTexts = new StyledTexts();
-        private readonly StyledTexts _optionTexts = new StyledTexts();
-        // 테마 그림·색: 행의 토글·슬라이더·버튼 그림, 펼침 목록 바탕과 선택지 바탕, 스크롤 막대.
-        private readonly ThemedImages _rowImages = new ThemedImages();
-        private readonly ThemedImages _optionImages = new ThemedImages();
-        private readonly ThemedImages _fixedImages = new ThemedImages();
+        // 글자 크기·언어별 글꼴과 테마 그림·색은 Styled에 넣어 Presentation과 같은 테마를 받는다. 행과 펼침 목록은 복제로 만들므로
+        // 만들 때 넣고 지울 때 뺀다(틀은 넣지 않는다). 글자 크기는 프리팹 크기 × 배율(Prefab).
         private readonly Dictionary<GameSettings.Kind, SettingRow> _templates = new Dictionary<GameSettings.Kind, SettingRow>();
         private readonly Vector3[] _corners = new Vector3[4];
 
@@ -81,16 +76,14 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            ScreenRefs.WarnMissing<Refs>(this);
-
             _rowList = View.Rect(Refs.RowList);
             _blocker = View.Rect(Refs.ChoiceBlocker_Button);
             _popup = View.Rect(Refs.ChoicePopup);
 
             // 고정 그림: 펼침 목록 바탕(panel 그림), 스크롤 막대·손잡이(단색, 알파는 프리팹 값).
-            _fixedImages.AddSprite(View.Image(Refs.ChoicePopup));
-            _fixedImages.AddColor(View.Image(Refs.Scrollbar), UIColorRole.TextMain);
-            _fixedImages.AddColor(View.Image(Refs.Handle), UIColorRole.TextMain);
+            Styled.AddSprite(View.Image(Refs.ChoicePopup));
+            Styled.AddImageColor(View.Image(Refs.Scrollbar), UIColorRole.TextMain);
+            Styled.AddImageColor(View.Image(Refs.Handle), UIColorRole.TextMain);
             _optionTemplate = View.Button(Refs.ChoiceOptionTemplate);
 
             AddTemplate(GameSettings.Kind.Toggle, Refs.ToggleRowTemplate);
@@ -148,16 +141,6 @@ namespace BlackHole.Unity
                     break;
                 }
             }
-        }
-
-        // 글자 크기·언어별 글꼴. 창 제목은 TextBindings에 있어 Theme가 맞춘다.
-        public void ApplyStyle(in UIStyle style)
-        {
-            _rowTexts.SetStyle(style);
-            _optionTexts.SetStyle(style);
-            _rowImages.SetStyle(style);
-            _optionImages.SetStyle(style);
-            _fixedImages.SetStyle(style);
         }
 
         // 패널이 닫힐 때(비활성) 펼침 목록도 닫는다.
@@ -247,13 +230,14 @@ namespace BlackHole.Unity
         {
             foreach (Button option in _options)
             {
-                if (option != null)
-                    Destroy(option.gameObject);
+                if (option == null)
+                    continue;
+
+                Styled.RemoveUnder(option);
+                Destroy(option.gameObject);
             }
 
             _options.Clear();
-            _optionTexts.Clear();
-            _optionImages.Clear();
             _choiceRow = null;
             SetVisible(_blocker, false);
             SetVisible(_popup, false);
@@ -268,7 +252,7 @@ namespace BlackHole.Unity
             if (label != null)
             {
                 label.text = text;
-                _optionTexts.Add(label, UITextRole.Body);
+                Styled.AddText(label, UITextRole.Body, UITextSizePolicy.Prefab);
             }
 
             // 선택지 바탕은 단색: 고른 것은 강조색, 나머지는 테마 표면색.
@@ -277,7 +261,7 @@ namespace BlackHole.Unity
                 if (selected)
                     back.color = SelectedOptionColor;
                 else
-                    _optionImages.AddColor(back, UIColorRole.Surface);
+                    Styled.AddImageColor(back, UIColorRole.Surface);
             }
 
             BindEvent(option, _ => ChooseOption(index));
@@ -297,9 +281,9 @@ namespace BlackHole.Unity
             row.ChoiceClicked += OpenChoice;
 
             foreach ((TMP_Text text, UITextRole role) in row.StyledTexts)
-                _rowTexts.Add(text, role);
+                Styled.AddText(text, role, UITextSizePolicy.Prefab);
 
-            _rowImages.AddSprites(row);
+            Styled.AddSprites(row);
             row.gameObject.SetActive(true);
             return row;
         }
@@ -308,13 +292,14 @@ namespace BlackHole.Unity
         {
             foreach (SettingRow row in _rows)
             {
-                if (row != null)
-                    Destroy(row.gameObject);
+                if (row == null)
+                    continue;
+
+                Styled.RemoveUnder(row);
+                Destroy(row.gameObject);
             }
 
             _rows.Clear();
-            _rowTexts.Clear();
-            _rowImages.Clear();
         }
 
         private void AddTemplate(GameSettings.Kind kind, Refs key)

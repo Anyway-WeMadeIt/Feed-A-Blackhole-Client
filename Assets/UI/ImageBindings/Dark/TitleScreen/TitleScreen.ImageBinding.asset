@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02fc928af00d48d4c948e4a48a8e7afc, type: 3}
   m_Name: TitleScreen.ImageBinding
   m_EditorClassIdentifier: UIPresentationFlow.Runtime::UIImageBindingSet
-  viewId: BlackHole.Unity.TitleScreen
+  viewId: TitleScreen
   images:
   - refId: Logo_Image
     baseSprite: {fileID: 21300000, guid: af59e8e2248c83384f2ab25443690301, type: 3}
