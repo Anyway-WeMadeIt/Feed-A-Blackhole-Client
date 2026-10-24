@@ -5,11 +5,9 @@ namespace BlackHole.Unity
 {
     // 타이틀 화면. 버튼이 눌렸다는 사실만 알린다. 무엇을 할지는 ScreenFlow가 정한다.
     // 버튼 연출(올림·누름)은 버튼마다 붙은 ButtonAnimation이 맡는다. 화면은 사건을 넘기기만 한다.
-    public sealed class TitleScreen : UIRoot<TitleScreen.Refs>, IUISoundView
+    public sealed class TitleScreen : UIRoot<TitleScreen.Refs>
     {
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
-
-        public void SetSounds(UISounds sounds) => ButtonAnimation.SetSounds(this, sounds);
 
         // 테마가 들어왔다: 배경 위 문양의 머티리얼을 테마에 맞춘다. 바탕색·그림·글자는 Presentation과 Styled가 맞췄다.
         protected override void OnPresented(in UIAppliedTheme theme) => Ambient?.Apply(theme.ThemeId);

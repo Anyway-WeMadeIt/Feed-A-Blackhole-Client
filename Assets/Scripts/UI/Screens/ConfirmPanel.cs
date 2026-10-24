@@ -6,7 +6,7 @@ namespace BlackHole.Unity
 {
     // 확인 창. 부르는 쪽이 글자(Present)와 확인·취소 때 할 일을 정한다.
     // 뒤를 가리개(Blocker)가 덮어, 창이 열린 동안 아래 화면은 눌리지 않는다.
-    public sealed class ConfirmPanel : UIPanel<ConfirmPanel.Refs>, IUISoundView
+    public sealed class ConfirmPanel : UIPanel<ConfirmPanel.Refs>
     {
         public enum Refs
         {
@@ -37,8 +37,6 @@ namespace BlackHole.Unity
 
         public event Action ConfirmClicked;
         public event Action CancelClicked;
-
-        public void SetSounds(UISounds sounds) => ButtonAnimation.SetSounds(this, sounds);
 
         protected override void OnInitialize()
         {

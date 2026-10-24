@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class SettlementScreen : UIRoot<SettlementScreen.Refs>, ILocalizedView, INumberFormatView, IUISoundView
+    public sealed class SettlementScreen : UIRoot<SettlementScreen.Refs>, ILocalizedView, INumberFormatView
     {
         public enum Refs
         {
@@ -181,8 +181,9 @@ namespace BlackHole.Unity
 
         // 언어가 바뀌면 다시 쓸 마지막 값. 아직 보이지 않았으면 null.
         private Localizer _localizer;
-        // 슬라이더·결산 소리. GameBootstrap이 넣는다. 없으면 소리 없이 진행한다.
+        // 슬라이더·결산 소리. 캔버스의 UISoundSource에서 처음 쓸 때 찾는다. 없으면 소리 없이 진행한다.
         private UISounds _sounds;
+        private UISounds Sounds => _sounds ??= UISoundSource.For(this);
         // Gold 표기(설정). UISettingsSync가 넣는다.
         private NumberFormat _numberFormat;
         private bool? _shownMilestone;
@@ -336,11 +337,11 @@ namespace BlackHole.Unity
                     _stageFillImage.color = _stageFillColor;
 
                 // 슬라이더 SFX 길이에 맞춰 물질 단계 셋이 올라가는 동안 막대가 찬다.
-                float length = _sounds?.SliderLength ?? 0f;
+                float length = Sounds?.SliderLength ?? 0f;
                 float total = length > 0f ? length : DefaultDuration;
                 _countUp.StepSeconds = total / MatterStepCount;
                 _stageFill.Start(_stageFillRect, reached ? 1 : levelFraction, _countUp.StepSeconds * StageFillSteps);
-                _sounds?.PlaySlider();
+                Sounds?.PlaySlider();
             }
 
             _shownStage = (current, goal, reached);
@@ -488,12 +489,6 @@ namespace BlackHole.Unity
 
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
-        public void SetSounds(UISounds sounds)
-        {
-            _sounds = sounds;
-            ButtonAnimation.SetSounds(this, sounds);
-        }
-
         // 테마가 들어왔다: 배경 위 문양의 머티리얼을 테마에 맞춘다. 글자·구분선·바탕색은 Styled가 맞췄다.
         protected override void OnPresented(in UIAppliedTheme theme) => Ambient?.Apply(theme.ThemeId);
 
@@ -590,8 +585,8 @@ namespace BlackHole.Unity
                 _earned.text = Money(_earnedTarget);
 
             StopScaleEffect();
-            _sounds?.StopSlider();
-            _sounds?.PlayClosing();
+            Sounds?.StopSlider();
+            Sounds?.PlayClosing();
         }
 
         // 막대가 다 찼다: 결과 색으로.
@@ -602,7 +597,7 @@ namespace BlackHole.Unity
         }
 
         // 숫자가 다 올랐다: 종료음.
-        private void HandleCountUpCompleted() => _sounds?.PlayClosing();
+        private void HandleCountUpCompleted() => Sounds?.PlayClosing();
 
         // 값이 바뀐 글자를 잠깐 키운다. 다른 글자가 커지는 중이었으면 그것은 원래 크기로.
         private void PlayScaleEffect(TMP_Text text)

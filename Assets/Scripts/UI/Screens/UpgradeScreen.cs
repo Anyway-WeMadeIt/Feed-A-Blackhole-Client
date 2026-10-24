@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, INumberFormatView, IUISoundView
+    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, INumberFormatView
     {
         public enum Refs
         {
@@ -378,8 +378,6 @@ namespace BlackHole.Unity
 
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
-        public void SetSounds(UISounds sounds) => ButtonAnimation.SetSounds(this, sounds);
-
         // 테마가 들어왔다: 문양 머티리얼, 코드로 칠하는 구매 탭·Gold 색을 다시 칠하고 툴팁 폭을 글자 배율만큼 넓힌다.
         protected override void OnPresented(in UIAppliedTheme theme)
         {
@@ -675,9 +673,14 @@ namespace BlackHole.Unity
             _buyPressed = pressed;
 
             if (pressed)
+            {
+                UISoundSource.For(this)?.PlayClick();
                 _buyAnimation.Press();
+            }
             else
+            {
                 _buyAnimation.Release();
+            }
 
             PaintBuyBack();
             PaintGold();

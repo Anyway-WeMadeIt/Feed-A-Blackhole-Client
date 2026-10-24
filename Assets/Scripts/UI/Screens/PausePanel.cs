@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class PausePanel : UIPanel<PausePanel.Refs>, IUISoundView
+    public sealed class PausePanel : UIPanel<PausePanel.Refs>
     {
         public enum Refs
         {
@@ -37,8 +37,6 @@ namespace BlackHole.Unity
         public event Action SettingsClicked;
         public event Action MainMenuClicked;
         public event Action QuitClicked;
-
-        public void SetSounds(UISounds sounds) => ButtonAnimation.SetSounds(this, sounds);
 
         protected override void OnInitialize()
         {

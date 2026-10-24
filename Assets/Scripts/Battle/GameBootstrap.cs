@@ -171,12 +171,8 @@ namespace BlackHole.Unity
             AimInput aim = new(battle);
 
             UIManager ui = CreateUI();
-            // 프리팹 화면에 UI 소리를 넣는다. 화면은 등록할 때 초기화되어 버튼 연출이 이미 붙어 있다.
-            foreach (UIBase view in _views)
-            {
-                if (view is IUISoundView sounded)
-                    sounded.SetSounds(uiSounds);
-            }
+            // UI 소리의 출처를 캔버스 루트에 둔다. 그 아래의 버튼 배선(ButtonFeedback)과 화면이 찾아 쓴다.
+            GetOrAdd<UISoundSource>(CanvasRoot().gameObject).Sounds = uiSounds;
             // 화면을 등록한 뒤에 프리팹 글자를 지금 언어로 바꾼다. 언어가 바뀌면 다시 바꾼다.
             _viewTexts = new ViewTexts(_views, localizer);
             // 다크 모드·언어·글자 크기 설정을 UIContext에 넣고, Gold 표기 설정을 숫자 화면에 넣는다. 설정이 바뀌면 다시 넣는다.
@@ -357,14 +353,14 @@ namespace BlackHole.Unity
             return ui;
         }
 
-        private ScreenTransition CreateScreenTransition()
+        private ScreenTransition CreateScreenTransition() =>
+            ScreenTransition.Create(CanvasRoot(), _screenTransitionLook);
+
+        // UI 캔버스의 루트. 캔버스를 못 찾으면 화면 층의 부모.
+        private Transform CanvasRoot()
         {
             Canvas canvas = _rootLayer.GetComponentInParent<Canvas>();
-            Transform transitionParent = canvas != null
-                ? canvas.rootCanvas.transform
-                : _rootLayer.parent;
-
-            return ScreenTransition.Create(transitionParent, _screenTransitionLook);
+            return canvas != null ? canvas.rootCanvas.transform : _rootLayer.parent;
         }
 
         // 에디터의 GetComponent는 없을 때 가짜 null을 돌려줘 ??로는 거를 수 없다. TryGetComponent로 본다.
