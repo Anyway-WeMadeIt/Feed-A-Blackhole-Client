@@ -12,6 +12,8 @@ public sealed class UIPresentationApplier
         UIPresentationBaseline baseline = GetBaseline(view);
 
         baseline.RestoreOwned(view);
+        // Code-registered elements keep their own baselines; put them back before the patches run.
+        view.Styled.RestoreAll();
         baseline.CaptureAndOwn(view, result.Resolved, result.Assets);
 
         foreach (IUIPatch patch in result.Patches)

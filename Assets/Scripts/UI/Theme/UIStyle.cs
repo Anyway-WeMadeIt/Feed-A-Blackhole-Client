@@ -11,17 +11,6 @@ namespace BlackHole.Unity
         void ApplyStyle(in UIStyle style);
     }
 
-    // 팔레트 색의 역할. 그림(단색 Image)에 색을 줄 때 쓴다.
-    public enum UIColorRole
-    {
-        TextMain,
-        TextWeak,
-        Accent,
-        Surface,
-        Line,
-        Backdrop,
-    }
-
     // 지금 UI 스타일: 글자 크기 배율, 언어별 글꼴, 테마의 색(UIPalette), 테마의 그림(UISpriteSet).
     // Theme가 TextBindings·ImageBindings에 넣는 것과 같은 기준이다.
     public readonly struct UIStyle

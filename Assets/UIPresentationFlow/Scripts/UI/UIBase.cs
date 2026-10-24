@@ -5,9 +5,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public abstract class UIBase : MonoBehaviour, IUIPresentationRefProvider
+public abstract class UIBase : MonoBehaviour, IUIPresentationRefProvider, IUIStyledElementsOwner
 {
     private bool _initialized;
+    private UIStyledElements _styled;
+
+    // Texts and images this View styles by code (cloned rows, cells made at runtime). Same theme as the catalog entries.
+    public UIStyledElements Styled => _styled ??= new UIStyledElements();
 
     protected virtual void Awake()
     {
