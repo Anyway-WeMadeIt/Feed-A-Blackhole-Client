@@ -11,7 +11,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace BlackHole.Unity
 {
-    public sealed class GameBootstrap : MonoBehaviour
+    public sealed partial class GameBootstrap : MonoBehaviour
     {
         [Header("Content")]
         [SerializeField] private GameContentSetup _content;
@@ -76,19 +76,6 @@ namespace BlackHole.Unity
         [SerializeField] private PlaytestLibrary _playtest;
 #pragma warning restore CS0169
 
-        private static readonly Type[] RequiredViews =
-        {
-            typeof(TitleScreen),
-            typeof(UpgradeScreen),
-            typeof(BattleScreen),
-            typeof(SettlementScreen),
-            typeof(NodeTreeView),
-            typeof(ModeSelectPanel),
-            typeof(SettingsPanel),
-            typeof(PausePanel),
-            typeof(ConfirmPanel),
-        };
-
         private ProgressState _progress;
         private ProgressStore _progressStore;
         private GameSettings _settings;
@@ -122,8 +109,14 @@ namespace BlackHole.Unity
             if (loaded != null)
                 Debug.Log($"[콘텐츠] 서버 콘텐츠 버전: {loaded.ServerContentVersion}");
 
-            if (loaded == null || !HasConfiguredLooks() || !HasConfiguredUI())
+            // 연결이 빠졌으면 돌리지 않는다. 빠진 칸은 에디터에서 고칠 때 바로 보인다(OnValidate, GameBootstrap.Validation).
+            List<string> missing = MissingLinks();
+
+            if (loaded == null || missing.Count > 0)
             {
+                if (missing.Count > 0)
+                    Debug.LogError("[조립] GameBootstrap에 연결하지 않은 것이 있다:\n- " + string.Join("\n- ", missing), this);
+
                 enabled = false;
                 return;
             }
@@ -378,151 +371,6 @@ namespace BlackHole.Unity
         // 에디터의 GetComponent는 없을 때 가짜 null을 돌려줘 ??로는 거를 수 없다. TryGetComponent로 본다.
         private static T GetOrAdd<T>(GameObject owner) where T : Component =>
             owner.TryGetComponent(out T component) ? component : owner.AddComponent<T>();
-
-        private bool HasConfiguredLooks()
-        {
-            bool configured = true;
-
-            if (_breakerLook == null
-                || _breakerLook.Material == null
-                || _breakerLook.OrbMaterial == null
-                || _breakerLook.CometAuraMaterial == null)
-            {
-                Debug.LogError(
-                    "[외형] GameBootstrap에 Breaker 외형(BreakerLook)을," +
-                    " Breaker 외형에 링·버프 구체·혜성 배경 원 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_explosionLook == null
-                || _explosionLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 폭발 외형(ExplosionLook)을," +
-                               " 폭발 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_cometLook == null || _cometLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 혜성 외형(CometLook)을, " +
-                               "혜성 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_lightningLook == null || _lightningLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 번개 외형(LightningLook)을," +
-                               " 번개 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_starLightningLook == null || _starLightningLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 전기 별 번개 외형(StarLightningLook)을," +
-                               " 그 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_laserLook == null || _laserLook.Material == null)
-            {
-                Debug.LogError("[외형] GameBootstrap에 레이저 외형(LaserLook)을," +
-                               " 그 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            return configured;
-        }
-
-        // Theme가 다른 글꼴 묶음을 가리키면 같은 화면 안에서 TextBindings 글자와 나머지 글자의 글꼴이 갈린다.
-        private void WarnOtherFontSets()
-        {
-            var others = new List<string>();
-
-            foreach (ThemeSpec theme in _presentations.Themes())
-            {
-                if (theme != null && (theme.fonts != _fonts || theme.palette != _palette) && !others.Contains(theme.name))
-                    others.Add(theme.name);
-            }
-
-            if (others.Count > 0)
-            {
-                Debug.LogWarning(
-                    $"[UI] 이 Theme들은 GameBootstrap과 다른 글꼴 묶음 또는 팔레트를 가리킨다: {string.Join(", ", others)}." +
-                    " 같은 UIFontSet·UIPalette를 연결한다.", this);
-            }
-        }
-
-        private bool HasConfiguredUI()
-        {
-            bool configured = true;
-
-            if (_screenTransitionLook == null
-                || _screenTransitionLook.Material == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 화면 전환 외형(ScreenTransitionLook)을," +
-                               " 화면 전환 외형에 머티리얼을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_rootLayer == null
-                || _panelLayer == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 Root Layer와 Panel Layer를 연결해야 한다.", this);
-                configured = false;
-            }
-
-            var missingViews = new List<string>();
-
-            foreach (Type type in RequiredViews)
-            {
-                if (_views == null
-                    || !Array.Exists(_views, view => view != null && view.GetType() == type))
-                    missingViews.Add(type.Name);
-            }
-
-            if (missingViews.Count > 0)
-            {
-                Debug.LogError(
-                    $"[UI] GameBootstrap의 Registered Views에 빠진 화면이 있다: {string.Join(", ", missingViews)}.", this);
-                configured = false;
-            }
-
-            if (_presentations == null)
-            {
-                Debug.LogError(
-                    "[UI] GameBootstrap에 화면 Presentation 묶음(ScreenPresentations)을 연결해야 한다.", this);
-                configured = false;
-            }
-            else
-            {
-                IReadOnlyList<string> missing = _presentations.MissingReferences();
-
-                if (missing.Count > 0)
-                {
-                    Debug.LogError(
-                        $"[UI] 화면 Presentation 묶음에 연결하지 않은 칸이 있다: {string.Join(", ", missing)}.", _presentations);
-                    configured = false;
-                }
-            }
-
-            if (_fonts == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 글꼴 묶음(UIFontSet)을 연결해야 한다.", this);
-                configured = false;
-            }
-
-            if (_palette == null || _sprites == null)
-            {
-                Debug.LogError("[UI] GameBootstrap에 팔레트(UIPalette)와 그림 짝(UISpriteSet)을 연결해야 한다.", this);
-                configured = false;
-            }
-            else if (_presentations != null)
-            {
-                WarnOtherFontSets();
-            }
-
-            return configured;
-        }
 
         private ScriptableRendererFeature FindShockwaveFeature()
         {
