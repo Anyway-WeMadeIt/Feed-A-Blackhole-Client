@@ -75,6 +75,35 @@ namespace BlackHole.Unity
 
         public Color PriceBackColor => _priceBackColor;
 
+        // 고른 노드 둘레의 고리 그림. 프로젝트에 고리 스프라이트가 없어 처음 쓸 때 한 번 만든다(가장자리 1px 부드럽게). 에셋이 살아 있는 동안 둔다.
+        private const int RingTextureSize = 64;
+        private const float RingThickness = 3;
+        [NonSerialized] private Sprite _ringSprite;
+
+        public Sprite RingSprite => _ringSprite != null ? _ringSprite : _ringSprite = BuildRingSprite();
+
+        private static Sprite BuildRingSprite()
+        {
+            int size = RingTextureSize;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+            float center = (size - 1) * 0.5f;
+            float outer = center - 1;
+            float inner = outer - RingThickness;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float distance = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    float alpha = Mathf.Clamp01(outer + 0.5f - distance) * Mathf.Clamp01(distance - inner + 0.5f);
+                    texture.SetPixel(x, y, new Color(1, 1, 1, alpha));
+                }
+            }
+
+            texture.Apply();
+            return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100);
+        }
+
         private Dictionary<string, NodeSprites> _byStat;
 
         // 아직 닿지 않은 노드를 안개로 보이는가.

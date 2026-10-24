@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using BlackHole.Core;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
@@ -48,32 +45,9 @@ namespace BlackHole.Unity
     {
         public enum Refs { }
 
-        private const float CellSize = 150;
-        private const float NodeSize = 96;
-        private const float LinkWidth = 6;
-        // 노드 아래 가격 딱지(글자 폭 + 여백). 선이 지나가도 가격이 읽히도록 바탕을 깐다.
-        private const float PriceHeight = 30;
-        private const float PriceSize = 24;
-        private const float PricePadding = 16;
-        // 노드 오른쪽 위 Rank 딱지.
-        private const float RankHeight = 26;
-        private const float RankSize = 18;
-        private const float RankPadding = 12;
-        // 일부만 산 노드에 산 색을 섞는 비율.
-        private const float PartialMix = 0.35f;
-        // 터치로 노드를 꾹 눌러 사는 데 필요한 시간(초).
-        private const float HoldSeconds = 0.3f;
-        // 고른 노드의 링: 노드보다 이만큼 크다(지름). 살 수 있는 노드(초록)와 고른 노드를 가르는 표시.
-        private const float SelectRingExtra = 18;
-        private const int RingTextureSize = 64;
-        private const float RingThickness = 3;
-        // 링: 고른 노드는 흰 링. 살 수 있는 노드를 꾹 누르면 그 위에 초록 링이 시계 방향으로 차오른다(HoldSeconds에 꽉 참 = 살 준비).
+        // 터치로 노드를 꾹 눌러 사는 데 필요한 시간(초). 살 수 있는 노드는 그동안 초록 링이 차오른다(꽉 참 = 살 준비).
         // 떼서 사면 초록 링이 잠깐 머물다 사라진다. 중간에 떼면 비워진다.
-        private static readonly Color SelectRingColor = new Color(1, 1, 1, 0.85f);
-        // 손을 올린 노드(PC)의 링: 고른 노드와 같은 자리·그림, 조금 흐리게. 노드 그림은 바꾸지 않는다.
-        private static readonly Color HoverRingColor = new Color(1, 1, 1, 0.55f);
-        private static readonly Color FillRingColor = new Color(0.55f, 0.85f, 0.6f, 1);
-        private const float FillDrainSeconds = 0.12f;
+        private const float HoldSeconds = 0.3f;
         private const float FillFadeSeconds = 0.35f;
         // 크기: 살 수 있는 노드를 누르면 살짝 부풀고(PuffScale), 떼서 사면 스프링으로 쫄깃하게 돌아온다. 다른 노드는 살짝 눌린다(PressScale).
         private const float PuffScale = 1.08f;
@@ -87,10 +61,9 @@ namespace BlackHole.Unity
         private const float AnticipateScale = 1.14f;
         private const float AnticipateSeconds = 0.06f;
         private const float SnapKick = 2.2f;
-        // 게이지가 꽉 찬 순간: 아주 잠깐 한 번 더 부풀고(ArmedBump), 그림이 초록 쪽으로 살짝 물든다(ArmedTint).
+        // 게이지가 꽉 찬 순간: 아주 잠깐 한 번 더 부풀고(ArmedBump), 그림이 초록 쪽으로 살짝 물든다(NodeVisual).
         private const float ArmedBumpScale = 1.13f;
         private const float ArmedBumpSeconds = 0.09f;
-        private const float ArmedTint = 0.3f;
         // 터치로 누른 뒤 패널을 띄우기까지의 지연(초). 끌기가 이 안에 시작되면 띄우지 않는다.
         private const float SelectDelaySeconds = 0.06f;
         // 이동·확대(PanZoomView)의 배율 범위. 축소 하한은 지도 전체가 창에 들어가는 배율과 MinZoomDefault 중 작은 쪽, 바닥은 MinZoomFloor.
@@ -102,13 +75,7 @@ namespace BlackHole.Unity
         private const float FocusNodeMillimeters = 9;
         private const float FocusMinZoom = 1;
         // 열 때 화면 가장자리에 남길 여백(트리 공간, 양쪽 합).
-        private const float FocusMargin = CellSize * 2;
-
-        private static readonly Color OwnedColor = new Color(0.22f, 0.58f, 0.32f);
-        private static readonly Color PurchasableColor = new Color(0.85f, 0.66f, 0.18f);
-        private static readonly Color RevealedColor = new Color(0.32f, 0.33f, 0.37f);
-        private static readonly Color OwnedLinkColor = new Color(0.72f, 0.9f, 0.76f);
-        private static readonly Color LinkColor = new Color(0.45f, 0.47f, 0.52f);
+        private const float FocusMargin = NodeVisual.CellSize * 2;
 
         [Tooltip("노드 그림과 선·가격 색. 비우면 상태 색 칸으로 그린다.")]
         [SerializeField] private NodeTreeLook _look;
@@ -123,62 +90,48 @@ namespace BlackHole.Unity
             RepaintAll();
         }
 
+        // 노드·선을 칠하는 재료: Look과 지금 테마.
+        private NodeTreeStyle Style => new(_look, _theme);
+
+        // 이 노드가 지금 받고 있는 손길(올림·고름·누름·살 준비).
+        private NodeHighlight HighlightOf(NodeVisual node)
+        {
+            NodeHighlight highlight = NodeHighlight.None;
+
+            if (node == _hovered)
+                highlight |= NodeHighlight.Hovered;
+
+            if (node == _selected)
+                highlight |= NodeHighlight.Selected;
+
+            if (node == _pressed)
+            {
+                highlight |= NodeHighlight.Pressed;
+
+                if (_holdArmed)
+                    highlight |= NodeHighlight.Armed;
+            }
+
+            return highlight;
+        }
+
+        private void Paint(NodeVisual node) => node.Paint(Style, HighlightOf(node));
+
         // 테마가 바뀌었다. 보이는 노드·선·딱지를 지금 테마로 다시 칠한다(상태는 그대로).
         private void RepaintAll()
         {
+            NodeTreeStyle style = Style;
+
             foreach (NodeVisual node in _nodes.Values)
             {
-                if (!node.Root.activeSelf)
+                if (!node.IsActive)
                     continue;
 
-                Paint(node);
-                PaintBadges(node);
+                node.Paint(style, HighlightOf(node));
+                node.PaintBadges(style);
             }
 
             PaintLinks();
-        }
-
-        // 가격·Rank 딱지의 바탕과 Rank 글자 색.
-        private void PaintBadges(NodeVisual node)
-        {
-            if (node.Badge != null && node.Badge.TryGetComponent(out Image priceBack))
-                priceBack.color = BadgeBackColor();
-
-            if (node.RankLabel != null)
-            {
-                node.RankLabel.color = PriceColorOf(NodeState.Purchasable);
-
-                if (node.RankLabel.transform.parent.TryGetComponent(out Image rankBack))
-                    rankBack.color = BadgeBackColor();
-            }
-        }
-
-        private Color BadgeBackColor() =>
-            _theme.ColorFor(UIColorRole.Surface) ?? (_look != null ? _look.PriceBackColor : new Color(0.1f, 0.1f, 0.12f, 0.85f));
-
-        private Color PriceColorOf(NodeState state)
-        {
-            if (_theme.HasColors)
-                return _theme.ColorFor(state == NodeState.Purchasable ? UIColorRole.TextMain : UIColorRole.TextWeak).Value;
-
-            return _look != null ? _look.PriceColorOf(state) : Color.white;
-        }
-
-        private Color LinkColorOf(NodeState a, NodeState b)
-        {
-            if (_theme.HasColors)
-            {
-                if (a == NodeState.Owned && b == NodeState.Owned)
-                    return _theme.ColorFor(UIColorRole.Accent).Value;
-
-                bool open = (a == NodeState.Owned && b == NodeState.Purchasable) || (b == NodeState.Owned && a == NodeState.Purchasable);
-                return _theme.ColorFor(open ? UIColorRole.TextMain : UIColorRole.Line).Value;
-            }
-
-            if (_look != null)
-                return _look.LinkColorOf(a, b);
-
-            return a == NodeState.Owned && b == NodeState.Owned ? OwnedLinkColor : LinkColor;
         }
 
         private readonly Dictionary<string, NodeVisual> _nodes = new Dictionary<string, NodeVisual>(StringComparer.Ordinal);
@@ -256,11 +209,11 @@ namespace BlackHole.Unity
 
         // 노드 칸(툴팁을 붙일 자리). 없으면 null.
         public RectTransform RectOf(string id) =>
-            id != null && _nodes.TryGetValue(id, out NodeVisual node) ? (RectTransform)node.Root.transform : null;
+            id != null && _nodes.TryGetValue(id, out NodeVisual node) ? node.Rect : null;
 
         // 노드에 지금 그려진 그림(상태·테마 반영). 없으면 null. 호스트가 고정 패널의 제목 옆에 같은 그림을 보인다.
         public Sprite IconOf(string id) =>
-            id != null && _nodes.TryGetValue(id, out NodeVisual node) ? node.Image.sprite : null;
+            id != null && _nodes.TryGetValue(id, out NodeVisual node) ? node.Sprite : null;
 
         public void SetSelected(string id)
         {
@@ -304,7 +257,7 @@ namespace BlackHole.Unity
 
             foreach (NodeItem node in nodes)
             {
-                NodeVisual visual = CreateNode(node);
+                NodeVisual visual = NodeVisual.Create(node, _nodeLayer, Style);
                 _nodes.Add(node.Id, visual);
                 _nodesByObject.Add(visual.Root, visual);
             }
@@ -313,7 +266,7 @@ namespace BlackHole.Unity
             {
                 if (_nodes.TryGetValue(a, out NodeVisual from) && _nodes.TryGetValue(b, out NodeVisual to))
                 {
-                    _links.Add(CreateLink(from, to));
+                    _links.Add(LinkVisual.Create(from, to, _linkLayer));
                     from.Neighbors.Add(to);
                     to.Neighbors.Add(from);
                 }
@@ -358,7 +311,7 @@ namespace BlackHole.Unity
                 max = Vector2.Max(max, node.Position);
             }
 
-            Vector2 pad = new Vector2(NodeSize + CellSize, NodeSize + CellSize) * 0.5f;
+            Vector2 pad = new Vector2(NodeVisual.NodeSize + NodeVisual.CellSize, NodeVisual.NodeSize + NodeVisual.CellSize) * 0.5f;
             _pan.SetContentBounds(min - pad, max + pad);
         }
 
@@ -432,8 +385,8 @@ namespace BlackHole.Unity
                 node.Far = node.State == NodeState.Hidden && !node.Ahead && (node.Region == null || !_openRegions.Contains(node.Region));
 
                 // 아직 닿지 않은 노드: 안개 설정(NodeTreeLook.ShowHidden)이 켜져 있으면 자물쇠나 점으로 보이고, 아니면 숨긴다.
-                bool visible = node.State != NodeState.Hidden || ShowHidden;
-                node.Root.SetActive(visible);
+                bool visible = node.State != NodeState.Hidden || Style.ShowHidden;
+                node.SetActive(visible);
 
                 if (!visible)
                     continue;
@@ -442,10 +395,10 @@ namespace BlackHole.Unity
             }
 
             // 올라가 있던(고른) 노드가 숨거나 먼 노드가 되면 올림(선택)을 푼다(먼 노드는 툴팁을 띄우지 않는다).
-            if (_hovered != null && (!_hovered.Root.activeSelf || _hovered.Far))
+            if (_hovered != null && (!_hovered.IsActive || _hovered.Far))
                 SetHovered(null);
 
-            if (_selected != null && (!_selected.Root.activeSelf || _selected.Far))
+            if (_selected != null && (!_selected.IsActive || _selected.Far))
                 SetSelected((NodeVisual)null);
 
             PaintLinks();
@@ -485,23 +438,13 @@ namespace BlackHole.Unity
             }
         }
 
-        // 선: 양 끝이 보일 때만 보이고, 양 끝 상태에 따른 색. 한쪽이라도 안개 속이면 안개 선 색.
         private void PaintLinks()
         {
+            NodeTreeStyle style = Style;
+
             foreach (LinkVisual link in _links)
-            {
-                bool fogged = link.From.State == NodeState.Hidden || link.To.State == NodeState.Hidden;
-                bool visible = !fogged || ShowHidden;
-                link.Root.SetActive(visible);
-
-                if (!visible)
-                    continue;
-
-                link.Image.color = fogged ? _look.HiddenLinkColor : LinkColorOf(LinkStateOf(link.From), LinkStateOf(link.To));
-            }
+                link.Paint(style);
         }
-
-        private bool ShowHidden => _look != null && _look.ShowHidden;
 
         // 모든 노드(숨은 노드 포함)의 범위가 보이게 맞춘다. 저작한 모양의 가운데가 화면 가운데임.
         public void FrameAll() => _pan.FrameAll();
@@ -553,7 +496,7 @@ namespace BlackHole.Unity
             if (dpi <= 0)
                 return FocusMinZoom;
 
-            float nodeMillimeters = NodeSize * _pan.CanvasScaleFactor / dpi * 25.4f;
+            float nodeMillimeters = NodeVisual.NodeSize * _pan.CanvasScaleFactor / dpi * 25.4f;
             return Mathf.Clamp(FocusNodeMillimeters / nodeMillimeters, FocusMinZoom, MaxZoom);
         }
 
@@ -623,7 +566,7 @@ namespace BlackHole.Unity
             if (!_downHeld)
             {
                 if (_downNode != null && _downNode != node)
-                    ApplyScale(_downNode, 1);
+                    _downNode.SetScale(1);
 
                 _downNode = node;
                 _downPointer = eventData.pointerId;
@@ -646,7 +589,8 @@ namespace BlackHole.Unity
             _pressedAt = Time.unscaledTime;
             _holdArmed = false;
             StopFade(node);
-            RefreshRing(node);
+            // 누르는 손길의 흰 링을 켠다.
+            Paint(node);
         }
 
         // 손을 뗐다. 초록 링이 꽉 찬 채 같은 칸에서 뗐으면 산다 — 크기는 스프링으로 돌아오고 초록 링은 잠깐 머물다 사라진다.
@@ -691,7 +635,7 @@ namespace BlackHole.Unity
                 NodeVisual node = _pendingSelect;
                 _pendingSelect = null;
                 SetSelected(node);
-                NodeTapped?.Invoke(node.Id, (RectTransform)node.Root.transform);
+                NodeTapped?.Invoke(node.Id, node.Rect);
             }
 
             if (_pressed == null)
@@ -702,7 +646,7 @@ namespace BlackHole.Unity
             float progress = Mathf.Clamp01((Time.unscaledTime - _pressedAt) / HoldSeconds);
 
             if (affordable)
-                SetFill(_pressed, progress);
+                _pressed.SetFill(progress);
 
             if (_holdArmed || progress < 1)
                 return;
@@ -761,11 +705,11 @@ namespace BlackHole.Unity
                     _downScale += _downVelocity * step;
                 }
 
-                ApplyScale(_downNode, _downScale);
+                _downNode.SetScale(_downScale);
 
                 if (!_downHeld && Time.unscaledTime >= _anticipateUntil && Mathf.Abs(_downScale - 1) < SpringRest && Mathf.Abs(_downVelocity) < SpringRest)
                 {
-                    ApplyScale(_downNode, 1);
+                    _downNode.SetScale(1);
                     _downNode = null;
                     _downScale = 1;
                     _downVelocity = 0;
@@ -777,34 +721,11 @@ namespace BlackHole.Unity
             {
                 _fadeElapsed += delta;
                 float t = Mathf.Clamp01(_fadeElapsed / FillFadeSeconds);
-                Color color = FillRingColor;
-                color.a = 1 - t;
-                SetFill(_fading, 1, color);
+                _fading.SetFill(1, alpha: 1 - t);
 
                 if (t >= 1)
                     StopFade(_fading);
             }
-        }
-
-        private static void ApplyScale(NodeVisual node, float scale) =>
-            node.Root.transform.localScale = new Vector3(scale, scale, 1);
-
-        // 초록 링의 채움(0 ~ 1)과 색. 0이면 끈다.
-        private static void SetFill(NodeVisual node, float amount, Color? color = null)
-        {
-            if (node.FillRing == null)
-                return;
-
-            bool on = amount > 0;
-
-            if (node.FillRing.gameObject.activeSelf != on)
-                node.FillRing.gameObject.SetActive(on);
-
-            if (!on)
-                return;
-
-            node.FillRing.fillAmount = amount;
-            node.FillRing.color = color ?? FillRingColor;
         }
 
         private void StopFade(NodeVisual node)
@@ -813,23 +734,7 @@ namespace BlackHole.Unity
                 return;
 
             _fading = null;
-            SetFill(node, 0);
-        }
-
-        // 흰 링의 켜짐: 고른 노드이거나 꾹 누르는 중인 노드, 또는 손을 올린 노드(조금 흐리게).
-        private void RefreshRing(NodeVisual node)
-        {
-            if (node.SelectRing == null)
-                return;
-
-            bool chosen = node == _selected || node == _pressed;
-            bool on = chosen || node == _hovered;
-
-            if (node.SelectRing.gameObject.activeSelf != on)
-                node.SelectRing.gameObject.SetActive(on);
-
-            if (on)
-                node.SelectRing.color = chosen ? SelectRingColor : HoverRingColor;
+            node.SetFill(0);
         }
 
         private void ReleasePress()
@@ -843,7 +748,7 @@ namespace BlackHole.Unity
 
             // 사지 않고 끝났으면(끌기·밖에서 뗌·시간 전에 뗌) 초록 링을 비운다. 산 경우는 _fading이 맡는다.
             if (_fading != node)
-                SetFill(node, 0);
+                node.SetFill(0);
 
             _armedBumpUntil = 0;
             // 살 준비 색을 되돌린다(산 경우는 Show가 다시 칠하지만, 취소면 여기서). Paint가 흰 링도 다시 맞춘다.
@@ -872,7 +777,7 @@ namespace BlackHole.Unity
                 if (IsTouch(eventData))
                 {
                     SetSelected(node);
-                    NodeTapped?.Invoke(node.Id, (RectTransform)node.Root.transform);
+                    NodeTapped?.Invoke(node.Id, node.Rect);
                 }
                 else if (node.State == NodeState.Purchasable)
                 {
@@ -906,7 +811,7 @@ namespace BlackHole.Unity
         {
             if (_downNode != null)
             {
-                ApplyScale(_downNode, 1);
+                _downNode.SetScale(1);
                 _downNode = null;
             }
 
@@ -963,274 +868,7 @@ namespace BlackHole.Unity
 
             _hovered = node;
             Paint(node);
-            NodeHovered?.Invoke(node.Id, (RectTransform)node.Root.transform);
-        }
-
-        // 선 색을 고를 때의 상태: Rank를 하나라도 산 노드는 산 것으로 본다.
-        private static NodeState LinkStateOf(NodeVisual node) => node.Rank > 0 ? NodeState.Owned : node.State;
-
-        // 노드 하나를 지금 상태(와 올림)대로 칠한다. 가격은 마지막 Rank까지 사지 않은 노드에만 쓴다.
-        private void Paint(NodeVisual node)
-        {
-            RefreshRing(node);
-
-            if (node.State == NodeState.Hidden)
-            {
-                // 안개 속: 가격·Rank 딱지는 숨긴다. 열린 구역이면 흐린 자물쇠, 먼 노드면 작고 흐린 점(레이캐스트를 받지 않아 올림·누름이 없다).
-                if (_look != null)
-                {
-                    node.Image.sprite = _theme.SpriteFor(node.Far ? _look.FarSprite : _look.SpriteOf(node.Stat, node.State));
-                    node.Image.color = node.Far ? _look.FarTint : TintOf(node, false);
-                    SetSize(node, node.Far ? NodeSize * _look.FarScale : NodeSize);
-                    node.Image.raycastTarget = !node.Far;
-                }
-
-                if (node.Badge != null && node.Badge.gameObject.activeSelf)
-                    node.Badge.gameObject.SetActive(false);
-
-                if (node.RankLabel != null && node.RankLabel.transform.parent.gameObject.activeSelf)
-                    node.RankLabel.transform.parent.gameObject.SetActive(false);
-
-                return;
-            }
-
-            SetSize(node, NodeSize);
-            node.Image.raycastTarget = true;
-
-            if (node.RankLabel != null && !node.RankLabel.transform.parent.gameObject.activeSelf)
-                node.RankLabel.transform.parent.gameObject.SetActive(true);
-
-            string price = NumberText.Compact(node.Price);
-            bool partial = node.Rank > 0 && node.State != NodeState.Owned;
-
-            if (node.RankLabel != null)
-                node.RankLabel.text = node.Rank.ToString(CultureInfo.InvariantCulture) + "/" + node.MaxRank.ToString(CultureInfo.InvariantCulture);
-
-            if (_look == null)
-            {
-                node.Image.sprite = null;
-                Color color = ColorOf(node.State);
-                node.Image.color = partial ? Color.Lerp(color, OwnedColor, PartialMix) : color;
-                node.Label.color = Color.white;
-                node.Label.text = node.State == NodeState.Owned ? $"{node.Id}\nowned" : $"{node.Id}\n{price}";
-                return;
-            }
-
-            // 고른 노드는 그림은 바꾸지 않고 — 아직 산 게 아니다 — 색만 온전한 밝기로 올린다. 링이 고름을 보인다.
-            // 올림(마우스)도 그림은 그대로이고 흐린 링과 온전한 밝기로 보인다.
-            bool lit = node == _hovered;
-            node.Image.sprite = _theme.SpriteFor(_look.SpriteOf(node.Stat, node.State));
-            Color tint = TintOf(node, lit);
-            node.Image.color = partial ? Color.Lerp(tint, OwnedColor, PartialMix) : tint;
-
-            bool showPrice = node.State != NodeState.Owned;
-            if (node.Badge != null && node.Badge.gameObject.activeSelf != showPrice)
-                node.Badge.gameObject.SetActive(showPrice);
-
-            if (!showPrice || node.Label.text == price)
-            {
-                node.Label.color = PriceColorOf(node.State);
-                return;
-            }
-
-            node.Label.color = PriceColorOf(node.State);
-            node.Label.text = price;
-
-            if (node.Badge != null)
-                node.Badge.sizeDelta = new Vector2(node.Label.GetPreferredValues(price).x + PricePadding, PriceHeight);
-        }
-
-        // 노드 색: 고른 노드(설명이 떠 있는 노드)는 상태와 무관하게 온전한 흰색(가장 밝고 불투명). 아니면 Look의 상태별 색.
-        // 꾹 눌러 게이지가 꽉 찬 노드는 초록 쪽으로 살짝 물든다(살 준비).
-        private Color TintOf(NodeVisual node, bool lit)
-        {
-            if (node == _pressed && _holdArmed && node.State == NodeState.Purchasable)
-                return Color.Lerp(Color.white, FillRingColor, ArmedTint);
-
-            return node == _selected ? Color.white : _look.TintOf(node.State, lit);
-        }
-
-        // 노드 칸 크기(먼 노드는 점으로 줄인다). 바뀔 때만 쓴다.
-        private static void SetSize(NodeVisual node, float size)
-        {
-            var rect = (RectTransform)node.Root.transform;
-
-            if (!Mathf.Approximately(rect.sizeDelta.x, size))
-                rect.sizeDelta = new Vector2(size, size);
-        }
-
-        private static Color ColorOf(NodeState state)
-        {
-            switch (state)
-            {
-                case NodeState.Owned: return OwnedColor;
-                case NodeState.Purchasable: return PurchasableColor;
-                default: return RevealedColor;
-            }
-        }
-
-        #region 만들기
-
-        private NodeVisual CreateNode(NodeItem item)
-        {
-            RectTransform rect = Child(_nodeLayer, "Node " + item.Id);
-            rect.sizeDelta = new Vector2(NodeSize, NodeSize);
-            var position = new Vector2(item.X * CellSize, item.Y * CellSize);
-            rect.anchoredPosition = position;
-
-            // 누름은 트리 영역(OnPointerClick)이 받는다. 노드에 Button을 두면 클릭을 가져가 입력 장치를 가를 수 없다.
-            var image = rect.gameObject.AddComponent<Image>();
-            image.preserveAspect = true;
-
-            // 고른 노드의 링: 노드 위에 그리는 얇은 흰 고리(가운데는 비어 노드가 보인다). 고를 때만 켠다.
-            RectTransform ringRect = Child(rect, "Select");
-            ringRect.anchorMin = new Vector2(0.5f, 0.5f);
-            ringRect.anchorMax = new Vector2(0.5f, 0.5f);
-            ringRect.sizeDelta = new Vector2(NodeSize + SelectRingExtra, NodeSize + SelectRingExtra);
-            var ringImage = ringRect.gameObject.AddComponent<Image>();
-            ringImage.sprite = RingSprite();
-            ringImage.color = SelectRingColor;
-            ringImage.raycastTarget = false;
-            ringRect.gameObject.SetActive(false);
-
-            // 초록 링: 흰 링과 같은 자리·같은 그림. 위에서 시작해 시계 방향으로 차오른다(Filled Radial360).
-            RectTransform fillRect = Child(rect, "Fill");
-            fillRect.anchorMin = new Vector2(0.5f, 0.5f);
-            fillRect.anchorMax = new Vector2(0.5f, 0.5f);
-            fillRect.sizeDelta = ringRect.sizeDelta;
-            var fillImage = fillRect.gameObject.AddComponent<Image>();
-            fillImage.sprite = RingSprite();
-            fillImage.color = FillRingColor;
-            fillImage.type = Image.Type.Filled;
-            fillImage.fillMethod = Image.FillMethod.Radial360;
-            fillImage.fillOrigin = (int)Image.Origin360.Top;
-            fillImage.fillClockwise = true;
-            fillImage.fillAmount = 0;
-            fillImage.raycastTarget = false;
-            fillRect.gameObject.SetActive(false);
-
-            RectTransform badge = null;
-            RectTransform labelRect;
-
-            if (_look != null)
-            {
-                // 가격 딱지: 노드 바로 아래 가운데. 폭은 칠할 때 글자에 맞춘다.
-                badge = Child(rect, "Price");
-                badge.anchorMin = new Vector2(0.5f, 0);
-                badge.anchorMax = new Vector2(0.5f, 0);
-                badge.pivot = new Vector2(0.5f, 1);
-                badge.sizeDelta = new Vector2(NodeSize, PriceHeight);
-                var back = badge.gameObject.AddComponent<Image>();
-                back.color = BadgeBackColor();
-                back.raycastTarget = false;
-                labelRect = Child(badge, "Label");
-                labelRect.anchorMin = Vector2.zero;
-                labelRect.anchorMax = Vector2.one;
-                labelRect.sizeDelta = Vector2.zero;
-            }
-            else
-            {
-                labelRect = Child(rect, "Label");
-            }
-
-            var label = labelRect.gameObject.AddComponent<TextMeshProUGUI>();
-            TMP_Text rankLabel = item.MaxRank > 1 ? CreateRankBadge(rect) : null;
-
-            if (_look != null)
-            {
-                label.fontSize = PriceSize;
-            }
-            else
-            {
-                labelRect.anchorMin = Vector2.zero;
-                labelRect.anchorMax = Vector2.one;
-                labelRect.offsetMin = new Vector2(4, 4);
-                labelRect.offsetMax = new Vector2(-4, -4);
-                // 긴 ID도 가격 줄까지 보이도록 칸에 맞게 글자를 줄인다.
-                label.enableAutoSizing = true;
-                label.fontSizeMin = 10;
-                label.fontSizeMax = 18;
-            }
-
-            label.alignment = TextAlignmentOptions.Center;
-            label.color = Color.white;
-            label.textWrappingMode = TextWrappingModes.NoWrap;
-            label.overflowMode = TextOverflowModes.Ellipsis;
-            label.raycastTarget = false;
-
-            return new NodeVisual(item.Id, item.Stat, item.Price, item.MaxRank, item.Start, position, rect.gameObject, image, label, badge, rankLabel,
-                ringImage, fillImage);
-        }
-
-        private static Sprite _ringSprite;
-
-        // 흰 고리 그림을 한 번 만든다(프로젝트에 고리 스프라이트가 없다). 가장자리는 1px 부드럽게.
-        private static Sprite RingSprite()
-        {
-            if (_ringSprite != null)
-                return _ringSprite;
-
-            int size = RingTextureSize;
-            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
-            float center = (size - 1) * 0.5f;
-            float outer = center - 1;
-            float inner = outer - RingThickness;
-
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    float distance = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
-                    float alpha = Mathf.Clamp01(outer + 0.5f - distance) * Mathf.Clamp01(distance - inner + 0.5f);
-                    texture.SetPixel(x, y, new Color(1, 1, 1, alpha));
-                }
-            }
-
-            texture.Apply();
-            _ringSprite = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100);
-            return _ringSprite;
-        }
-
-        // Rank 딱지: 노드 오른쪽 위 모서리에 걸친다. 글자는 칠할 때 쓴다("3/10").
-        private TMP_Text CreateRankBadge(RectTransform node)
-        {
-            RectTransform badge = Child(node, "Rank");
-            badge.anchorMin = new Vector2(1, 1);
-            badge.anchorMax = new Vector2(1, 1);
-            badge.pivot = new Vector2(1, 1);
-            badge.anchoredPosition = new Vector2(RankPadding, RankPadding);
-            badge.sizeDelta = new Vector2(NodeSize * 0.6f, RankHeight);
-
-            var back = badge.gameObject.AddComponent<Image>();
-            back.color = BadgeBackColor();
-            back.raycastTarget = false;
-
-            RectTransform textRect = Child(badge, "Label");
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            var text = textRect.gameObject.AddComponent<TextMeshProUGUI>();
-            text.fontSize = RankSize;
-            text.alignment = TextAlignmentOptions.Center;
-            text.color = PriceColorOf(NodeState.Purchasable);
-            text.textWrappingMode = TextWrappingModes.NoWrap;
-            text.raycastTarget = false;
-            return text;
-        }
-
-        // 두 노드 중심을 잇는 얇은 막대: 가운데에 놓고, 길이만큼 늘리고, 방향만큼 돌린다.
-        private LinkVisual CreateLink(NodeVisual from, NodeVisual to)
-        {
-            RectTransform rect = Child(_linkLayer, $"Link {from.Id}-{to.Id}");
-            Vector2 delta = to.Position - from.Position;
-            rect.anchoredPosition = (from.Position + to.Position) * 0.5f;
-            rect.sizeDelta = new Vector2(delta.magnitude, LinkWidth);
-            rect.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
-
-            var image = rect.gameObject.AddComponent<Image>();
-            image.raycastTarget = false;
-            return new LinkVisual(from, to, rect.gameObject, image);
+            NodeHovered?.Invoke(node.Id, node.Rect);
         }
 
         private void Clear()
@@ -1263,90 +901,9 @@ namespace BlackHole.Unity
 
         private static RectTransform Layer(RectTransform parent, string name)
         {
-            RectTransform rect = Child(parent, name);
+            RectTransform rect = NodeVisual.Child(parent, name);
             rect.sizeDelta = Vector2.zero;
             return rect;
         }
-
-        // 부모 가운데에 붙는 자식.
-        private static RectTransform Child(RectTransform parent, string name)
-        {
-            var child = new GameObject(name, typeof(RectTransform));
-            var rect = (RectTransform)child.transform;
-            rect.SetParent(parent, false);
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            return rect;
-        }
-
-        private sealed class NodeVisual
-        {
-            public readonly string Id;
-            public readonly string Stat;
-            public readonly int MaxRank;
-            // 시작 노드. 그 구역은 처음부터 열린 구역이다.
-            public readonly bool Start;
-            // 든 구역의 열쇠. 구역에 들지 않았으면 null.
-            public string Region;
-            // 선으로 이어진 노드.
-            public readonly List<NodeVisual> Neighbors = new List<NodeVisual>();
-            // 미리 보기 거리 안의 안개 속 노드(MarkAhead).
-            public bool Ahead;
-            // 먼 노드(열린 구역 밖이고 미리 보기 거리 밖인 안개 속 노드). Show가 정한다.
-            public bool Far;
-            // 다음 Rank의 비용.
-            public long Price;
-            // 산 Rank.
-            public int Rank;
-            public readonly Vector2 Position;
-            public readonly GameObject Root;
-            public readonly Image Image;
-            public readonly TMP_Text Label;
-            // 가격 딱지(Look이 있을 때만). 샀으면 숨긴다.
-            public readonly RectTransform Badge;
-            // Rank 딱지의 글자(Rank가 둘 이상인 노드만).
-            public readonly TMP_Text RankLabel;
-            // 흰 링(고름·꾹 누름)과 그 위에 차오르는 초록 링(꾹 누름 진행 → 살 준비 → 산 뒤 사라짐).
-            public readonly Image SelectRing;
-            public readonly Image FillRing;
-            public NodeState State = NodeState.Hidden;
-
-            public NodeVisual(string id, string stat, long price, int maxRank, bool start, Vector2 position, GameObject root, Image image,
-                TMP_Text label, RectTransform badge, TMP_Text rankLabel, Image selectRing, Image fillRing)
-            {
-                Id = id;
-                Stat = stat;
-                Price = price;
-                MaxRank = maxRank;
-                Start = start;
-                RankLabel = rankLabel;
-                Position = position;
-                Root = root;
-                Image = image;
-                Label = label;
-                SelectRing = selectRing;
-                FillRing = fillRing;
-                Badge = badge;
-            }
-        }
-
-        private sealed class LinkVisual
-        {
-            public readonly NodeVisual From;
-            public readonly NodeVisual To;
-            public readonly GameObject Root;
-            public readonly Image Image;
-
-            public LinkVisual(NodeVisual from, NodeVisual to, GameObject root, Image image)
-            {
-                From = from;
-                To = to;
-                Root = root;
-                Image = image;
-            }
-        }
-
-        #endregion
     }
 }
