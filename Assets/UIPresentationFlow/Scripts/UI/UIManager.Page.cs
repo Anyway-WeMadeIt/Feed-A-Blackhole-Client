@@ -7,6 +7,8 @@ public sealed partial class UIManager
     {
         public UIBase Page;
         public UIPresentationSpec Presentation;
+        // Page를 열 때 받은 닫힘 콜백. Page가 어떤 이유로 닫히든(교체, Owner가 닫힘) 이것을 부른다.
+        public Action<UIBase> AfterClosed;
     }
 
     private readonly Dictionary<UIBase, PageState> _pagesByOwner = new();
@@ -44,13 +46,14 @@ public sealed partial class UIManager
             current.Page != page)
         {
             SetVisible(current.Page, false);
-            afterClosed?.Invoke(current.Page);
+            current.AfterClosed?.Invoke(current.Page);
         }
 
         _pagesByOwner[owner] = new PageState
         {
             Page = page,
-            Presentation = presentation
+            Presentation = presentation,
+            AfterClosed = afterClosed
         };
 
         ApplyPresentation(
@@ -65,9 +68,8 @@ public sealed partial class UIManager
         return page;
     }
     
-    public UIBase ClosePage(
-        UIBase owner,
-        Action<UIBase> afterClosed = null)
+    // Owner의 Page를 닫는다. 닫힘 콜백은 Page를 열 때 받은 것을 쓴다(Owner를 닫는 쪽의 콜백이 아니다).
+    public UIBase ClosePage(UIBase owner)
     {
         if (owner == null)
             throw new ArgumentNullException(nameof(owner));
@@ -79,7 +81,7 @@ public sealed partial class UIManager
 
         SetVisible(state.Page, false);
 
-        afterClosed?.Invoke(state.Page);
+        state.AfterClosed?.Invoke(state.Page);
 
         return state.Page;
     }
