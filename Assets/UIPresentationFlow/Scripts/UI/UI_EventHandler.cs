@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public enum ETouchEvent
 {
@@ -23,6 +24,9 @@ public enum ETouchEvent
 //
 // Pointer enter and exit are always paired: exit is sent at most once per enter,
 // and a pointer that is still inside when this object is disabled receives exit then.
+//
+// Click is not sent while a Selectable on the same object is not interactable
+// (Selectable.IsInteractable, which also honors parent CanvasGroups). Other events still arrive.
 public sealed class UI_EventHandler : MonoBehaviour,
     IPointerClickHandler,
     IPointerDownHandler,
@@ -55,10 +59,24 @@ public sealed class UI_EventHandler : MonoBehaviour,
     private PointerEventData _cachedEventData;
     private PointerEventData _enterEventData;
     private Coroutine _longPressCoroutine;
+    // Selectable on this object, if any. Looked up once.
+    private Selectable _selectable;
+    private bool _selectableLookedUp;
+
+    private bool IsClickable()
+    {
+        if (!_selectableLookedUp)
+        {
+            _selectableLookedUp = true;
+            TryGetComponent(out _selectable);
+        }
+
+        return _selectable == null || _selectable.IsInteractable();
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_isDragConfirmed || _isLongPressTriggered)
+        if (_isDragConfirmed || _isLongPressTriggered || !IsClickable())
             return;
 
         OnClickHandler?.Invoke(eventData);

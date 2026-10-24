@@ -135,20 +135,20 @@ namespace BlackHole.Unity
         // 매 프레임: 카드를 제자리로 조금씩 옮긴다. 일시정지(timeScale 0)와 관계없이 움직인다.
         private void Update() => Slide(1 - Mathf.Exp(-SlideSharpness * Time.unscaledDeltaTime));
 
-        // 버튼의 클릭은 Button.interactable과 관계없이 온다(UI_EventHandler). 막힌 버튼은 여기서 거른다.
+        // 막힌 버튼(interactable=false)의 클릭은 UI_EventHandler가 보내지 않는다.
         private void HandlePrevClicked(PointerEventData _) => Select(_selected - 1);
         private void HandleNextClicked(PointerEventData _) => Select(_selected + 1);
         private void HandleBackClicked(PointerEventData _) => BackClicked?.Invoke();
 
         private void HandleContinueClicked(PointerEventData _)
         {
-            if (IsOn(_continue) && _modes.Count > 0)
+            if (_modes.Count > 0)
                 ContinueClicked?.Invoke(SelectedId);
         }
 
         private void HandleNewGameClicked(PointerEventData _)
         {
-            if (IsOn(_newGame) && _modes.Count > 0)
+            if (_modes.Count > 0)
                 NewGameClicked?.Invoke(SelectedId);
         }
 
@@ -282,8 +282,6 @@ namespace BlackHole.Unity
 
             return -1;
         }
-
-        private static bool IsOn(Button button) => button != null && button.interactable;
 
         private static void SetOn(Button button, bool on)
         {
