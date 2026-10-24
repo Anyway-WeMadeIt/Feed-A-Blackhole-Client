@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class UIImageBindingBuilder
 {
-    private const string RootPath = "Assets/UI/ImageBindings";
+    private const string RootPath = UIBindingEditorUtil.ImageBindingsRoot;
 
     public static UIImageBindingSet Build(
         UIBase view,
@@ -31,9 +31,9 @@ public static class UIImageBindingBuilder
         string assetPath =
             $"{viewPath}/{viewName}.ImageBinding.asset";
 
-        EnsureFolder(RootPath);
-        EnsureFolder(themePath);
-        EnsureFolder(viewPath);
+        UIBindingEditorUtil.EnsureFolder(RootPath);
+        UIBindingEditorUtil.EnsureFolder(themePath);
+        UIBindingEditorUtil.EnsureFolder(viewPath);
 
         UIImageThemeSpec theme =
             GetOrCreateTheme(themeId, themePath);
@@ -197,21 +197,5 @@ public static class UIImageBindingBuilder
 
         theme.bindings.Add(binding);
         EditorUtility.SetDirty(theme);
-    }
-
-    private static void EnsureFolder(string path)
-    {
-        if (AssetDatabase.IsValidFolder(path))
-            return;
-
-        int split = path.LastIndexOf('/');
-        if (split <= 0)
-            throw new InvalidOperationException($"Invalid asset folder path: {path}");
-
-        string parent = path.Substring(0, split);
-        string folderName = path.Substring(split + 1);
-
-        EnsureFolder(parent);
-        AssetDatabase.CreateFolder(parent, folderName);
     }
 }

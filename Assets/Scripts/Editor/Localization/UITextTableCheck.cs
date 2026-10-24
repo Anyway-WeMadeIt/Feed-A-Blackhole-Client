@@ -216,23 +216,12 @@ namespace BlackHole.EditorTools
                 if (type.IsAbstract || type.IsGenericType)
                     continue;
 
-                Type refs = RefsTypeOf(type);
+                Type refs = UIRefCheck.RefsTypeOf(type);
                 if (refs != null)
                     refsByView[type.Name] = new HashSet<string>(Enum.GetNames(refs), StringComparer.Ordinal);
             }
 
             return refsByView;
-        }
-
-        private static Type RefsTypeOf(Type type)
-        {
-            for (Type current = type; current != null && current != typeof(object); current = current.BaseType)
-            {
-                if (current.IsGenericType && current.GetGenericTypeDefinition() == typeof(UIBase<>))
-                    return current.GetGenericArguments()[0];
-            }
-
-            return null;
         }
 
         private static int ColumnOf(string[] header, string name) =>

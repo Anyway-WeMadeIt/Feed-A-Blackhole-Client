@@ -5,8 +5,8 @@ using UnityEngine;
 
 public static class UITextBindingBuilder
 {
-    private const string RootPath = "Assets/UI/TextBindings";
-    private const string CatalogPath = RootPath + "/UI.TextBindings.asset";
+    private const string RootPath = UIBindingEditorUtil.TextBindingsRoot;
+    private const string CatalogPath = UIBindingEditorUtil.TextBindingCatalogPath;
 
     public static UITextBindingSet Build(UIBase view)
     {
@@ -22,8 +22,8 @@ public static class UITextBindingBuilder
         string assetPath =
             $"{viewPath}/{viewName}.TextBinding.asset";
 
-        EnsureFolder(RootPath);
-        EnsureFolder(viewPath);
+        UIBindingEditorUtil.EnsureFolder(RootPath);
+        UIBindingEditorUtil.EnsureFolder(viewPath);
 
         UITextBindingCatalog catalog = GetOrCreateCatalog();
 
@@ -164,21 +164,5 @@ public static class UITextBindingBuilder
 
         catalog.bindings.Add(binding);
         EditorUtility.SetDirty(catalog);
-    }
-
-    private static void EnsureFolder(string path)
-    {
-        if (AssetDatabase.IsValidFolder(path))
-            return;
-
-        int split = path.LastIndexOf('/');
-        if (split <= 0)
-            throw new InvalidOperationException($"Invalid asset folder path: {path}");
-
-        string parent = path.Substring(0, split);
-        string folderName = path.Substring(split + 1);
-
-        EnsureFolder(parent);
-        AssetDatabase.CreateFolder(parent, folderName);
     }
 }

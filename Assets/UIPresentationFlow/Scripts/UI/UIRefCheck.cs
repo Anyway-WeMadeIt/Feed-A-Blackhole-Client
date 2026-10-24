@@ -39,7 +39,8 @@ public static class UIRefCheck
     }
 
     // The TRefs of a View: the type argument of the UIBase<> it derives from. Null if it is not a UIBase<>.
-    private static Type RefsTypeOf(Type type)
+    // Editor tools (binding scanners, text table check) use this too.
+    public static Type RefsTypeOf(Type type)
     {
         for (Type current = type; current != null && current != typeof(object); current = current.BaseType)
         {
