@@ -51,15 +51,15 @@ namespace BlackHole.Unity
 
         private void OpenEndingScreen()
         {
-            UIStyle style = CodeScreenStyle();
+            UIAppliedTheme theme = _ui.Theme;
 
             _endingScreen = EndingScreen.Create(
                 CodeScreenParent(),
                 CodeScreenSiblingIndex(),
                 EndingTextsOf(),
-                style.FontFor(UITextRole.Title),
-                style.FontFor(UITextRole.Body),
-                style.Scale);
+                theme.FontFor(UITextRole.Title),
+                theme.FontFor(UITextRole.Body),
+                theme.TextScale);
 
             _endingScreen.Covered += HandleEndingCovered;
             _endingScreen.Finished += HandleEndingFinished;

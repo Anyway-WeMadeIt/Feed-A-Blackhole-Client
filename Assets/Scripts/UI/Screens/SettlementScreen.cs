@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class SettlementScreen : UIRoot<SettlementScreen.Refs>, ILocalizedView, IStyleView, INumberFormatView, IUISoundView
+    public sealed class SettlementScreen : UIRoot<SettlementScreen.Refs>, ILocalizedView, INumberFormatView, IUISoundView
     {
         public enum Refs
         {
@@ -184,9 +184,6 @@ namespace BlackHole.Unity
         private Localizer _localizer;
         // 슬라이더·결산 소리. GameBootstrap이 넣는다. 없으면 소리 없이 진행한다.
         private UISounds _sounds;
-        private readonly StyledTexts _styled = new();
-        // 테마 색: 화면 바탕색과 구분선.
-        private readonly ThemedImages _themed = new();
         private bool? _shownMilestone;
         // 이정표 글자: 지금 자리 이름과 목표 이름("소행성대 → 행성계"). 목표가 없으면(마지막 뒤) 이름 하나. 닿았으면 "행성계 도달!".
         private (string Current, string Goal, bool Reached)? _shownStage;
@@ -262,21 +259,22 @@ namespace BlackHole.Unity
             _tooltipText = View.Text(Refs.Tooltip_Text);
             HideTooltip();
 
-            _styled.Add(_totalGold, UITextRole.Body);
-            _styled.Add(_tooltipText, UITextRole.Body);
-            _styled.Add(View.Text(Refs.DestroyedCaption_Text), UITextRole.Caption);
-            _styled.Add(View.Text(Refs.AsteroidName_Text), UITextRole.Caption);
-            _styled.Add(View.Text(Refs.PlanetName_Text), UITextRole.Caption);
-            _styled.Add(View.Text(Refs.StarName_Text), UITextRole.Caption);
-            _styled.Add(View.Text(Refs.GoldCaption_Text), UITextRole.Caption);
+            // TextBindings에 없는 글자(합계·툴팁·캡션·통계 값)와 바탕색·구분선은 Styled가 테마에 맞춘다. 글자 크기는 프리팹 크기 × 배율.
+            Styled.AddText(_totalGold, UITextRole.Body, UITextSizePolicy.Prefab);
+            Styled.AddText(_tooltipText, UITextRole.Body, UITextSizePolicy.Prefab);
+            Styled.AddText(View.Text(Refs.DestroyedCaption_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
+            Styled.AddText(View.Text(Refs.AsteroidName_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
+            Styled.AddText(View.Text(Refs.PlanetName_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
+            Styled.AddText(View.Text(Refs.StarName_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
+            Styled.AddText(View.Text(Refs.GoldCaption_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
             // 골드 줄은 "$5,700" 숫자만 보인다. 캡션 "골드"와 그 아이콘은 프리팹에 두되 숨긴다.
             View.Text(Refs.GoldCaption_Text)?.gameObject.SetActive(false);
             View.Image(Refs.GoldIcon_Image)?.gameObject.SetActive(false);
-            _styled.Add(View.Text(Refs.GrowthCaption_Text), UITextRole.Caption);
+            Styled.AddText(View.Text(Refs.GrowthCaption_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
 
-            _themed.AddColor(GetComponent<Image>(), UIColorRole.Backdrop);
-            _themed.AddColor(View.Image(Refs.Divider), UIColorRole.TextMain);
-            _themed.AddColor(View.Image(Refs.StatsDivider), UIColorRole.TextMain);
+            Styled.AddImageColor(GetComponent<Image>(), UIColorRole.Backdrop);
+            Styled.AddImageColor(View.Image(Refs.Divider), UIColorRole.TextMain);
+            Styled.AddImageColor(View.Image(Refs.StatsDivider), UIColorRole.TextMain);
 
             _asteroidRow = View.Button(Refs.AsteroidRow_Button);
             _planetRow = View.Button(Refs.PlanetRow_Button);
@@ -323,7 +321,7 @@ namespace BlackHole.Unity
         private StatCell BindStat(Refs button, Refs value, string labelKey)
         {
             StatCell cell = new(View.Button(button), View.Text(value), labelKey);
-            _styled.Add(cell.Value, UITextRole.Body);
+            Styled.AddText(cell.Value, UITextRole.Body, UITextSizePolicy.Prefab);
 
             ButtonFeedback.Bind(cell.Button,
                 onHover: () => ShowTooltip(cell.Button, Localized(cell.LabelKey)),
@@ -524,7 +522,6 @@ namespace BlackHole.Unity
                 ShowUpgradeCount(purchasable);
         }
 
-        // 글자 크기·언어별 글꼴. TextBindings에 등록되지 않은 글자만 여기서 맞춘다(등록된 글자는 Theme가 맞춘다).
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
         public void SetSounds(UISounds sounds)
@@ -533,12 +530,8 @@ namespace BlackHole.Unity
             ButtonAnimation.SetSounds(this, sounds);
         }
 
-        public void ApplyStyle(in UIStyle style)
-        {
-            Ambient?.Apply(style.ThemeId);
-            _styled.SetStyle(style);
-            _themed.SetStyle(style);
-        }
+        // 테마가 들어왔다: 배경 위 문양의 머티리얼을 테마에 맞춘다. 글자·구분선·바탕색은 Styled가 맞췄다.
+        protected override void OnPresented(in UIAppliedTheme theme) => Ambient?.Apply(theme.ThemeId);
 
         // Gold 표기 설정이 바뀌었다. 증가 연출이 마지막으로 쓴 값을 지금 표기로 다시 쓴다(연출 중이면 다음 프레임이 이어 쓴다).
         public void RefreshNumbers()

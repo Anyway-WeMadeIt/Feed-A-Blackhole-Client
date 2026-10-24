@@ -31,6 +31,13 @@ public abstract class UIBase : MonoBehaviour, IUIPresentationRefProvider, IUISty
     protected virtual void PreInitialize() { }
     protected virtual void OnInitialize() { }
 
+    // A presentation was applied to this View (shown, context changed, display changed). Catalog entries and
+    // Styled elements are already themed; refresh here what the View draws in code from the theme
+    // (materials, computed colors, texts it owns outright). theme is also the value to keep for later drawing.
+    protected virtual void OnPresented(in UIAppliedTheme theme) { }
+
+    internal void NotifyPresented(in UIAppliedTheme theme) => OnPresented(theme);
+
     // 버튼의 포인터 사건 하나에 처리를 묶는다(UIEvents.Bind). 뷰가 자기 버튼을 묶을 때 쓴다.
     protected static void BindEvent(
         Button button,

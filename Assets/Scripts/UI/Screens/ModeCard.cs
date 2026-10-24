@@ -20,8 +20,8 @@ namespace BlackHole.Unity
             RecordText,
         }
 
-        // 글자 크기·언어별 글꼴·테마 색을 받는 글자와 역할. 모드 선택 창이 카드를 만들 때 StyledTexts에 넣는다.
-        // 카드의 그림(바탕 panel)은 모드 선택 창이 ThemedImages.AddSprites(card)로 테마 짝으로 바꾼다. 머리(Header)는 그림이 없어 모드 색이 그대로다.
+        // 글자 크기·언어별 글꼴·테마 색을 받는 글자와 역할. 모드 선택 창이 카드를 만들 때 자기 Styled에 넣는다.
+        // 카드의 그림(바탕 panel)은 모드 선택 창이 Styled.AddSprites(card)로 테마 짝으로 바꾼다. 머리(Header)는 그림이 없어 모드 색이 그대로다.
         public IEnumerable<(TMP_Text Text, UITextRole Role)> StyledTexts
         {
             get

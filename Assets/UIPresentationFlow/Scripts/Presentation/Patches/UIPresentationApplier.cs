@@ -18,6 +18,8 @@ public sealed class UIPresentationApplier
 
         foreach (IUIPatch patch in result.Patches)
             patch?.Apply(view);
+
+        view.NotifyPresented(result.Theme);
     }
 
     private UIPresentationBaseline GetBaseline(UIBase view)

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, IStyleView, INumberFormatView, IUISoundView
+    public sealed class UpgradeScreen : UIRoot<UpgradeScreen.Refs>, IUIPageOwner, ILocalizedView, INumberFormatView, IUISoundView
     {
         public enum Refs
         {
@@ -127,9 +127,8 @@ namespace BlackHole.Unity
 
         // 언어가 바뀌면 다시 쓸 마지막 값. 아직 보이지 않았으면 null.
         private Localizer _localizer;
-        private readonly StyledTexts _styled = new();
-        // 테마 색: 화면 바탕색(배경 그림 뒤).
-        private readonly ThemedImages _themed = new();
+        // 마지막으로 들어온 테마. 코드로 칠하는 패널·구매 탭의 색을 여기서 고른다(OnPresented).
+        private UIAppliedTheme _theme;
         // 노드 툴팁의 프리팹 폭. 글자 크기 설정만큼 넓힌다(원작처럼 상자가 글자를 따라 커진다).
         private float _tooltipWidth;
         private long? _shownGold;
@@ -147,8 +146,9 @@ namespace BlackHole.Unity
             _tooltipBody = View.Text(Refs.NodeTooltipBody_Text);
             _hint = View.Text(Refs.Hint_Text);
             CreatePanelParts();
-            _styled.Add(_hint, UITextRole.Caption);
-            _themed.AddColor(GetComponent<Image>(), UIColorRole.Backdrop);
+            // 안내 글자와 화면 바탕색(배경 그림 뒤)은 Styled가 테마에 맞춘다. TextBindings에 등록된 글자는 Theme가 맞춘다.
+            Styled.AddText(_hint, UITextRole.Caption, UITextSizePolicy.Prefab);
+            Styled.AddImageColor(GetComponent<Image>(), UIColorRole.Backdrop);
             _tooltipWidth = _tooltip != null ? _tooltip.sizeDelta.x : 0;
             HideNodeTooltip();
 
@@ -370,21 +370,20 @@ namespace BlackHole.Unity
             PaintHeader();
         }
 
-        // 글자 크기·언어별 글꼴. TextBindings에 등록되지 않은 글자만 여기서 맞춘다(등록된 글자는 Theme가 맞춘다).
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
         public void SetSounds(UISounds sounds) => ButtonAnimation.SetSounds(this, sounds);
 
-        public void ApplyStyle(in UIStyle style)
+        // 테마가 들어왔다: 문양 머티리얼, 코드로 칠하는 구매 탭·Gold 색을 다시 칠하고 툴팁 폭을 글자 배율만큼 넓힌다.
+        protected override void OnPresented(in UIAppliedTheme theme)
         {
-            Ambient?.Apply(style.ThemeId);
-            _styled.SetStyle(style);
-            _themed.SetStyle(style);
+            _theme = theme;
+            Ambient?.Apply(theme.ThemeId);
             PaintBuyButton();
             PaintGold();
 
             if (_tooltip != null)
-                _tooltip.sizeDelta = new Vector2(_tooltipWidth * style.Scale, _tooltip.sizeDelta.y);
+                _tooltip.sizeDelta = new Vector2(_tooltipWidth * theme.TextScale, _tooltip.sizeDelta.y);
         }
 
         private string Localized(string key, params object[] args) =>
@@ -630,7 +629,7 @@ namespace BlackHole.Unity
 
         private Color PanelBackColor()
         {
-            Color? themed = _themed.Style.ColorFor(UIColorRole.Surface);
+            Color? themed = _theme.ColorFor(UIColorRole.Surface);
 
             if (themed is not Color color)
                 return PanelColor;
@@ -731,7 +730,7 @@ namespace BlackHole.Unity
         }
 
         // 고정 패널에서만 쓰는 부품을 프리팹 툴팁 아래에 만든다(트리의 노드와 같은 방식). 그림 없이 단색으로 만들고
-        // 테마 색(ThemedImages)과 글꼴(StyledTexts)을 받는다. 올림 툴팁에서는 모두 숨긴다.
+        // 테마 색(_theme)과 글꼴(Styled)을 받는다. 올림 툴팁에서는 모두 숨긴다.
         // - 제목 옆 노드 그림(제목 글자의 왼쪽 여백에 놓는다)
         
         // - 구매 탭: 패널 오른쪽 위 모서리에 걸친 "구매 70". 비용 표시이자 버튼이다. 누르는 즉시 산다(꾹 누름은 노드 쪽이다).
@@ -791,7 +790,7 @@ namespace BlackHole.Unity
                 _buyLabel.font = _tooltipBody.font;
                 _buyLabel.color = _tooltipBody.color;
             }
-            _styled.Add(_buyLabel, UITextRole.Body);
+            Styled.AddText(_buyLabel, UITextRole.Body, UITextSizePolicy.Prefab);
 
             _buyButton = buy.AddComponent<Button>();
             _buyButton.targetGraphic = _buyBack;
@@ -840,15 +839,14 @@ namespace BlackHole.Unity
         // 살 수 있으면 팔레트의 강조색(초록). 아니면 패널 면 색(Surface)을 조금 밝혀 — 글자색(TextMain)을 쓰면 다크 테마에서 흰 상자가 되어 흰 글자가 안 보인다.
         private Color BuyBackColor(bool ready)
         {
-            UIStyle style = _themed.Style;
             Color fallback = ready ? BuyReadyColor : BuyBlockedColor;
-            Color? themed = style.ColorFor(ready ? UIColorRole.Accent : UIColorRole.Surface);
+            Color? themed = _theme.ColorFor(ready ? UIColorRole.Accent : UIColorRole.Surface);
 
             if (themed is not Color color)
                 return fallback;
 
             if (!ready)
-                color = Color.Lerp(color, style.ColorFor(UIColorRole.TextMain) ?? Color.white, 0.12f);
+                color = Color.Lerp(color, _theme.ColorFor(UIColorRole.TextMain) ?? Color.white, 0.12f);
 
             color.a = fallback.a;
             return color;

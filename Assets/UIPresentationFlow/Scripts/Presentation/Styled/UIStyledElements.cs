@@ -66,7 +66,12 @@ public sealed class UIStyledElements
     }
 
     // The image's sprite follows the theme (sprite set variants); Sprite Swap states of its Selectable too.
-    public void AddSprite(Image image) => AddImage(image, themesSprite: true, colorRole: null);
+    // An image without a sprite has nothing to theme and is not registered.
+    public void AddSprite(Image image)
+    {
+        if (image != null && image.sprite != null)
+            AddImage(image, themesSprite: true, colorRole: null);
+    }
 
     // All images under root (inactive included) follow the theme. For a cloned row or card.
     public void AddSprites(Component root)
@@ -120,6 +125,19 @@ public sealed class UIStyledElements
 
         _images.Remove(image);
         _imageList.Remove(entry);
+    }
+
+    // Forget every text and image under root (inactive included). For a cloned row or card about to be destroyed.
+    public void RemoveUnder(Component root)
+    {
+        if (root == null)
+            return;
+
+        foreach (TMP_Text text in root.GetComponentsInChildren<TMP_Text>(true))
+            Remove(text);
+
+        foreach (Image image in root.GetComponentsInChildren<Image>(true))
+            Remove(image);
     }
 
     // Forget every element. Does not restore their values (they are usually being destroyed).

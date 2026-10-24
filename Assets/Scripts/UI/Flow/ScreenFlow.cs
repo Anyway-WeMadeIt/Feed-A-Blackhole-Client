@@ -19,7 +19,6 @@ namespace BlackHole.Unity
         private readonly HqGrowthDefinition _growth;// 블랙홀 성장(성장도별 Level 표, 이정표).
         private readonly GameSettings _settings;// 플레이어 설정.
         private readonly Localizer _localizer;// 코드가 쓰는 UI 글자의 번역.
-        private readonly UIFontSet _fonts;// 언어·역할별 글꼴. 프리팹 없이 코드로 만드는 화면(엔딩)이 쓴다.
         private readonly ScreenTransition _transition;
         private readonly KeyInput _keyInput;
         private readonly IAuthSession _auth;// 서버 로그인 세션. 타이틀의 연결 결과 알림이 상태를 읽는다.
@@ -39,7 +38,6 @@ namespace BlackHole.Unity
             HqGrowthDefinition growth,
             GameSettings settings,
             Localizer localizer,
-            UIFontSet fonts,
             ScreenTransition transition,
             KeyInput keyInput,
             ProgressRecorder recorder,
@@ -57,7 +55,6 @@ namespace BlackHole.Unity
             _growth = growth;
             _settings = settings;
             _localizer = localizer;
-            _fonts = fonts;
             _transition = transition;
             _keyInput = keyInput;
             _recorder = recorder;
@@ -72,10 +69,7 @@ namespace BlackHole.Unity
                 _auth.StateChanged += HandleConnectionStateChanged;
         }
 
-        // 프리팹 없이 코드로 만드는 화면(엔딩, 알림)의 글꼴·글자 배율과 자리. 화면 전환 덮개 바로 아래, 같은 캔버스에 둔다.
-        private UIStyle CodeScreenStyle() =>
-            new(_settings.TextScale, _fonts, _settings.LanguageLocale.ToId(), null, null, null);
-
+        // 프리팹 없이 코드로 만드는 화면(엔딩, 알림)의 자리: 화면 전환 덮개 바로 아래, 같은 캔버스. 글꼴·글자 배율은 _ui.Theme에서 받는다.
         private Transform CodeScreenParent() => _transition.transform.parent;
 
         private int CodeScreenSiblingIndex() => _transition.transform.GetSiblingIndex();

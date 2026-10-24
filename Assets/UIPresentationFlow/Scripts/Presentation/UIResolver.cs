@@ -55,9 +55,18 @@ public sealed class UIResolver
         resolved.Layout?.BuildPatches(patches);
         resolved.ImageTheme?.BuildPatches(patches, Assets.Sprites, _context.ThemeId);
         // Code-registered elements (UIStyledElements) get the same theme, with or without a ThemeSpec.
-        patches.Add(new UIStyledElementsPatch(resolved.Theme, Assets, _context.TextScale, _context.LocaleId, _context.ThemeId));
+        UIAppliedTheme applied = AppliedThemeOf(resolved.Theme);
+        patches.Add(new UIStyledElementsPatch(resolved.Theme, applied));
         trace?.Add($"[Patches] {patches.Count}");
 
-        return new UIResolveResult(resolved, patches, trace, Assets);
+        return new UIResolveResult(resolved, patches, trace, Assets, applied);
     }
+
+    // The fonts, colors and sprites for the current context: the screen's own overrides, else the shared assets.
+    public UIAppliedTheme AppliedThemeOf(ThemeSpec theme) =>
+        new(_context,
+            theme != null ? theme.FontsOr(Assets) : Assets.Fonts,
+            theme != null ? theme.PaletteOr(Assets) : Assets.Palette,
+            Assets.Sprites);
+
 }

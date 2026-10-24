@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    public sealed class ModeSelectPanel : UIPanel<ModeSelectPanel.Refs>, IStyleView
+    public sealed class ModeSelectPanel : UIPanel<ModeSelectPanel.Refs>
     {
         public enum Refs
         {
@@ -69,11 +69,8 @@ namespace BlackHole.Unity
 
         private readonly List<ModeItem> _modes = new();
         private readonly List<ModeCard> _cards = new();
-        // 글자 크기·언어별 글꼴. 카드는 복제로 만들므로 만들 때 넣고 지울 때 비운다(틀은 넣지 않는다).
-        // 창 제목·버튼 글자는 TextBindings에 있어 Theme가 맞춘다.
-        private readonly StyledTexts _cardTexts = new();
-        // 테마 그림·색: 카드 바탕, 넘김 버튼 아이콘, 창의 바탕색.
-        private readonly ThemedImages _themed = new();
+        // 카드의 글자·그림, 넘김 버튼 아이콘, 창의 바탕색은 Styled에 넣어 Presentation과 같은 테마를 받는다.
+        // 카드는 복제로 만들므로 만들 때 넣고 지울 때 뺀다(틀은 넣지 않는다). 창 제목·버튼 글자는 TextBindings에 있어 Theme가 맞춘다.
         private readonly List<Vector2> _targetPositions = new();
         private readonly List<float> _targetScales = new();
 
@@ -213,19 +210,15 @@ namespace BlackHole.Unity
 
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
-        public void ApplyStyle(in UIStyle style)
-        {
-            Ambient?.Apply(style.ThemeId);
-            _cardTexts.SetStyle(style);
-            _themed.SetStyle(style);
-        }
+        // 테마가 들어왔다: 배경 위 문양의 머티리얼을 테마에 맞춘다.
+        protected override void OnPresented(in UIAppliedTheme theme) => Ambient?.Apply(theme.ThemeId);
 
         // 카드 밖의 고정 그림: 창 바탕색(단색)과 넘김 버튼의 아이콘(ink → ivory). 버튼 자체 그림은 ImageBindings가 바꾼다.
         private void ThemeFixedImages()
         {
-            _themed.AddColor(GetComponent<Image>(), UIColorRole.Backdrop);
-            _themed.AddSprite(ChildImage(Refs.PrevBtn_Button, "PrevBtn_Icon"));
-            _themed.AddSprite(ChildImage(Refs.NextBtn_Button, "NextBtn_Icon"));
+            Styled.AddImageColor(GetComponent<Image>(), UIColorRole.Backdrop);
+            Styled.AddSprite(ChildImage(Refs.PrevBtn_Button, "PrevBtn_Icon"));
+            Styled.AddSprite(ChildImage(Refs.NextBtn_Button, "NextBtn_Icon"));
         }
 
         private Image ChildImage(Refs parent, string name)
@@ -244,9 +237,9 @@ namespace BlackHole.Unity
             card.Clicked += () => Select(index);
 
             foreach ((TMPro.TMP_Text text, UITextRole role) in card.StyledTexts)
-                _cardTexts.Add(text, role);
+                Styled.AddText(text, role, UITextSizePolicy.Prefab);
 
-            _themed.AddSprites(card);
+            Styled.AddSprites(card);
 
             card.gameObject.SetActive(true);
             return card;
@@ -256,14 +249,14 @@ namespace BlackHole.Unity
         {
             foreach (ModeCard card in _cards)
             {
-                if (card != null)
-                    Destroy(card.gameObject);
+                if (card == null)
+                    continue;
+
+                Styled.RemoveUnder(card);
+                Destroy(card.gameObject);
             }
 
             _cards.Clear();
-            _cardTexts.Clear();
-            _themed.Clear();
-            ThemeFixedImages();
             _modes.Clear();
             _targetPositions.Clear();
             _targetScales.Clear();

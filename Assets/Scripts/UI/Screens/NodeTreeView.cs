@@ -43,7 +43,7 @@ namespace BlackHole.Unity
     // 이 컴포넌트는 트리 영역(보이는 창)에 붙고, 그 영역은 호스트의 PageRoot 바로 아래 자식.
     //
     // 영역은 가운데 기준(pivot 0.5)이어야 확대 계산이 맞음.
-    public sealed class NodeTreeView : UIPage<NodeTreeView.Refs>, IStyleView, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler,
+    public sealed class NodeTreeView : UIPage<NodeTreeView.Refs>, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler,
         IPointerMoveHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
     {
         public enum Refs { }
@@ -117,12 +117,12 @@ namespace BlackHole.Unity
         [SerializeField] private NodeTreeLook _look;
 
         // 테마(다크 모드): 노드 그림은 Look의 그림을 테마 짝(UISpriteSet)으로, 선·가격·딱지 색은 팔레트 역할로 바꾼다.
-        // 팔레트가 없으면 Look의 색을 쓴다. 설정이 바뀌면 UISettingsSync가 다시 넣는다.
-        private UIStyle _style = UIStyle.Default;
+        // 팔레트가 없으면 Look의 색을 쓴다. 페이지가 보일 때와 설정이 바뀔 때 들어온다(OnPresented).
+        private UIAppliedTheme _theme;
 
-        public void ApplyStyle(in UIStyle style)
+        protected override void OnPresented(in UIAppliedTheme theme)
         {
-            _style = style;
+            _theme = theme;
             RepaintAll();
         }
 
@@ -157,25 +157,25 @@ namespace BlackHole.Unity
         }
 
         private Color BadgeBackColor() =>
-            _style.ColorFor(UIColorRole.Surface) ?? (_look != null ? _look.PriceBackColor : new Color(0.1f, 0.1f, 0.12f, 0.85f));
+            _theme.ColorFor(UIColorRole.Surface) ?? (_look != null ? _look.PriceBackColor : new Color(0.1f, 0.1f, 0.12f, 0.85f));
 
         private Color PriceColorOf(NodeState state)
         {
-            if (_style.HasColors)
-                return _style.ColorFor(state == NodeState.Purchasable ? UIColorRole.TextMain : UIColorRole.TextWeak).Value;
+            if (_theme.HasColors)
+                return _theme.ColorFor(state == NodeState.Purchasable ? UIColorRole.TextMain : UIColorRole.TextWeak).Value;
 
             return _look != null ? _look.PriceColorOf(state) : Color.white;
         }
 
         private Color LinkColorOf(NodeState a, NodeState b)
         {
-            if (_style.HasColors)
+            if (_theme.HasColors)
             {
                 if (a == NodeState.Owned && b == NodeState.Owned)
-                    return _style.ColorFor(UIColorRole.Accent).Value;
+                    return _theme.ColorFor(UIColorRole.Accent).Value;
 
                 bool open = (a == NodeState.Owned && b == NodeState.Purchasable) || (b == NodeState.Owned && a == NodeState.Purchasable);
-                return _style.ColorFor(open ? UIColorRole.TextMain : UIColorRole.Line).Value;
+                return _theme.ColorFor(open ? UIColorRole.TextMain : UIColorRole.Line).Value;
             }
 
             if (_look != null)
@@ -1121,7 +1121,7 @@ namespace BlackHole.Unity
                 // 안개 속: 가격·Rank 딱지는 숨긴다. 열린 구역이면 흐린 자물쇠, 먼 노드면 작고 흐린 점(레이캐스트를 받지 않아 올림·누름이 없다).
                 if (_look != null)
                 {
-                    node.Image.sprite = _style.SpriteFor(node.Far ? _look.FarSprite : _look.SpriteOf(node.Stat, node.State));
+                    node.Image.sprite = _theme.SpriteFor(node.Far ? _look.FarSprite : _look.SpriteOf(node.Stat, node.State));
                     node.Image.color = node.Far ? _look.FarTint : TintOf(node, false);
                     SetSize(node, node.Far ? NodeSize * _look.FarScale : NodeSize);
                     node.Image.raycastTarget = !node.Far;
@@ -1161,7 +1161,7 @@ namespace BlackHole.Unity
             // 고른 노드는 그림은 바꾸지 않고 — 아직 산 게 아니다 — 색만 온전한 밝기로 올린다. 링이 고름을 보인다.
             // 올림(마우스)도 그림은 그대로이고 흐린 링과 온전한 밝기로 보인다.
             bool lit = node == _hovered;
-            node.Image.sprite = _style.SpriteFor(_look.SpriteOf(node.Stat, node.State));
+            node.Image.sprite = _theme.SpriteFor(_look.SpriteOf(node.Stat, node.State));
             Color tint = TintOf(node, lit);
             node.Image.color = partial ? Color.Lerp(tint, OwnedColor, PartialMix) : tint;
 

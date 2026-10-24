@@ -5,20 +5,14 @@ namespace BlackHole.Unity
 {
     // 타이틀 화면. 버튼이 눌렸다는 사실만 알린다. 무엇을 할지는 ScreenFlow가 정한다.
     // 버튼 연출(올림·누름)은 버튼마다 붙은 ButtonAnimation이 맡는다. 화면은 사건을 넘기기만 한다.
-    public sealed class TitleScreen : UIRoot<TitleScreen.Refs>, IStyleView, IUISoundView
+    public sealed class TitleScreen : UIRoot<TitleScreen.Refs>, IUISoundView
     {
-        // 테마 색: 화면 바탕색(배경 그림 뒤). 나머지 그림·글자는 Presentation이 맞춘다.
-        private readonly ThemedImages _themed = new();
-
         private UIScreenAmbient Ambient => View.Component<UIScreenAmbient>(Refs.Ambient);
 
         public void SetSounds(UISounds sounds) => ButtonAnimation.SetSounds(this, sounds);
 
-        public void ApplyStyle(in UIStyle style)
-        {
-            _themed.SetStyle(style);
-            Ambient?.Apply(style.ThemeId);
-        }
+        // 테마가 들어왔다: 배경 위 문양의 머티리얼을 테마에 맞춘다. 바탕색·그림·글자는 Presentation과 Styled가 맞췄다.
+        protected override void OnPresented(in UIAppliedTheme theme) => Ambient?.Apply(theme.ThemeId);
 
         public enum Refs
         {
@@ -55,7 +49,8 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            _themed.AddColor(GetComponent<Image>(), UIColorRole.Backdrop);
+            // 화면 바탕색(배경 그림 뒤)은 팔레트의 Backdrop을 따른다. 나머지 그림·글자는 Presentation이 맞춘다.
+            Styled.AddImageColor(GetComponent<Image>(), UIColorRole.Backdrop);
             _startButton = View.Button(Refs.StartBtn_Button);
             _settingsButton = View.Button(Refs.SettingsBtn_Button);
             _quitButton = View.Button(Refs.QuitBtn_Button);

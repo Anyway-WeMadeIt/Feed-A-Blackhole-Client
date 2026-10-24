@@ -46,7 +46,7 @@ namespace BlackHole.Unity
         // 펼침 목록이 붙을 자리.
         public RectTransform ChoiceBox => View.Rect(Refs.Choice_Button);
 
-        // 글자 크기·언어별 글꼴을 받는 글자(이름, 선택지·단계 값)와 역할. 설정 창이 행을 만들 때 StyledTexts에 넣는다.
+        // 글자 크기·언어별 글꼴을 받는 글자(이름, 선택지·단계 값)와 역할. 설정 창이 행을 만들 때 자기 Styled에 넣는다.
         public IEnumerable<(TMP_Text Text, UITextRole Role)> StyledTexts
         {
             get

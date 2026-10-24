@@ -179,8 +179,8 @@ namespace BlackHole.Unity
             }
             // 화면을 등록한 뒤에 프리팹 글자를 지금 언어로 바꾼다. 언어가 바뀌면 다시 바꾼다.
             _viewTexts = new ViewTexts(_views, localizer);
-            // 언어·글자 크기 설정을 UIContext와 화면 글자(크기·글꼴)에 넣는다. 설정이 바뀌면 다시 넣는다.
-            _uiSettings = new UISettingsSync(ui, _views, _settings, _fonts, _palette, _sprites);
+            // 다크 모드·언어·글자 크기 설정을 UIContext에 넣고, Gold 표기 설정을 숫자 화면에 넣는다. 설정이 바뀌면 다시 넣는다.
+            _uiSettings = new UISettingsSync(ui, _views, _settings);
             ScreenTransition transition = CreateScreenTransition();
             KeyInput keyInput = GetOrAdd<KeyInput>(gameObject);
 
@@ -196,7 +196,6 @@ namespace BlackHole.Unity
                 loaded.Content.Growth,
                 _settings,
                 localizer,
-                _fonts,
                 transition,
                 keyInput,
                 recorder,

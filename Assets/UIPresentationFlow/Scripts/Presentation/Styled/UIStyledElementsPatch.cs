@@ -11,23 +11,14 @@ using UnityEngine.UI;
 public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
 {
     private readonly ThemeSpec _theme;
-    private readonly UIFontSet _fonts;
-    private readonly UIPalette.ThemeColors _colors;
-    private readonly UISpriteSet _sprites;
-    private readonly float _textScale;
-    private readonly string _localeId;
-    private readonly string _themeId;
+    private readonly UIAppliedTheme _applied;
 
-    public UIStyledElementsPatch(ThemeSpec theme, UIThemeAssets assets, float textScale, string localeId, string themeId)
+    // theme: the screen's ThemeSpec (role sizes, fallback text colors); null when the presentation has none.
+    // applied: the fonts, colors and sprites chosen for the user context (UIResolver.AppliedThemeOf).
+    public UIStyledElementsPatch(ThemeSpec theme, in UIAppliedTheme applied)
     {
         _theme = theme;
-        _fonts = theme != null ? theme.FontsOr(assets) : assets?.Fonts;
-        UIPalette palette = theme != null ? theme.PaletteOr(assets) : assets?.Palette;
-        _colors = palette != null ? palette.Get(themeId) : null;
-        _sprites = assets?.Sprites;
-        _textScale = textScale > 0f ? textScale : 1f;
-        _localeId = localeId;
-        _themeId = themeId;
+        _applied = applied;
     }
 
     public void Apply(IUIPresentationRefProvider refs)
@@ -54,7 +45,7 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
 
         entry.Baseline.CaptureOnce(text);
 
-        TMP_FontAsset font = _fonts != null ? _fonts.Get(_localeId, entry.Role) : null;
+        TMP_FontAsset font = _applied.FontFor(entry.Role);
         text.font = font != null ? font : entry.Baseline.Font;
 
         Color color = TextColorFor(entry.Role) ?? entry.Baseline.Color;
@@ -64,7 +55,7 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
         switch (entry.SizePolicy)
         {
             case UITextSizePolicy.Role when _theme != null:
-                float size = RoleSize(entry.Role) * _textScale;
+                float size = RoleSize(entry.Role) * _applied.TextScale;
                 if (text.enableAutoSizing)
                     text.fontSizeMax = size;
                 text.fontSize = size;
@@ -73,12 +64,12 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
             default: // Prefab, or Role without a theme
                 if (text.enableAutoSizing)
                 {
-                    text.fontSizeMin = entry.Baseline.FontSizeMin * _textScale;
-                    text.fontSizeMax = entry.Baseline.FontSizeMax * _textScale;
+                    text.fontSizeMin = entry.Baseline.FontSizeMin * _applied.TextScale;
+                    text.fontSizeMax = entry.Baseline.FontSizeMax * _applied.TextScale;
                 }
                 else
                 {
-                    text.fontSize = entry.Baseline.FontSize * _textScale;
+                    text.fontSize = entry.Baseline.FontSize * _applied.TextScale;
                 }
                 break;
         }
@@ -113,7 +104,7 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
 
         if (entry.ColorRole is UIColorRole role)
         {
-            Color color = ColorFor(role) ?? entry.Baseline.Color;
+            Color color = _applied.ColorFor(role) ?? entry.Baseline.Color;
             color.a = entry.Baseline.Color.a;
             image.color = color;
         }
@@ -126,10 +117,11 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
         _ => _theme.bodySize,
     };
 
+    // Palette color by role; without a palette, the ThemeSpec's own two colors.
     private Color? TextColorFor(UITextRole role)
     {
-        if (_colors != null)
-            return role == UITextRole.Caption ? _colors.textWeak : _colors.textMain;
+        if (_applied.HasColors)
+            return _applied.TextColorFor(role);
 
         if (_theme != null)
             return role == UITextRole.Caption ? _theme.textWeakColor : _theme.textMainColor;
@@ -137,23 +129,7 @@ public sealed class UIStyledElementsPatch : IUIPatch, IUIStyledElementsApplier
         return null;
     }
 
-    public Color? ColorFor(UIColorRole role)
-    {
-        if (_colors == null)
-            return null;
-
-        return role switch
-        {
-            UIColorRole.TextWeak => _colors.textWeak,
-            UIColorRole.Accent => _colors.accent,
-            UIColorRole.Surface => _colors.surface,
-            UIColorRole.Line => _colors.line,
-            UIColorRole.Backdrop => _colors.backdrop,
-            _ => _colors.textMain,
-        };
-    }
-
-    private Sprite SpriteFor(Sprite sprite) => _sprites != null ? _sprites.For(sprite, _themeId) : sprite;
+    private Sprite SpriteFor(Sprite sprite) => _applied.SpriteFor(sprite);
 }
 
 // A View that has code-registered styled elements. UIBase implements it.

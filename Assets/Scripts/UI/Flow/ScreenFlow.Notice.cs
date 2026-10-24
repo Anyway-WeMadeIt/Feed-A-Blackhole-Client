@@ -89,13 +89,13 @@ namespace BlackHole.Unity
             if (_notice != null)
                 return _notice;
 
-            UIStyle style = CodeScreenStyle();
+            UIAppliedTheme theme = _ui.Theme;
 
             _notice = FloatingNotice.Create(
                 CodeScreenParent(),
                 CodeScreenSiblingIndex(),
-                style.FontFor(UITextRole.Body),
-                style.Scale);
+                theme.FontFor(UITextRole.Body),
+                theme.TextScale);
 
             return _notice;
         }
