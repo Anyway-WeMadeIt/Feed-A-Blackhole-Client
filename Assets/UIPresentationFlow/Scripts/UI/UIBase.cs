@@ -27,7 +27,9 @@ public abstract class UIBase : MonoBehaviour, IUIPresentationRefProvider
     protected virtual void PreInitialize() { }
     protected virtual void OnInitialize() { }
 
-    protected static void BindEvent(
+    // 버튼의 포인터 사건 하나에 처리를 묶는다. 같은 처리를 두 번 묶어도 한 번만 불린다.
+    // 화면 밖의 도우미(버튼 연출·소리를 한 번에 묶는 것 등)도 쓰므로 public이다.
+    public static void BindEvent(
         Button button,
         Action<PointerEventData> action,
         ETouchEvent type = ETouchEvent.Click)

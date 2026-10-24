@@ -1,6 +1,5 @@
 using System;
 using TMPro;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace BlackHole.Unity
@@ -31,8 +30,6 @@ namespace BlackHole.Unity
 
         private Button _confirmButton;
         private Button _cancelButton;
-        private ButtonAnimation _confirmAnimation;
-        private ButtonAnimation _cancelAnimation;
         private TMP_Text _title;
         private TMP_Text _body;
         private TMP_Text _confirmLabel;
@@ -54,20 +51,8 @@ namespace BlackHole.Unity
             _confirmLabel = View.Text(Refs.ConfirmBtn_Text);
             _cancelLabel = View.Text(Refs.CancelBtn_Text);
 
-            _confirmAnimation = ButtonAnimation.Of(_confirmButton);
-            _cancelAnimation = ButtonAnimation.Of(_cancelButton);
-
-            BindEvent(_confirmButton, ClickConfirmButton);
-            BindEvent(_confirmButton, HoverConfirmButton, ETouchEvent.PointerEnter);
-            BindEvent(_confirmButton, LeaveConfirmButton, ETouchEvent.PointerExit);
-            BindEvent(_confirmButton, PressConfirmButton, ETouchEvent.PointerDown);
-            BindEvent(_confirmButton, ReleaseConfirmButton, ETouchEvent.PointerUp);
-
-            BindEvent(_cancelButton, ClickCancelButton);
-            BindEvent(_cancelButton, HoverCancelButton, ETouchEvent.PointerEnter);
-            BindEvent(_cancelButton, LeaveCancelButton, ETouchEvent.PointerExit);
-            BindEvent(_cancelButton, PressCancelButton, ETouchEvent.PointerDown);
-            BindEvent(_cancelButton, ReleaseCancelButton, ETouchEvent.PointerUp);
+            ButtonFeedback.Bind(_confirmButton, () => ConfirmClicked?.Invoke());
+            ButtonFeedback.Bind(_cancelButton, () => CancelClicked?.Invoke());
         }
 
         // 창의 글자. 열 때마다(afterPresented) 부른다.
@@ -78,17 +63,5 @@ namespace BlackHole.Unity
             _confirmLabel.text = confirmLabel;
             _cancelLabel.text = cancelLabel;
         }
-
-        private void ClickConfirmButton(PointerEventData _) => ConfirmClicked?.Invoke();
-        private void HoverConfirmButton(PointerEventData _) => _confirmAnimation.Hover();
-        private void LeaveConfirmButton(PointerEventData _) => _confirmAnimation.Leave();
-        private void PressConfirmButton(PointerEventData _) => _confirmAnimation.Press();
-        private void ReleaseConfirmButton(PointerEventData _) => _confirmAnimation.Release();
-
-        private void ClickCancelButton(PointerEventData _) => CancelClicked?.Invoke();
-        private void HoverCancelButton(PointerEventData _) => _cancelAnimation.Hover();
-        private void LeaveCancelButton(PointerEventData _) => _cancelAnimation.Leave();
-        private void PressCancelButton(PointerEventData _) => _cancelAnimation.Press();
-        private void ReleaseCancelButton(PointerEventData _) => _cancelAnimation.Release();
     }
 }

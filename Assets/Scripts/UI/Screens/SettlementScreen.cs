@@ -3,7 +3,6 @@ using System.Globalization;
 using BlackHole.Core;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -143,11 +142,6 @@ namespace BlackHole.Unity
         private Button _starRow;
         private Button _upgradeButton;
         private Button _continueButton;
-        private ButtonAnimation _asteroidAnimation;
-        private ButtonAnimation _planetAnimation;
-        private ButtonAnimation _starAnimation;
-        private ButtonAnimation _upgradeAnimation;
-        private ButtonAnimation _continueAnimation;
 
         private RectTransform _tooltip;
         private TMP_Text _tooltipText;
@@ -175,14 +169,12 @@ namespace BlackHole.Unity
         private sealed class StatCell
         {
             public Button Button { get; }
-            public ButtonAnimation Animation { get; }
             public TMP_Text Value { get; }
             public string LabelKey { get; }
 
             public StatCell(Button button, TMP_Text value, string labelKey)
             {
                 Button = button;
-                Animation = ButtonAnimation.Of(button);
                 Value = value;
                 LabelKey = labelKey;
             }
@@ -294,38 +286,19 @@ namespace BlackHole.Unity
             _upgradeButton = View.Button(Refs.UpgradeBtn_Button);
             _continueButton = View.Button(Refs.ContinueBtn_Button);
 
-            _asteroidAnimation = ButtonAnimation.Of(_asteroidRow);
-            _planetAnimation = ButtonAnimation.Of(_planetRow);
-            _starAnimation = ButtonAnimation.Of(_starRow);
-            _upgradeAnimation = ButtonAnimation.Of(_upgradeButton);
-            _continueAnimation = ButtonAnimation.Of(_continueButton);
+            // 물질 행 셋: 올리면 툴팁. 통계 칸(BindStat)과 같은 방식이다.
+            ButtonFeedback.Bind(_asteroidRow,
+                onHover: () => ShowTooltip(_asteroidRow, Localized("settlement.row.asteroid")),
+                onLeave: () => HideTooltip(_asteroidRow));
+            ButtonFeedback.Bind(_planetRow,
+                onHover: () => ShowTooltip(_planetRow, Localized("settlement.row.planet")),
+                onLeave: () => HideTooltip(_planetRow));
+            ButtonFeedback.Bind(_starRow,
+                onHover: () => ShowTooltip(_starRow, Localized("settlement.row.star")),
+                onLeave: () => HideTooltip(_starRow));
 
-            BindEvent(_asteroidRow, HoverAsteroidRow, ETouchEvent.PointerEnter);
-            BindEvent(_asteroidRow, LeaveAsteroidRow, ETouchEvent.PointerExit);
-            BindEvent(_asteroidRow, PressAsteroidRow, ETouchEvent.PointerDown);
-            BindEvent(_asteroidRow, ReleaseAsteroidRow, ETouchEvent.PointerUp);
-
-            BindEvent(_planetRow, HoverPlanetRow, ETouchEvent.PointerEnter);
-            BindEvent(_planetRow, LeavePlanetRow, ETouchEvent.PointerExit);
-            BindEvent(_planetRow, PressPlanetRow, ETouchEvent.PointerDown);
-            BindEvent(_planetRow, ReleasePlanetRow, ETouchEvent.PointerUp);
-
-            BindEvent(_starRow, HoverStarRow, ETouchEvent.PointerEnter);
-            BindEvent(_starRow, LeaveStarRow, ETouchEvent.PointerExit);
-            BindEvent(_starRow, PressStarRow, ETouchEvent.PointerDown);
-            BindEvent(_starRow, ReleaseStarRow, ETouchEvent.PointerUp);
-
-            BindEvent(_upgradeButton, ClickUpgradeButton);
-            BindEvent(_upgradeButton, HoverUpgradeButton, ETouchEvent.PointerEnter);
-            BindEvent(_upgradeButton, LeaveUpgradeButton, ETouchEvent.PointerExit);
-            BindEvent(_upgradeButton, PressUpgradeButton, ETouchEvent.PointerDown);
-            BindEvent(_upgradeButton, ReleaseUpgradeButton, ETouchEvent.PointerUp);
-
-            BindEvent(_continueButton, ClickContinueButton);
-            BindEvent(_continueButton, HoverContinueButton, ETouchEvent.PointerEnter);
-            BindEvent(_continueButton, LeaveContinueButton, ETouchEvent.PointerExit);
-            BindEvent(_continueButton, PressContinueButton, ETouchEvent.PointerDown);
-            BindEvent(_continueButton, ReleaseContinueButton, ETouchEvent.PointerUp);
+            ButtonFeedback.Bind(_upgradeButton, () => UpgradeClicked?.Invoke());
+            ButtonFeedback.Bind(_continueButton, () => ContinueClicked?.Invoke());
 
             _skillStats = ObjectOf(View.Rect(Refs.SkillStats));
             _countStats = ObjectOf(View.Rect(Refs.CountStats));
@@ -349,87 +322,18 @@ namespace BlackHole.Unity
         // 화면이 닫힐 때 툴팁도 닫는다. 다시 열 때 남아 있지 않게 한다.
         private void OnDisable() => HideTooltip();
 
-        private void HoverAsteroidRow(PointerEventData _)
-        {
-            _asteroidAnimation.Hover();
-            ShowTooltip(_asteroidRow, Localized("settlement.row.asteroid"));
-        }
-
-        private void LeaveAsteroidRow(PointerEventData _)
-        {
-            _asteroidAnimation.Leave();
-            HideTooltip(_asteroidRow);
-        }
-
-        private void PressAsteroidRow(PointerEventData _) => _asteroidAnimation.Press();
-        private void ReleaseAsteroidRow(PointerEventData _) => _asteroidAnimation.Release();
-
-        private void HoverPlanetRow(PointerEventData _)
-        {
-            _planetAnimation.Hover();
-            ShowTooltip(_planetRow, Localized("settlement.row.planet"));
-        }
-
-        private void LeavePlanetRow(PointerEventData _)
-        {
-            _planetAnimation.Leave();
-            HideTooltip(_planetRow);
-        }
-
-        private void PressPlanetRow(PointerEventData _) => _planetAnimation.Press();
-        private void ReleasePlanetRow(PointerEventData _) => _planetAnimation.Release();
-
-        private void HoverStarRow(PointerEventData _)
-        {
-            _starAnimation.Hover();
-            ShowTooltip(_starRow, Localized("settlement.row.star"));
-        }
-
-        private void LeaveStarRow(PointerEventData _)
-        {
-            _starAnimation.Leave();
-            HideTooltip(_starRow);
-        }
-
-        private void PressStarRow(PointerEventData _) => _starAnimation.Press();
-        private void ReleaseStarRow(PointerEventData _) => _starAnimation.Release();
-
         private StatCell BindStat(Refs button, Refs value, string labelKey)
         {
             StatCell cell = new(View.Button(button), View.Text(value), labelKey);
             _styled.Add(cell.Value, UITextRole.Body);
 
-            BindEvent(cell.Button, _ => HoverStat(cell), ETouchEvent.PointerEnter);
-            BindEvent(cell.Button, _ => LeaveStat(cell), ETouchEvent.PointerExit);
-            BindEvent(cell.Button, _ => cell.Animation.Press(), ETouchEvent.PointerDown);
-            BindEvent(cell.Button, _ => cell.Animation.Release(), ETouchEvent.PointerUp);
+            ButtonFeedback.Bind(cell.Button,
+                onHover: () => ShowTooltip(cell.Button, Localized(cell.LabelKey)),
+                onLeave: () => HideTooltip(cell.Button));
 
             return cell;
         }
 
-        private void HoverStat(StatCell cell)
-        {
-            cell.Animation.Hover();
-            ShowTooltip(cell.Button, Localized(cell.LabelKey));
-        }
-
-        private void LeaveStat(StatCell cell)
-        {
-            cell.Animation.Leave();
-            HideTooltip(cell.Button);
-        }
-
-        private void ClickUpgradeButton(PointerEventData _) => UpgradeClicked?.Invoke();
-        private void HoverUpgradeButton(PointerEventData _) => _upgradeAnimation.Hover();
-        private void LeaveUpgradeButton(PointerEventData _) => _upgradeAnimation.Leave();
-        private void PressUpgradeButton(PointerEventData _) => _upgradeAnimation.Press();
-        private void ReleaseUpgradeButton(PointerEventData _) => _upgradeAnimation.Release();
-
-        private void ClickContinueButton(PointerEventData _) => ContinueClicked?.Invoke();
-        private void HoverContinueButton(PointerEventData _) => _continueAnimation.Hover();
-        private void LeaveContinueButton(PointerEventData _) => _continueAnimation.Leave();
-        private void PressContinueButton(PointerEventData _) => _continueAnimation.Press();
-        private void ReleaseContinueButton(PointerEventData _) => _continueAnimation.Release();
 
         // milestone: 이정표에 닿아 끝난 판인가(남은 시간과 관계없이 끝났다).
         public void ShowResult(bool milestone)
