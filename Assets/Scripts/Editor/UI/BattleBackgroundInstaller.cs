@@ -1,5 +1,3 @@
-using BlackHole.CelestialBattle;
-using BlackHole.CelestialBattle.Editor;
 using BlackHole.Unity;
 using UnityEditor;
 using UnityEditor.SceneManagement;

@@ -5,7 +5,7 @@ using System.Text;
 using BlackHole.Core;
 using UnityEngine;
 
-namespace BlackHole.Unity
+namespace BlackHole.Save
 {
     // 진행 저장 파일(JSON)을 읽고 쓴다. 내용 검사는 하지 않는다.
     // 쓰기: 임시 파일에 다 쓴 뒤 바꿔치기한다. 바뀌기 전 파일은 직전 저장(.prev)으로 남는다 — 본 파일이 깨지면 그것으로 이어 한다.

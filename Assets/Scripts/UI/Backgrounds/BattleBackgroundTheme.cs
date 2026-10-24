@@ -1,5 +1,4 @@
 using System;
-using BlackHole.CelestialBattle;
 using UnityEngine;
 
 namespace BlackHole.Unity

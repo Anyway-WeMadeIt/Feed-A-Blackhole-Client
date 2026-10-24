@@ -1,9 +1,10 @@
 using System;
+using BlackHole.Unity;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlackHole.CelestialBattle.Editor
+namespace BlackHole.EditorTools
 {
     public sealed class BattleTextureImporter : AssetPostprocessor
     {

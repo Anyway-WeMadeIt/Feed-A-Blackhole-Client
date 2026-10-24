@@ -2,7 +2,7 @@ using System;
 using BlackHole.Core;
 using BlackHole.Net;
 
-namespace BlackHole.Unity
+namespace BlackHole.Save
 {
     // 진행 상태의 변화를 로그와 함께 저장하는 쪽. ProgressStore가 구현한다.
     // ProgressRecorder가 이것만 보므로, 파일 없이(장부만으로) 로그 순서를 검사하는 테스트를 만들 수 있다.

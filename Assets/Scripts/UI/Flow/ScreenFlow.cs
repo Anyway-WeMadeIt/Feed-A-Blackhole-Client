@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BlackHole.Core;
 using BlackHole.Net;
+using BlackHole.Save;
 using UnityEngine;
 
 namespace BlackHole.Unity
