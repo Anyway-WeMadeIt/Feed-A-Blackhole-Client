@@ -89,13 +89,11 @@ namespace BlackHole.Unity
             if (_notice != null)
                 return _notice;
 
-            var style = new UIStyle(_settings.TextScale, _fonts, _settings.LanguageLocale.ToId(), null, null, null);
-            Transform canvas = _transition.transform.parent;
+            UIStyle style = CodeScreenStyle();
 
-            // 엔딩 화면과 같이 화면 전환 덮개 바로 아래에 둔다.
             _notice = FloatingNotice.Create(
-                canvas,
-                _transition.transform.GetSiblingIndex(),
+                CodeScreenParent(),
+                CodeScreenSiblingIndex(),
                 style.FontFor(UITextRole.Body),
                 style.Scale);
 

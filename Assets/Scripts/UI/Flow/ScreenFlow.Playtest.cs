@@ -77,8 +77,6 @@ namespace BlackHole.Unity
                 // 엔딩 중에 새 테스트를 시작하면 엔딩 화면을 닫는다(엔딩의 결산은 하지 않는다 — 판은 아래에서 포기한다).
                 CloseEnding();
                 _ui.PopAllPanels(Unbind);
-                _pauseOpen = false;
-                _settingsOpen = false;
 
                 if (await _battle.TryAbandonAsync())
                     _runId = null;

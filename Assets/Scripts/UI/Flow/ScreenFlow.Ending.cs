@@ -56,12 +56,11 @@ namespace BlackHole.Unity
 
         private void OpenEndingScreen()
         {
-            var style = new UIStyle(_settings.TextScale, _fonts, _settings.LanguageLocale.ToId(), null, null, null);
-            Transform canvas = _transition.transform.parent;
+            UIStyle style = CodeScreenStyle();
 
             _endingScreen = EndingScreen.Create(
-                canvas,
-                _transition.transform.GetSiblingIndex(),
+                CodeScreenParent(),
+                CodeScreenSiblingIndex(),
                 EndingTextsOf(),
                 style.FontFor(UITextRole.Title),
                 style.FontFor(UITextRole.Body),

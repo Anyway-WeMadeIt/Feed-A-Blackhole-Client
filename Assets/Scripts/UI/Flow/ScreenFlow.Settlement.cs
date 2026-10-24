@@ -42,18 +42,18 @@ namespace BlackHole.Unity
                 r => r.UpgradeClicked += HandleSettlementUpgradeClicked,
                 r => r.UpgradeClicked -= HandleSettlementUpgradeClicked);
 
+            // 계속: 업그레이드 화면을 거치지 않고 지금 산 노드로 다음 판을 시작한다.
             AddBinding(root,
-                r => r.ContinueClicked += HandleSettlementContinueClicked,
-                r => r.ContinueClicked -= HandleSettlementContinueClicked);
+                r => r.ContinueClicked += RequestStart,
+                r => r.ContinueClicked -= RequestStart);
         }
 
-        // 업그레이드: 업그레이드 화면으로. 계속: 업그레이드 화면을 거치지 않고 지금 산 노드로 다음 판을 시작한다.
+        // 업그레이드: 업그레이드 화면으로.
         private void HandleSettlementUpgradeClicked()
         {
             SoundManager.Instance.PlaySwitchingScreens();
             GoToUpgrade();
         }
-        private void HandleSettlementContinueClicked() => RequestStart();
 
         // 이정표 이름(번역표 milestone.<n>.name). 표에 없으면 번호.
         private string MilestoneName(int stage) =>

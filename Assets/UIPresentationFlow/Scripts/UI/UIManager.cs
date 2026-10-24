@@ -19,6 +19,8 @@ public sealed partial class UIManager
 
     public UIBase CurrentRoot { get; private set; }
     public bool HasPanel => _panelStack.Count > 0;
+    // 맨 위에 쌓인 Panel. 없으면 null.
+    public UIBase TopPanel => _panelStack.Count > 0 ? _panelStack.Peek() : null;
 
     public DisplayContext LastDisplay { get; private set; }
     public UIResolveResult LastResult { get; private set; }

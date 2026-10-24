@@ -27,15 +27,13 @@ namespace BlackHole.Unity
         private void ApplyBindings(UpgradeScreen root)
         {
             AddBinding(root,
-                r => r.StartBattleClicked += HandleUpgradeStartBattleClicked,
-                r => r.StartBattleClicked -= HandleUpgradeStartBattleClicked);
+                r => r.StartBattleClicked += RequestStart,
+                r => r.StartBattleClicked -= RequestStart);
 
             AddBinding(root,
                 r => r.BuyConfirmed += HandleUpgradeBuyConfirmed,
                 r => r.BuyConfirmed -= HandleUpgradeBuyConfirmed);
         }
-
-        private void HandleUpgradeStartBattleClicked() => RequestStart();
 
         // 진행 상태를 화면 값(Gold, 블랙홀 성장도·다음 판의 목표 Level, 노드마다의 상태·다음 Rank 비용·산 Rank)으로 바꿔 넘긴다.
         private void RefreshUpgrade()

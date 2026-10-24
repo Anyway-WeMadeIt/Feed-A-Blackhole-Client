@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BlackHole.Core;
 using BlackHole.Net;
 using BlackHole.Sync;
+using UnityEngine;
 
 namespace BlackHole.Unity
 {
@@ -70,6 +71,14 @@ namespace BlackHole.Unity
             if (_auth != null)
                 _auth.StateChanged += HandleConnectionStateChanged;
         }
+
+        // 프리팹 없이 코드로 만드는 화면(엔딩, 알림)의 글꼴·글자 배율과 자리. 화면 전환 덮개 바로 아래, 같은 캔버스에 둔다.
+        private UIStyle CodeScreenStyle() =>
+            new(_settings.TextScale, _fonts, _settings.LanguageLocale.ToId(), null, null, null);
+
+        private Transform CodeScreenParent() => _transition.transform.parent;
+
+        private int CodeScreenSiblingIndex() => _transition.transform.GetSiblingIndex();
 
         private void BindView<T>(T screen, Action<T> apply) where T : UIBase
         {

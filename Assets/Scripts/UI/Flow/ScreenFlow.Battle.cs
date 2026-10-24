@@ -21,18 +21,13 @@ namespace BlackHole.Unity
         private void ApplyBindings(BattleScreen root)
         {
             AddBinding(root,
-                r => r.PauseClicked += HandleBattlePauseClicked,
-                r => r.PauseClicked -= HandleBattlePauseClicked);
+                r => r.PauseClicked += OpenPause,
+                r => r.PauseClicked -= OpenPause);
 
             AddBinding(root,
-                r => r.EndClicked += HandleBattleEndClicked,
-                r => r.EndClicked -= HandleBattleEndClicked);
+                r => r.EndClicked += RequestEnd,
+                r => r.EndClicked -= RequestEnd);
         }
-
-        private void HandleBattlePauseClicked() => OpenPause();
-        private void HandleBattleEndClicked() => RequestEnd();
-
-        internal void HandleBattleTimeExpired() => RequestEnd();
 
         // 화면 버튼과 시간 종료가 같은 전환 경로를 사용한다. 판은 화면이 다 덮인 뒤에 바꾼다.
         // 덮인 뒤의 일에서 난 예외는 ScreenTransition이 로그로 남기고 전환을 이어 간다.
@@ -46,7 +41,8 @@ namespace BlackHole.Unity
         // 끝: 덮인 뒤 판을 정리·결산하고 결산 화면으로 바꾼다. 적이 치워지는 모습이 보이지 않는다.
         // 튜토리얼 판은 결산하지 않고 첫 판으로 넘어간다(EndTutorialAsync).
         // 엔딩 중(마지막 이정표 뒤 붕괴·엔딩 화면)에는 받지 않는다 — 엔딩이 판을 결산하고 타이틀로 간다(ScreenFlow.Ending).
-        private void RequestEnd()
+        // GameHost(시간 만료, 이정표 연출 뒤)와 테스트 도구도 이 길로 온다.
+        internal void RequestEnd()
         {
             if (IsEndingPlaying)
                 return;

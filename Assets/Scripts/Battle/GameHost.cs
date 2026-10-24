@@ -104,7 +104,7 @@ namespace BlackHole.Unity
                 return;
             }
 
-            _screens.HandleBattleTimeExpired();
+            _screens.RequestEnd();
         }
 
         // 이 이정표를 넘으면 더 이상 이정표가 없다(엔딩). 튜토리얼 판은 자기 성장 표를 쓰므로 부르는 쪽이 뺀다.
@@ -119,7 +119,7 @@ namespace BlackHole.Unity
             _endAwaitsMilestoneEffect = false;
 
             if (_battle.Session != null)
-                _screens.HandleBattleTimeExpired();
+                _screens.RequestEnd();
         }
 
         private void RefreshCursor()

@@ -15,8 +15,6 @@ namespace BlackHole.Unity
                     panel.Build(SettingItems());
                 },
                 afterClosed: Unbind);
-
-            _settingsOpen = true;
         }
 
         private void ApplyBindings(SettingsPanel panel)
@@ -56,7 +54,6 @@ namespace BlackHole.Unity
         {
             _settings.Save();
             _ui.PopPanel(Unbind);
-            _settingsOpen = false;
         }
 
         // 설정 정의와 지금 값을 설정 창의 행으로 바꾼다. 이름·선택지는 지금 언어로.
