@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using BlackHole.Core;
 
 namespace BlackHole.Unity
@@ -46,19 +44,7 @@ namespace BlackHole.Unity
             int stage = _progress.GrowthStage;
             root.ShowHq(stage, _growth.GoalLevelAt(stage));
 
-            var states = new Dictionary<string, NodeState>(_tree.Nodes.Count, StringComparer.Ordinal);
-            var costs = new Dictionary<string, long>(_tree.Nodes.Count, StringComparer.Ordinal);
-            var ranks = new Dictionary<string, int>(_tree.Nodes.Count, StringComparer.Ordinal);
-            foreach (NodeDefinition node in _tree.Nodes)
-            {
-                states.Add(node.Id, NodePurchase.StateOf(_progress, _tree, node.Id));
-                ranks.Add(node.Id, _progress.RankOf(node.Id));
-
-                if (NodePurchase.TryGetNextCost(_progress, _tree, node.Id, out long cost))
-                    costs.Add(node.Id, cost);
-            }
-
-            _ui.GetUI<NodeTreeView>().Show(states, costs, ranks);
+            _ui.GetUI<NodeTreeView>().Show(NodePurchase.StatusesOf(_progress, _tree));
         }
     }
 }

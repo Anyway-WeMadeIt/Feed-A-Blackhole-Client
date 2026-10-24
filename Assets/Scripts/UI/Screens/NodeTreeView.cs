@@ -355,17 +355,19 @@ namespace BlackHole.Unity
             RegionViewed?.Invoke(nearest);
         }
 
-        // 노드마다 상태(와 다음 Rank 비용, 산 Rank)를 받아 칠한다. 바뀐 프레임에만 호출.
-        // costs에 없는 노드(마지막 Rank까지 산 노드)는 가격을 바꾸지 않는다 — Owned면 가격을 쓰지 않는다.
-        public void Show(IReadOnlyDictionary<string, NodeState> states, IReadOnlyDictionary<string, long> costs,
-            IReadOnlyDictionary<string, int> ranks)
+        // 노드마다 상태·산 Rank·다음 Rank 비용(NodePurchase.StatusesOf)을 받아 칠한다. 바뀐 프레임에만 호출.
+        // 다음 비용이 없는 노드(마지막 Rank까지 산 노드)는 가격을 바꾸지 않는다 — Owned면 가격을 쓰지 않는다.
+        public void Show(IReadOnlyList<NodeStatus> statuses)
         {
-            foreach (NodeVisual node in _nodes.Values)
+            foreach (NodeStatus status in statuses)
             {
-                node.State = states[node.Id];
-                node.Rank = ranks[node.Id];
+                if (!_nodes.TryGetValue(status.Id, out NodeVisual node))
+                    continue;
 
-                if (costs.TryGetValue(node.Id, out long cost))
+                node.State = status.State;
+                node.Rank = status.Rank;
+
+                if (status.NextCost is long cost)
                     node.Price = cost;
             }
 

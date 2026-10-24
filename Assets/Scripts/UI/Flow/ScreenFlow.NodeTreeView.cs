@@ -94,13 +94,13 @@ namespace BlackHole.Unity
         private bool Purchase(string id)
         {
             // 비용은 사기 전에 읽는다. 산 뒤에는 다음 Rank의 비용이 된다.
-            NodePurchase.TryGetNextCost(_progress, _tree, id, out long cost);
+            long? cost = NodePurchase.StatusOf(_progress, _tree, id).NextCost;
             PurchaseResult result = NodePurchase.TryPurchase(_progress, _tree, id);
 
             if (result == PurchaseResult.Purchased)
             {
                 _sounds.PlayNodeUpgrade();
-                _recorder.Purchase(id, _progress.RankOf(id), cost);
+                _recorder.Purchase(id, _progress.RankOf(id), cost ?? 0);
             }
 
             RefreshUpgrade();
@@ -182,16 +182,11 @@ namespace BlackHole.Unity
                 return;
             }
 
-            NodeState state = NodePurchase.StateOf(_progress, _tree, id);
-            root.PinNodeTooltip(rect, page.IconOf(id), NodeTooltipTitle(id), NodeTooltipBody(id, withCost: false), state);
+            NodeStatus status = NodePurchase.StatusOf(_progress, _tree, id);
+            root.PinNodeTooltip(rect, page.IconOf(id), NodeTooltipTitle(id), NodeTooltipBody(id, withCost: false), status.State);
 
             // 비용은 골드 칩 옆에 "-70"으로. 다음 Rank가 없거나(최대) 아직 닿지 않은 노드면 없다.
-            long? pendingCost = null;
-
-            if (state != NodeState.Hidden && NodePurchase.TryGetNextCost(_progress, _tree, id, out long cost))
-                pendingCost = cost;
-
-            root.ShowPendingCost(pendingCost);
+            root.ShowPendingCost(status.State != NodeState.Hidden ? status.NextCost : null);
         }
 
         // 선택을 풀고 툴팁을 닫는다. 지도를 옮기기 시작했을 때(ViewMoved)도 온다 — 트리는 선택을 이미 풀었다.
@@ -235,8 +230,10 @@ namespace BlackHole.Unity
             if (!_tree.TryGet(id, out NodeDefinition node))
                 return string.Empty;
 
+            NodeStatus status = NodePurchase.StatusOf(_progress, _tree, id);
+
             // 아직 닿지 않은 노드(자물쇠): 수치·비용 없이 무엇을 주는지 한 줄만(새 요소를 미리 알 수 있게). 설명이 없으면 이름만.
-            if (NodePurchase.StateOf(_progress, _tree, id) == NodeState.Hidden)
+            if (status.State == NodeState.Hidden)
             {
                 string hiddenStat = StatIdOf(node.RankAt(1).Effects[0].Stat);
                 return hiddenStat != null && _localizer.TryGet(UIText.Stat.Description(hiddenStat), out string hiddenDescription)
@@ -244,8 +241,8 @@ namespace BlackHole.Unity
                     : string.Empty;
             }
 
-            int rank = _progress.RankOf(id);
-            bool maxed = rank >= node.MaxRank;
+            int rank = status.Rank;
+            bool maxed = status.NextCost == null;
             NodeRankDefinition shown = node.RankAt(maxed ? node.MaxRank : rank + 1);
             UpgradeStatValues values = NodePurchase.StatsFor(_progress, _tree);
             // 효과 이름은 효과가 둘 이상일 때만(하나면 제목과 같은 이름이 반복된다).
@@ -299,16 +296,17 @@ namespace BlackHole.Unity
         // 비용 줄: "비용 70" / "최대", Gold가 모자라면 모자란 만큼을 한 줄 더. 아직 닿지 않은 노드는 빈 글자.
         private string NodeTooltipCost(string id)
         {
-            if (!_tree.TryGet(id, out NodeDefinition node) || NodePurchase.StateOf(_progress, _tree, id) == NodeState.Hidden)
+            if (!_tree.TryGet(id, out _))
                 return string.Empty;
 
-            int rank = _progress.RankOf(id);
-            bool maxed = rank >= node.MaxRank;
+            NodeStatus status = NodePurchase.StatusOf(_progress, _tree, id);
 
-            if (maxed)
+            if (status.State == NodeState.Hidden)
+                return string.Empty;
+
+            if (status.NextCost is not long cost)
                 return _localizer.Get(UIText.Node.Maxed);
 
-            long cost = node.RankAt(rank + 1).Cost;
             string text = _localizer.Format(UIText.Node.Cost, NumberText.Compact(cost));
 
             if (_progress.Gold < cost)
