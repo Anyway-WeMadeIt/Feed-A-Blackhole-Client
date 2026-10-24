@@ -60,6 +60,8 @@ namespace BlackHole.Unity
         private int _galaxyTier = -1;
         private int _shownTenths = -1;
         private long _shownEarned = -1;
+        // Gold 표기(설정). UISettingsSync가 넣는다.
+        private NumberFormat _numberFormat;
         private bool _idle;
         private bool? _shownPaused;
         private Localizer _localizer;
@@ -271,14 +273,16 @@ namespace BlackHole.Unity
                 _galaxyBar?.Rename(GalaxyName(_galaxyTier));
         }
 
-        // Gold 표기 설정이 바뀌었다. 보이는 번 Gold를 다시 쓴다.
-        public void RefreshNumbers()
+        // Gold 표기 설정. 보이는 번 Gold를 새 표기로 다시 쓴다.
+        public void SetNumberFormat(NumberFormat format)
         {
+            _numberFormat = format;
+
             if (_earned != null && _shownEarned >= 0)
                 _earned.text = EarnedText(_shownEarned);
         }
 
-        private string EarnedText(long earnedGold) => Localized(UIText.Battle.Earned, GoldText.Of(earnedGold));
+        private string EarnedText(long earnedGold) => Localized(UIText.Battle.Earned, GoldText.Of(earnedGold, _numberFormat));
 
         // 남은 시간 글자. 0.1초마다 바뀌므로 흔들림을 줄인다.
         // - 숫자는 칸 폭을 고정한다(<mspace>). 1과 8의 폭이 달라 가운데 정렬에서 숫자 묶음이 좌우로 움직이지 않게 한다.

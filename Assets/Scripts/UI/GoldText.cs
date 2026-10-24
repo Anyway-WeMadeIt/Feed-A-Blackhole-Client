@@ -12,14 +12,10 @@ namespace BlackHole.Unity
         Scientific, // 1.2e6
     }
 
-    // Gold를 지금 설정의 표기로 쓴다. 전투의 획득 글자·결산·업그레이드 화면이 모두 이것을 쓴다.
-    // Format은 UISettingsSync가 설정에서 넣는다(시작할 때 한 번, 바뀔 때마다). 이미 보이는 숫자는 INumberFormatView가 다시 쓴다.
+    // Gold를 주어진 표기로 쓴다. 전투의 획득 글자·결산·업그레이드 화면이 모두 이것을 쓴다.
+    // 표기는 설정(GameSettings.NumberFormatValue)에서 온다: 화면은 INumberFormatView로 받아 두고, 적 위 글자는 EnemyView가 설정에서 읽어 넘긴다.
     public static class GoldText
     {
-        public static NumberFormat Format { get; set; } = NumberFormat.Short;
-
-        public static string Of(long gold) => Of(gold, Format);
-
         public static string Of(long gold, NumberFormat format)
         {
             return format == NumberFormat.Scientific ? Scientific(gold) : OverThousand.GoldThousand(gold);
@@ -51,9 +47,10 @@ namespace BlackHole.Unity
         }
     }
 
-    // Gold 숫자를 보여 주는 화면. 등록된 화면이면 표기 설정이 바뀔 때 UISettingsSync가 부른다(닫힌 화면도). 마지막으로 보인 값을 지금 표기로 다시 쓴다.
+    // Gold 숫자를 보여 주는 화면. UISettingsSync가 시작할 때 한 번, 표기 설정이 바뀔 때마다 부른다(닫힌 화면도).
+    // 화면은 표기를 간직하고, 마지막으로 보인 값을 새 표기로 다시 쓴다.
     public interface INumberFormatView
     {
-        void RefreshNumbers();
+        void SetNumberFormat(NumberFormat format);
     }
 }

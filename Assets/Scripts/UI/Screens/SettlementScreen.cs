@@ -184,6 +184,8 @@ namespace BlackHole.Unity
         private Localizer _localizer;
         // 슬라이더·결산 소리. GameBootstrap이 넣는다. 없으면 소리 없이 진행한다.
         private UISounds _sounds;
+        // Gold 표기(설정). UISettingsSync가 넣는다.
+        private NumberFormat _numberFormat;
         private bool? _shownMilestone;
         // 이정표 글자: 지금 자리 이름과 목표 이름("소행성대 → 행성계"). 목표가 없으면(마지막 뒤) 이름 하나. 닿았으면 "행성계 도달!".
         private (string Current, string Goal, bool Reached)? _shownStage;
@@ -533,9 +535,11 @@ namespace BlackHole.Unity
         // 테마가 들어왔다: 배경 위 문양의 머티리얼을 테마에 맞춘다. 글자·구분선·바탕색은 Styled가 맞췄다.
         protected override void OnPresented(in UIAppliedTheme theme) => Ambient?.Apply(theme.ThemeId);
 
-        // Gold 표기 설정이 바뀌었다. 증가 연출이 마지막으로 쓴 값을 지금 표기로 다시 쓴다(연출 중이면 다음 프레임이 이어 쓴다).
-        public void RefreshNumbers()
+        // Gold 표기 설정. 증가 연출이 마지막으로 쓴 값을 새 표기로 다시 쓴다(연출 중이면 다음 프레임이 이어 쓴다).
+        public void SetNumberFormat(NumberFormat format)
         {
+            _numberFormat = format;
+
             foreach (KeyValuePair<TMP_Text, long> pair in _previousGolds)
             {
                 if (pair.Key != null)
@@ -591,8 +595,8 @@ namespace BlackHole.Unity
 
         private static string Whole(int count) => count.ToString(CultureInfo.InvariantCulture);
 
-        private static string Money(long gold) =>
-            "$" + GoldText.Of(gold);
+        private string Money(long gold) =>
+            "$" + GoldText.Of(gold, _numberFormat);
 
         // MonoBehavior
         // 성장도 막대나 숫자가 아직 올라가는 중인가.

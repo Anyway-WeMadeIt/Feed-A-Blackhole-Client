@@ -23,8 +23,8 @@ namespace BlackHole.Unity
         {
         }
 
-        // 사망 기록 하나의 Gold(보상 합계, 황금 치명타 보너스 포함)를 죽은 자리에 띄운다. Gold가 없으면 띄우지 않는다.
-        public void Show(DeathRecord death)
+        // 사망 기록 하나의 Gold(보상 합계, 황금 치명타 보너스 포함)를 죽은 자리에 주어진 표기로 띄운다. Gold가 없으면 띄우지 않는다.
+        public void Show(DeathRecord death, NumberFormat format)
         {
             long gold = death.Reward.TotalGold;
 
@@ -34,7 +34,7 @@ namespace BlackHole.Unity
             // 황금 성질로 Gold를 더 받은 사망만 고정된 금색으로 띄운다. 황금 치명타는 피해 텍스트의 치명타처럼 기울인다.
             Color color = death.IsGolden ? GoldenColor : NormalColor;
             FontStyles style = death.Reward.IsCritical ? (FontStyles.Bold | FontStyles.Italic) : FontStyles.Bold;
-            Show(new Vector3(death.Position.X, death.Position.Y, 0), "+$" + GoldText.Of(gold), color, death.IsGolden, style);
+            Show(new Vector3(death.Position.X, death.Position.Y, 0), "+$" + GoldText.Of(gold, format), color, death.IsGolden, style);
         }
     }
 }

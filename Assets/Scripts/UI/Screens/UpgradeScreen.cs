@@ -132,6 +132,8 @@ namespace BlackHole.Unity
         // 노드 툴팁의 프리팹 폭. 글자 크기 설정만큼 넓힌다(원작처럼 상자가 글자를 따라 커진다).
         private float _tooltipWidth;
         private long? _shownGold;
+        // Gold 표기(설정). UISettingsSync가 넣는다.
+        private NumberFormat _numberFormat;
         private (int Stage, int GoalLevel)? _shownHq;
         // 트리에서 보고 있는 구역의 열쇠(번역표 node.region.<열쇠>). 있으면 블랙홀 글자 자리에 구역 이름을 보인다.
         private string _shownRegion;
@@ -211,7 +213,7 @@ namespace BlackHole.Unity
         // 글자색은 테마가 정하므로 숫자만 리치 텍스트로 칠한다. 모자람(붉게, 섞임만큼) > 미리보기(황금) > 평소.
         private void WriteGold(long amount, bool preview)
         {
-            string number = GoldText.Of(amount);
+            string number = GoldText.Of(amount, _numberFormat);
             string text;
 
             if (_goldShortMix > 0)
@@ -352,11 +354,15 @@ namespace BlackHole.Unity
         }
 
         // 마지막으로 보인 Gold·블랙홀 글자를 지금 언어로 다시 쓴다. 노드 툴팁은 닫는다(다시 올리면 새 언어로 뜬다).
-        // Gold 표기 설정이 바뀌었다. 보이는 Gold를 다시 쓴다.
-        public void RefreshNumbers()
+        // Gold 표기 설정. 보이는 Gold와 구매 탭을 새 표기로 다시 쓴다.
+        public void SetNumberFormat(NumberFormat format)
         {
+            _numberFormat = format;
+
             if (_shownGold is long gold)
                 ShowGold(gold);
+
+            PaintBuyButton();
         }
 
         public void Relocalize(Localizer localizer)
@@ -821,7 +827,7 @@ namespace BlackHole.Unity
             {
                 NodeState.Owned => Localized(UIText.Node.Maxed),
                 NodeState.Hidden => Localized(UIText.Node.Locked),
-                _ => _pendingCost is long cost ? Localized(UIText.Node.Buy) + " " + GoldText.Of(cost) : Localized(UIText.Node.Buy),
+                _ => _pendingCost is long cost ? Localized(UIText.Node.Buy) + " " + GoldText.Of(cost, _numberFormat) : Localized(UIText.Node.Buy),
             };
 
             _buyButton.interactable = interactable;

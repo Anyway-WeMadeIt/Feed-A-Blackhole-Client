@@ -350,7 +350,7 @@ namespace BlackHole.Unity
                 }
 
                 if (goldText)
-                    _goldText.Show(death);
+                    _goldText.Show(death, _settings.NumberFormatValue);
 
                 if (death.EnemyType == EnemyType.Galaxy)
                     _collapsing.Add(death.EnemyId);
