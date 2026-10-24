@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 namespace BlackHole.Unity
 {
     // 모바일 진동. 레벨업 물결에 맞춰 짧고 묵직하게 한 번 울린다. 게임 상태를 바꾸지 않는다.
+    // 켜고 끄는 것은 부르는 쪽(HqView)이 설정 "블랙홀 진동"(GameSettings.BlackHolePulse)으로 정한다 — 물결과 진동은 같은 설정이다.
     // 에디터·PC에서는 아무것도 하지 않는다.
     // Android: Vibrator로 울린다(API 26 이상은 세기까지, 미만은 길이만).
     // iOS: Plugins/iOS/HapticsIOS.mm의 탭틱(Heavy)으로 울린다. (현재 해당 부분은 일부러 넣지 않은 상태여서 IOS 관련으로 하게 된다면 넣어질 예정)
@@ -15,14 +16,8 @@ namespace BlackHole.Unity
         private const long DurationMs = 80;
         private const int Amplitude = 255;
 
-        // 설정 화면의 "진동" 옵션과 연결한다.
-        public static bool Enabled = true;
-
         public static void Play()
         {
-            if (!Enabled)
-                return;
-
 #if UNITY_ANDROID && !UNITY_EDITOR
             AndroidVibrate(DurationMs, Amplitude);
 #elif UNITY_IOS && !UNITY_EDITOR
