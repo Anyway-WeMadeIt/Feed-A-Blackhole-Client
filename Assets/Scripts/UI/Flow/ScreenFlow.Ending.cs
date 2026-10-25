@@ -26,8 +26,8 @@ namespace BlackHole.Unity
         // 엔딩 흐름 중인가(붕괴부터 타이틀로 갈 때까지). 이 동안 판 종료 버튼·시간 만료·키는 엔딩만 다룬다.
         public bool IsEndingPlaying => _endingPlaying;
 
-        // GameHost: 마지막 이정표에 닿아 판이 끝났다. 붕괴 연출을 시작했으면 true(한 번만).
-        internal bool TryBeginEnding()
+        // 마지막 이정표에 닿아 판이 끝났다(ScreenFlow.Battle). 붕괴 연출을 시작했으면 true(한 번만).
+        private bool TryBeginEnding()
         {
             if (_endingPlaying || !_battle.TryBeginCollapse())
                 return false;

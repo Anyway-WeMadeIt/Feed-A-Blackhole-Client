@@ -12,7 +12,7 @@ namespace BlackHole.Unity
     // - 처음 보일 때(Show의 첫 호출)는 이미 오른 Level을 연출 없이 맞춘다. 그 뒤 늘어난 칸만 짧게 커졌다 돌아온다(여럿이면 조금씩 늦춰서).
     // - 마지막 한 칸만 남으면 그 빈 칸만 천천히 맥동한다.
     // - 모두 참(이정표 도달): Celebrate → 초록으로 다 찬 줄을 잠깐 보인 뒤 한 줄을 금색으로 바꾸며 살짝 키우고 파편을 낸다.
-    //   IsCelebrating이 끝날 때까지 GameHost가 결산 전환을 미룬다. 연출은 실제 시간으로 흐른다(판은 이미 끝나 있다).
+    //   IsCelebrating이 끝날 때까지 ScreenFlow가 결산 전환을 미룬다. 연출은 실제 시간으로 흐른다(판은 이미 끝나 있다).
     // Reset은 색·크기·연출을 모두 되돌린다. 화면이 닫히거나 새 판이 시작될 때 부른다.
     internal sealed class MilestoneRow
     {
@@ -153,7 +153,7 @@ namespace BlackHole.Unity
             }
         }
 
-        // 이정표 달성 연출을 시작한다. 이미 시작했거나 칸이 없으면 false. 한 판에 한 번만 부른다(GameHost).
+        // 이정표 달성 연출을 시작한다. 이미 시작했거나 칸이 없으면 false. 한 판에 한 번만 부른다(ScreenFlow).
         public bool TryCelebrate()
         {
             if (_phase != Phase.None || _active == 0)
