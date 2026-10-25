@@ -30,7 +30,7 @@ namespace BlackHole.Unity
         public bool IsDead => Health <= 0;
     }
 
-    // 은하 체력바 [임시: 프리팹 없이 코드로 만든다] — RPG 보스바처럼 체력을 여러 줄로 나눈다. 화면 아래 가운데.
+    // 은하 체력바 — RPG 보스바처럼 체력을 여러 줄로 나눈다. 화면 아래 가운데. 부품은 BattleScreen 프리팹에 있고(Refs.Galaxy*), 이 클래스는 연출만 한다.
     // - 줄 수 = 색별 줄 수(HealthLines). 은하의 크기는 체력을 바꾸지 않는다(EnemyDefinition.StatsAt).
     // - 막대 하나가 지금 줄이다. 줄이 비면 아래에 깔린 다음 줄(색이 다르다)이 드러난다. 오른쪽 "x240"은 남은 줄 수(지금 줄 포함)이고 줄이 줄 때마다 튄다.
     // - 막대 안에 남은 체력 / 최대 체력. 깎인 몫은 흰 꼬리가 잠깐 남았다가 따라 줄어든다(줄을 넘으면 새 줄 전체에서 다시). 맞은 순간 막대가 잠깐 밝아진다.
@@ -39,17 +39,35 @@ namespace BlackHole.Unity
     // - 이름·줄 수 글자와 바탕·홈은 화면의 Styled가 테마(글꼴·크기·색)를 맞춘다. 막대 안 수치는 막대 위에 읽히도록 흰 글자 + 그림자로 고정하고 글꼴·크기만 따른다.
     internal sealed class GalaxyHealthBar
     {
-        // 배치(기준 해상도 1920×1080, Safe Area 안). 화면에서 보고 맞출 값이다.
-        private const float Width = 980f;
-        private const float Height = 104f;
-        private const float BottomMargin = 32f;
-        private const float Padding = 24f;
-        private const float TrackHeight = 34f;
-        private const float TrackBottom = 18f;
-        private const float CountWidth = 150f;
-        private const float NameSize = 30f;
-        private const float HealthSize = 24f;
-        private const float CountSize = 40f;
+        // 프리팹의 부품. BattleScreen이 Refs로 찾아 넘긴다. 이름이 같은 오브젝트가 프리팹에 있어야 한다(없으면 그 부품만 빈다).
+        public readonly struct Parts
+        {
+            public readonly RectTransform Root;      // GalaxyHealth: 막대 전체(CanvasGroup). 화면 아래 가운데에 놓고 꺼 둔다
+            public readonly Image Panel;             // GalaxyPanel_Image: 바탕(테마 Surface)
+            public readonly Image Track;             // GalaxyTrack_Image: 막대 홈(테마 Line)
+            public readonly Image NextLine;          // GalaxyNextLine_Image: 홈에 깔린 다음 줄
+            public readonly Image Trail;             // GalaxyTrail_Image: 깎인 몫의 흰 꼬리
+            public readonly Image Fill;              // GalaxyFill_Image: 지금 줄
+            public readonly TMP_Text Health;         // GalaxyHealth_Text: 막대 안 수치(흰 글자)
+            public readonly TMP_Text HealthShadow;   // GalaxyHealthShadow_Text: 수치 그림자(검정, 오른쪽 아래로 2px)
+            public readonly TMP_Text Name;           // GalaxyName_Text: 은하 이름(막대 위 왼쪽)
+            public readonly TMP_Text Lines;          // GalaxyLines_Text: 남은 줄 수 "x240"(막대 오른쪽)
+
+            public Parts(RectTransform root, Image panel, Image track, Image nextLine, Image trail, Image fill,
+                TMP_Text health, TMP_Text healthShadow, TMP_Text name, TMP_Text lines)
+            {
+                Root = root;
+                Panel = panel;
+                Track = track;
+                NextLine = nextLine;
+                Trail = trail;
+                Fill = fill;
+                Health = health;
+                HealthShadow = healthShadow;
+                Name = name;
+                Lines = lines;
+            }
+        }
 
         // 연출(초). 실제 시간으로 흐른다.
         private const float AppearSeconds = 0.3f;
@@ -63,10 +81,6 @@ namespace BlackHole.Unity
         private const float DeathHoldSeconds = 0.8f;
         private const float FadeSeconds = 0.4f;
 
-        private static readonly Color TrailColor = new(1f, 1f, 1f, 0.8f);
-        private static readonly Color ShadowColor = new(0f, 0f, 0f, 0.65f);
-        private static readonly Vector2 ShadowOffset = new(2f, -2f);
-
         private readonly RectTransform _root;
         private readonly CanvasGroup _group;
         private readonly Image _under;
@@ -77,7 +91,11 @@ namespace BlackHole.Unity
         private readonly TMP_Text _health;
         private readonly TMP_Text _healthShadow;
         private readonly TMP_Text _count;
+        // 프리팹의 수치 글꼴·크기. 테마가 글꼴을 주지 않으면 이 글꼴로, 크기는 이것 × 글자 배율.
         private readonly TMP_FontAsset _baseFont;
+        private readonly float _healthBaseSize;
+        // 프리팹에 놓인 자리. 나타날 때 이 아래에서 떠오른다.
+        private readonly Vector2 _restPosition;
 
         private int _key = int.MinValue;
         // 줄 나누기(줄 수·줄 체력·줄 색).
@@ -93,70 +111,32 @@ namespace BlackHole.Unity
         private float _sinceDeath = float.NaN;
         private bool _active;
 
-        public GalaxyHealthBar(RectTransform parent, TMP_FontAsset font, UIStyledElements styled)
+        // parts: 프리팹의 부품. styled: 바탕·홈·이름·줄 수를 테마에 맞추는 화면의 Styled.
+        public GalaxyHealthBar(in Parts parts, UIStyledElements styled)
         {
-            _baseFont = font;
-
-            _root = UIParts.NewRect("Galaxy Health", parent);
-            _root.anchorMin = _root.anchorMax = new Vector2(0.5f, 0f);
-            _root.pivot = new Vector2(0.5f, 0f);
-            _root.sizeDelta = new Vector2(Width, Height);
-            _root.anchoredPosition = new Vector2(0, BottomMargin);
-
-            _group = _root.gameObject.AddComponent<CanvasGroup>();
+            _root = parts.Root;
+            _group = _root.GetComponent<CanvasGroup>() ?? _root.gameObject.AddComponent<CanvasGroup>();
             _group.blocksRaycasts = false;
             _group.interactable = false;
             _group.alpha = 0;
+            _restPosition = _root.anchoredPosition;
 
-            Image panel = UIParts.NewImage("Panel", _root, new Color(1, 1, 1, 0.82f));
-            UIParts.Stretch(panel.rectTransform);
-            styled.AddImageColor(panel, UIColorRole.Surface);
+            if (parts.Panel != null)
+                styled.AddImageColor(parts.Panel, UIColorRole.Surface);
 
-            // 막대 홈: 왼쪽 여백부터 줄 수 칸 앞까지.
-            RectTransform track = UIParts.NewRect("Track", _root);
-            track.anchorMin = new Vector2(0, 0);
-            track.anchorMax = new Vector2(1, 0);
-            track.pivot = new Vector2(0.5f, 0);
-            track.offsetMin = new Vector2(Padding, TrackBottom);
-            track.offsetMax = new Vector2(-(Padding + CountWidth), TrackBottom + TrackHeight);
-            Image trackImage = track.gameObject.AddComponent<Image>();
-            trackImage.raycastTarget = false;
-            trackImage.color = new Color(1, 1, 1, 0.35f);
-            styled.AddImageColor(trackImage, UIColorRole.Line);
+            if (parts.Track != null)
+                styled.AddImageColor(parts.Track, UIColorRole.Line);
 
-            _under = UIParts.NewImage("Next Line", track, Color.white);
-            UIParts.Stretch(_under.rectTransform);
-            _trail = UIParts.NewImage("Trail", track, TrailColor).rectTransform;
-            UIParts.Stretch(_trail);
-            _fillImage = UIParts.NewImage("Fill", track, Color.white);
-            _fill = _fillImage.rectTransform;
-            UIParts.Stretch(_fill);
-
-            // 막대 안 수치: 그림자 → 글자 순서로 그린다.
-            _healthShadow = NewText("Health Shadow", track, font, HealthSize, TextAlignmentOptions.Center);
-            UIParts.Stretch((RectTransform)_healthShadow.transform);
-            ((RectTransform)_healthShadow.transform).anchoredPosition = ShadowOffset;
-            _healthShadow.color = ShadowColor;
-            _health = NewText("Health", track, font, HealthSize, TextAlignmentOptions.Center);
-            UIParts.Stretch((RectTransform)_health.transform);
-            _health.color = Color.white;
-
-            // 이름: 막대 위 왼쪽.
-            _name = NewText("Name", _root, font, NameSize, TextAlignmentOptions.BottomLeft);
-            RectTransform nameRect = (RectTransform)_name.transform;
-            nameRect.anchorMin = new Vector2(0, 0);
-            nameRect.anchorMax = new Vector2(1, 1);
-            nameRect.offsetMin = new Vector2(Padding, TrackBottom + TrackHeight + 4);
-            nameRect.offsetMax = new Vector2(-Padding, -6);
-
-            // 남은 줄 수: 막대 오른쪽, 막대 높이 가운데.
-            _count = NewText("Lines", _root, font, CountSize, TextAlignmentOptions.Right);
-            RectTransform countRect = (RectTransform)_count.transform;
-            countRect.anchorMin = new Vector2(1, 0);
-            countRect.anchorMax = new Vector2(1, 0);
-            countRect.pivot = new Vector2(1, 0.5f);
-            countRect.sizeDelta = new Vector2(CountWidth - 8, TrackHeight + 16);
-            countRect.anchoredPosition = new Vector2(-Padding, TrackBottom + TrackHeight * 0.5f);
+            _under = parts.NextLine;
+            _trail = parts.Trail != null ? parts.Trail.rectTransform : null;
+            _fillImage = parts.Fill;
+            _fill = _fillImage != null ? _fillImage.rectTransform : null;
+            _health = parts.Health;
+            _healthShadow = parts.HealthShadow;
+            _name = parts.Name;
+            _count = parts.Lines;
+            _baseFont = _health != null ? _health.font : null;
+            _healthBaseSize = _health != null ? _health.fontSize : 0;
 
             styled.AddText(_name, UITextRole.Body, UITextSizePolicy.Prefab);
             styled.AddText(_count, UITextRole.Title, UITextSizePolicy.Prefab);
@@ -171,8 +151,11 @@ namespace BlackHole.Unity
 
             foreach (TMP_Text text in new[] { _health, _healthShadow })
             {
+                if (text == null)
+                    continue;
+
                 text.font = font != null ? font : _baseFont;
-                text.fontSize = HealthSize * theme.TextScale;
+                text.fontSize = _healthBaseSize * theme.TextScale;
             }
         }
 
@@ -204,19 +187,27 @@ namespace BlackHole.Unity
                 if (!float.IsNaN(_shownHealth))
                 {
                     _trailFraction = 1;
-                    _countPop.Play(_count.transform);
+                    if (_count != null)
+                        _countPop.Play(_count.transform);
                 }
 
                 _line = line;
-                _count.text = "x" + line.ToString(CultureInfo.InvariantCulture);
+
+                if (_count != null)
+                    _count.text = "x" + line.ToString(CultureInfo.InvariantCulture);
+
                 ApplyLineColors();
             }
 
             _shownHealth = galaxy.Health;
             _fraction = _lines.FractionOf(galaxy.Health, line);
             string health = NumberText.Compact((double)Mathf.Max(0, Mathf.Ceil(galaxy.Health))) + " / " + NumberText.Compact((double)galaxy.MaxHealth);
-            _health.text = health;
-            _healthShadow.text = health;
+
+            if (_health != null)
+                _health.text = health;
+
+            if (_healthShadow != null)
+                _healthShadow.text = health;
 
             if (galaxy.IsDead && float.IsNaN(_sinceDeath))
                 _sinceDeath = 0;
@@ -225,7 +216,7 @@ namespace BlackHole.Unity
         // 언어가 바뀌었다. 보이는 이름을 다시 쓴다.
         public void Rename(string name)
         {
-            if (_active)
+            if (_active && _name != null)
                 _name.text = name;
         }
 
@@ -247,7 +238,7 @@ namespace BlackHole.Unity
 
             _appear = Mathf.Min(1, _appear + delta / AppearSeconds);
             float ease = UIMotion.EaseOut(_appear);
-            _root.anchoredPosition = new Vector2(0, BottomMargin - AppearRise * (1 - ease));
+            _root.anchoredPosition = _restPosition - new Vector2(0, AppearRise * (1 - ease));
 
             // 꼬리: 맞은 뒤 잠깐 머물렀다가 막대를 따라 줄어든다. 막대보다 짧아지지 않는다.
             _sinceHit += delta;
@@ -260,7 +251,9 @@ namespace BlackHole.Unity
             SetWidth(_trail, _trailFraction);
 
             float flash = _sinceHit < FlashSeconds ? FlashAmount * (1 - _sinceHit / FlashSeconds) : 0;
-            _fillImage.color = Color.Lerp(_lines.ColorOf(_line), Color.white, flash);
+
+            if (_fillImage != null)
+                _fillImage.color = Color.Lerp(_lines.ColorOf(_line), Color.white, flash);
 
             _countPop.Tick(delta);
 
@@ -286,7 +279,10 @@ namespace BlackHole.Unity
             _countPop.Stop();
             _sinceDeath = float.NaN;
             _appear = 0;
-            _name.text = name;
+
+            if (_name != null)
+                _name.text = name;
+
             _active = true;
             _group.alpha = 0;
             _root.gameObject.SetActive(true);
@@ -296,16 +292,24 @@ namespace BlackHole.Unity
         private void ApplyLineColors()
         {
             bool hasNext = _line > 1;
-            _under.enabled = hasNext;
 
-            if (hasNext)
-                _under.color = _lines.ColorOf(_line - 1);
+            if (_under != null)
+            {
+                _under.enabled = hasNext;
 
-            _fillImage.color = _lines.ColorOf(_line);
+                if (hasNext)
+                    _under.color = _lines.ColorOf(_line - 1);
+            }
+
+            if (_fillImage != null)
+                _fillImage.color = _lines.ColorOf(_line);
         }
 
         private static void SetWidth(RectTransform rect, float fraction)
         {
+            if (rect == null)
+                return;
+
             Vector2 max = rect.anchorMax;
 
             if (Mathf.Approximately(max.x, fraction))
@@ -315,8 +319,5 @@ namespace BlackHole.Unity
             rect.anchorMax = max;
         }
 
-        // 흰 글자, 한 줄(NoWrap).
-        private static TMP_Text NewText(string name, Transform parent, TMP_FontAsset font, float size, TextAlignmentOptions alignment) =>
-            UIParts.NewText(name, parent, font, size, Color.white, alignment, TextWrappingModes.NoWrap);
     }
 }

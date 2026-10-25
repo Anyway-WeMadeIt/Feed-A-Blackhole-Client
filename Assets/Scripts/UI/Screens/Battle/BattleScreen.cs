@@ -33,6 +33,17 @@ namespace BlackHole.Unity
             EndBtn_Text,
             // 노치·둥근 모서리를 피하는 영역. 화면을 열 때와 해상도가 바뀔 때 UIManager가 Safe Area에 맞춘다(SafeAreaUtility).
             SafeAreaRoot,
+            // 은하 체력바(GalaxyHealthBar). 막대 전체(CanvasGroup, 꺼 둔다)와 그 부품. 바탕·홈·이름·줄 수의 테마는 코드(Styled)가 맞춘다.
+            GalaxyHealth,
+            GalaxyPanel_Image,
+            GalaxyTrack_Image,
+            GalaxyNextLine_Image,
+            GalaxyTrail_Image,
+            GalaxyFill_Image,
+            GalaxyHealth_Text,
+            GalaxyHealthShadow_Text,
+            GalaxyName_Text,
+            GalaxyLines_Text,
 
             // Presentation이 바꾸는 그림. 코드는 건드리지 않는다.
             // 배경이 어두워지면 Image Theme로 칩·아이콘을 바꾼다(예: 아이콘 ink → ivory).
@@ -56,7 +67,7 @@ namespace BlackHole.Unity
         private RectTransform _levelFill;
         private TMP_Text _pauseLabel;
         private MilestoneRow _milestones;
-        // 은하 체력바(코드로 만든다). 이름·줄 수 글자와 바탕은 Styled에 넣어 테마를 받고, 막대 안 수치는 OnPresented가 넘긴다.
+        // 은하 체력바(프리팹의 Galaxy* 부품). 이름·줄 수 글자와 바탕은 Styled에 넣어 테마를 받고, 막대 안 수치는 OnPresented가 넘긴다. 프리팹에 없으면 null.
         private GalaxyHealthBar _galaxyBar;
         private int _galaxyTier = -1;
         private int _shownTenths = -1;
@@ -87,11 +98,22 @@ namespace BlackHole.Unity
                 burstRect != null ? burstRect.GetComponent<UIMilestoneBurst>() : null);
             _milestones.Reset();
 
-            // 은하 체력바의 기준 글꼴은 일시정지 글자의 것(한글이 있는 글꼴). 테마가 들어오면 언어·역할에 맞는 글꼴로 바뀐다.
-            RectTransform safeArea = View.Rect(Refs.SafeAreaRoot);
+            RectTransform galaxyRoot = View.Rect(Refs.GalaxyHealth);
 
-            if (safeArea != null)
-                _galaxyBar = new GalaxyHealthBar(safeArea, _pauseLabel != null ? _pauseLabel.font : null, Styled);
+            if (galaxyRoot != null)
+            {
+                _galaxyBar = new GalaxyHealthBar(new GalaxyHealthBar.Parts(
+                    galaxyRoot,
+                    View.Image(Refs.GalaxyPanel_Image),
+                    View.Image(Refs.GalaxyTrack_Image),
+                    View.Image(Refs.GalaxyNextLine_Image),
+                    View.Image(Refs.GalaxyTrail_Image),
+                    View.Image(Refs.GalaxyFill_Image),
+                    View.Text(Refs.GalaxyHealth_Text),
+                    View.Text(Refs.GalaxyHealthShadow_Text),
+                    View.Text(Refs.GalaxyName_Text),
+                    View.Text(Refs.GalaxyLines_Text)), Styled);
+            }
 
             ButtonFeedback.Bind(View.Button(Refs.PauseBtn_Button), HandlePauseClicked);
             ButtonFeedback.Bind(View.Button(Refs.EndBtn_Button), HandleEndClicked);
