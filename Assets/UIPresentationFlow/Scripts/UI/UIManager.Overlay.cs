@@ -56,6 +56,7 @@ public sealed partial class UIManager
         if (overlay == null || !_shownOverlays.Remove(overlay))
             return null;
 
+        ClosePage(overlay);
         _overlayPresentations.Remove(overlay);
         SetVisible(overlay, false);
 
@@ -69,27 +70,36 @@ public sealed partial class UIManager
         {
             UIBase overlay = _shownOverlays[i];
             _shownOverlays.RemoveAt(i);
+            ClosePage(overlay);
             _overlayPresentations.Remove(overlay);
             SetVisible(overlay, false);
             afterClosed?.Invoke(overlay);
         }
     }
 
-    // 보이는 Overlay에 지금 표시(테마·언어·크기)를 다시 적용한다. 보인 순서대로.
+    // 보이는 Overlay(와 그 Page)에 지금 표시(테마·언어·크기)를 다시 적용한다. 보인 순서대로.
+    // 적용 중 OnPresented가 Overlay를 열고 닫아도 목록이 흔들리지 않게 복사본을 돈다.
     private void ReapplyOverlays(in DisplayContext display)
     {
-        for (int i = 0; i < _shownOverlays.Count; i++)
-        {
-            UIBase overlay = _shownOverlays[i];
+        if (_shownOverlays.Count == 0)
+            return;
 
-            if (_overlayPresentations.TryGetValue(overlay, out UIPresentationSpec presentation))
-                ApplyPresentation(overlay, presentation, display);
+        foreach (UIBase overlay in _shownOverlays.ToArray())
+        {
+            if (!_overlayPresentations.TryGetValue(overlay, out UIPresentationSpec presentation))
+                continue;
+
+            ApplyPresentation(overlay, presentation, display);
+            ReapplyCurrentPage(overlay, display);
         }
     }
 
     // 층을 넘기지 않았을 때: Panel 층 바로 다음 형제로 꽉 채운 층을 만든다(화면 전환 덮개는 그 뒤에 만들어져 위에 온다).
     private static Transform CreateOverlayLayer(Transform panelLayer)
     {
+        if (panelLayer == null)
+            throw new ArgumentNullException(nameof(panelLayer), "[UIManager] Overlay 층을 만들 Panel 층이 없다.");
+
         var layer = new GameObject("OverlayLayer", typeof(RectTransform));
         layer.layer = panelLayer.gameObject.layer;
 
