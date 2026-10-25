@@ -21,3 +21,4 @@ MonoBehaviour:
   _settings: {fileID: 11400000, guid: 79b59cf03ed15cc61b9670cee87c0176, type: 2}
   _pause: {fileID: 11400000, guid: 1374d3343c1e8709b59738e3ceedd700, type: 2}
   _confirm: {fileID: 11400000, guid: c248df9f586a46cd824e90aa1bf5bf51, type: 2}
+  _notice: {fileID: 11400000, guid: 6bbbb79176f146d48bd3a169298b6e05, type: 2}

@@ -1,9 +1,8 @@
 using BlackHole.Net;
-using UnityEngine;
 
 namespace BlackHole.Unity
 {
-    // 타이틀·업그레이드 화면의 알림 글자(FloatingNotice). 알림은 세로 목록으로 한꺼번에 보이고, 알림마다 제 수명을 가진다.
+    // 타이틀·업그레이드 화면의 알림 글자(NoticeOverlay). 알림은 세로 목록으로 한꺼번에 보이고, 알림마다 제 수명을 가진다.
     //
     // 1. 서버 연결 결과(계약 2.8): 알릴 연결 상태가 바뀌었을 때 한 번(ConnectionNoticeTracker). 처음 확인할 때는 로그인과 시작 동기화가 끝난 뒤의 상태를 알린다.
     //    - 온라인: "서버에 연결되었습니다"(짧게). 같이 알릴 거부가 있으면 건너뛴다 — 연결은 됐지만 진행도가 서버 기준으로 바뀐 것이 알릴 일이다.
@@ -23,7 +22,7 @@ namespace BlackHole.Unity
         private const float WarningHoldSeconds = 5f;
         private const float ContentOutdatedHoldSeconds = 9f;
 
-        private FloatingNotice _notice;
+        private NoticeOverlay _notice;
         private readonly ConnectionNoticeTracker _connectionNotices = new();
 
         // GameBootstrap이 SyncSender.RejectionReceived에 연결한다. 메인 스레드에서 불린다.
@@ -84,27 +83,23 @@ namespace BlackHole.Unity
             _progressStore.MarkLastRejectionShown();
         }
 
-        private FloatingNotice EnsureNotice()
+        // 처음 알릴 때 Overlay로 열고 그 뒤로는 계속 둔다(알림이 없으면 아무것도 그리지 않는다). 테마·글자 배율은 UIManager가 다시 적용한다.
+        private NoticeOverlay EnsureNotice()
         {
             if (_notice != null)
                 return _notice;
 
-            UIAppliedTheme theme = _ui.Theme;
-
-            // 프리팹 없이 코드로 만드는 뷰: UIManager의 Overlay 층 맨 위에 둔다. 글꼴·글자 배율은 _ui.Theme에서 받는다.
-            _notice = FloatingNotice.Create(
-                _ui.OverlayLayer,
-                int.MaxValue,
-                theme.FontFor(UITextRole.Body),
-                theme.TextScale);
-
+            _notice = _ui.ShowOverlay<NoticeOverlay>(_presentations.Notice);
             return _notice;
         }
 
         private void DisposeNotice()
         {
             if (_notice != null)
-                Object.Destroy(_notice.gameObject);
+            {
+                _notice.Clear();
+                _ui.HideOverlay<NoticeOverlay>();
+            }
 
             _notice = null;
         }

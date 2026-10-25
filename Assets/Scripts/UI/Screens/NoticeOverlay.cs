@@ -1,45 +1,43 @@
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    // 화면 위쪽에 잠깐 뜨는 알림 글자 목록(서버 연결 결과, 동기화 거부; 계약 2.8, 5.9). 프리팹 없이 코드로 만든다.
+    // 화면 위쪽에 잠깐 뜨는 알림 글자 목록(서버 연결 결과, 동기화 거부; 계약 2.8, 5.9). Overlay 층의 프리팹(NoticeOverlay.prefab)으로, ScreenFlow가 ShowOverlay로 연다.
     // 알림은 먼저 온 것이 위, 나중에 온 것이 아래인 세로 목록으로 한꺼번에 보인다. 글자는 호출하는 쪽이 번역해서 넘긴다.
     // - 알림마다 제 수명을 가진다: 나타남 → 머묾(Show의 holdSeconds) → 사라짐. 혼자 끝나고 입력을 가로채지 않는다. 실제 시간으로 흐른다(timeScale과 무관).
     // - 일부가 사라지면 그 아래 알림이 위로 부드럽게 올라온다. 사라지는 동안에는 자리를 지키다가 다 사라진 뒤에 올라온다.
     // - 이미 보이는 알림과 같은 글자가 다시 오면 쌓지 않고 그 알림의 수명만 새로 시작한다(사라지는 중이어도 다시 선명해진다).
     // - 한꺼번에 MaxVisible개까지 보인다. 넘치면 가장 오래된 알림부터 사라지기 시작한다.
     // 높이는 글자 줄 수에 맞춰 알림마다 정한다(글자 크기 설정이 커져 줄이 늘어도 넘치지 않는다).
-    [DisallowMultipleComponent]
-    internal sealed class FloatingNotice : MonoBehaviour
+    // 배치(너비·위 여백·최소 높이·글자 여백·글자 크기)는 프리팹의 본보기(Notice)에서 읽고 글자 배율(TextScale)만큼 늘린다. 글꼴은 테마의 Body.
+    // 판·글자 색은 테마와 무관하게 프리팹 값 그대로다(어두운 판 위 밝은 글자).
+    public sealed class NoticeOverlay : UIOverlay<NoticeOverlay.Refs>
     {
+        public enum Refs
+        {
+            // 알림이 쌓이는 자리(화면 전체).
+            NoticeList,
+            // 알림 하나의 본보기(꺼 둔다). 복제해 쓴다. 자리·크기가 배치의 기준이다.
+            Notice,
+            // 본보기의 글자. 좌우·상하 여백과 크기가 기준이다.
+            Notice_Text,
+        }
+
         private const float FadeInSeconds = 0.3f;
         private const float FadeOutSeconds = 0.8f;
         // 알림 하나가 목록에서 새 자리로 움직이는 빠르기. 클수록 빨리 닿는다(지수 보간).
         private const float SlideSharpness = 14f;
         private const int MaxVisible = 4;
-
-        // 배치(기준 해상도 1920×1080).
-        private const float Width = 1500f;
-        // 업그레이드 화면 위쪽의 Gold 표시·구역 이름 아래, 노드 트리 위에서 시작한다. 타이틀에서는 로고 위다.
-        private const float TopMargin = 125f;
-        private const float MinHeight = 50f;
-        private const float VerticalPadding = 10f;
         private const float Gap = 8f;
-        private const float TextSize = 30f;
-        private const float TextPadding = 28f;
-
-        private static readonly Color PanelColor = new(0.04f, 0.03f, 0.08f, 0.82f);
-        private static readonly Color TextColor = new(1f, 0.9f, 0.82f, 1f);
 
         // 알림 하나. 쓰고 나면 풀로 돌아가 다시 쓴다.
         private sealed class Entry
         {
             public RectTransform Rect;
             public CanvasGroup Group;
+            public RectTransform TextRect;
             public TMP_Text Text;
             public string Message;
             public float Hold;
@@ -54,39 +52,82 @@ namespace BlackHole.Unity
 
         private readonly List<Entry> _active = new();
         private readonly Stack<Entry> _pool = new();
-        private RectTransform _root;
+        private RectTransform _list;
+        private RectTransform _template;
+
+        // 프리팹 본보기의 배치(배율 1 기준).
+        private float _width;
+        private float _topMargin;
+        private float _minHeight;
+        private Vector2 _textPadding;   // x: 좌우, y: 상하
+        private float _textSize;
+        private TMP_FontAsset _baseFont;
+
+        // 지금 테마. OnPresented가 넘긴다.
         private TMP_FontAsset _font;
         private float _scale = 1f;
 
         // 보이는 알림이 있는가.
         public bool IsBusy => _active.Count > 0;
 
-        public static FloatingNotice Create(Transform canvas, int siblingIndex, TMP_FontAsset font, float scale)
+        protected override void OnInitialize()
         {
-            if (canvas == null)
-                throw new ArgumentNullException(nameof(canvas));
+            _list = View.Rect(Refs.NoticeList);
+            _template = View.Rect(Refs.Notice);
+            TMP_Text templateText = View.Text(Refs.Notice_Text);
 
-            var view = new GameObject("Floating Notices", typeof(RectTransform));
-            view.layer = canvas.gameObject.layer;
-            var rect = (RectTransform)view.transform;
-            rect.SetParent(canvas, false);
-            rect.SetSiblingIndex(Mathf.Clamp(siblingIndex, 0, canvas.childCount - 1));
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
+            if (_template != null)
+            {
+                _width = _template.sizeDelta.x;
+                _minHeight = _template.sizeDelta.y;
+                _topMargin = -_template.anchoredPosition.y;
+                _template.gameObject.SetActive(false);
+            }
 
-            var notice = view.AddComponent<FloatingNotice>();
-            notice._root = rect;
-            notice._font = font;
-            notice._scale = scale > 0 ? scale : 1f;
-            return notice;
+            if (templateText != null)
+            {
+                _textPadding = templateText.rectTransform.offsetMin;
+                _textSize = templateText.fontSize;
+                _baseFont = templateText.font;
+                _font = _baseFont;
+            }
+        }
+
+        // 글꼴·글자 배율. 보이는 알림은 글자와 높이를 다시 맞춘다.
+        protected override void OnPresented(in UIAppliedTheme theme)
+        {
+            TMP_FontAsset font = theme.FontFor(UITextRole.Body);
+            _font = font != null ? font : _baseFont;
+            _scale = theme.TextScale;
+
+            foreach (Entry entry in _active)
+            {
+                ApplyTheme(entry);
+                entry.Height = HeightOf(entry.Text, entry.Message);
+                entry.Rect.sizeDelta = new Vector2(_width * _scale, entry.Height);
+            }
+
+            foreach (Entry entry in _pool)
+                ApplyTheme(entry);
+
+            if (_active.Count == 0)
+                return;
+
+            Relayout();
+
+            foreach (Entry entry in _active)
+            {
+                entry.Y = entry.TargetY;
+                Place(entry);
+            }
         }
 
         // 알림을 목록 맨 아래에 더한다. holdSeconds는 다 나타난 뒤 머무는 시간이다.
         public void Show(string message, float holdSeconds)
         {
+            if (_template == null)
+                return;
+
             message ??= string.Empty;
             holdSeconds = Mathf.Max(0f, holdSeconds);
 
@@ -106,7 +147,7 @@ namespace BlackHole.Unity
             entry.Elapsed = 0f;
             entry.Text.text = message;
             entry.Height = HeightOf(entry.Text, message);
-            entry.Rect.sizeDelta = new Vector2(Width * _scale, entry.Height);
+            entry.Rect.sizeDelta = new Vector2(_width * _scale, entry.Height);
             entry.Group.alpha = 0f;
 
             // 새 알림은 제 자리에서 나타난다(미끄러져 오지 않는다).
@@ -207,7 +248,7 @@ namespace BlackHole.Unity
         }
 
         private void Place(Entry entry) =>
-            entry.Rect.anchoredPosition = new Vector2(0f, -(TopMargin * _scale + entry.Y));
+            entry.Rect.anchoredPosition = new Vector2(0f, -(_topMargin * _scale + entry.Y));
 
         private void Release(int index)
         {
@@ -219,9 +260,18 @@ namespace BlackHole.Unity
 
         private float HeightOf(TMP_Text text, string message)
         {
-            float textWidth = (Width - 2f * TextPadding) * _scale;
+            float textWidth = (_width - 2f * _textPadding.x) * _scale;
             float preferred = text.GetPreferredValues(message, textWidth, 0f).y;
-            return Mathf.Max(MinHeight * _scale, preferred + 2f * VerticalPadding * _scale);
+            return Mathf.Max(_minHeight * _scale, preferred + 2f * _textPadding.y * _scale);
+        }
+
+        // 글꼴·글자 크기·글자 여백을 지금 테마에 맞춘다.
+        private void ApplyTheme(Entry entry)
+        {
+            entry.Text.font = _font;
+            entry.Text.fontSize = _textSize * _scale;
+            entry.TextRect.offsetMin = _textPadding * _scale;
+            entry.TextRect.offsetMax = -_textPadding * _scale;
         }
 
         private Entry Take()
@@ -229,43 +279,21 @@ namespace BlackHole.Unity
             if (_pool.Count > 0)
                 return _pool.Pop();
 
-            var view = new GameObject("Notice", typeof(RectTransform), typeof(CanvasGroup), typeof(Image));
-            view.layer = _root.gameObject.layer;
+            GameObject view = Instantiate(_template.gameObject, _list, false);
+            view.name = "Notice";
             var rect = (RectTransform)view.transform;
-            rect.SetParent(_root, false);
-            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 1f);
 
-            var panel = view.GetComponent<Image>();
-            panel.color = PanelColor;
-            panel.raycastTarget = false;
-
-            var group = view.GetComponent<CanvasGroup>();
+            CanvasGroup group = view.GetComponent<CanvasGroup>() ?? view.AddComponent<CanvasGroup>();
             group.alpha = 0f;
             group.blocksRaycasts = false;
             group.interactable = false;
 
-            var textObject = new GameObject("Text", typeof(RectTransform));
-            textObject.layer = view.layer;
-            var textRect = (RectTransform)textObject.transform;
-            textRect.SetParent(rect, false);
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = new Vector2(TextPadding * _scale, 0f);
-            textRect.offsetMax = new Vector2(-TextPadding * _scale, 0f);
-
-            TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
-            text.raycastTarget = false;
-            text.textWrappingMode = TextWrappingModes.Normal;
-            text.overflowMode = TextOverflowModes.Overflow;
-            text.alignment = TextAlignmentOptions.Center;
-            text.fontSize = TextSize * _scale;
-            text.color = TextColor;
-
-            if (_font != null)
-                text.font = _font;
+            TMP_Text text = view.GetComponentInChildren<TMP_Text>(true);
+            var entry = new Entry { Rect = rect, Group = group, Text = text, TextRect = text.rectTransform };
+            ApplyTheme(entry);
 
             view.SetActive(false);
-            return new Entry { Rect = rect, Group = group, Text = text };
+            return entry;
         }
     }
 }

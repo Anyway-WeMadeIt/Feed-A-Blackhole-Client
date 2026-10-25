@@ -24,6 +24,10 @@ namespace BlackHole.Unity
         [SerializeField] private UIPresentationSpec _pause;
         [SerializeField] private UIPresentationSpec _confirm;
 
+        [Header("Overlay")]
+        [Tooltip("알림 목록(NoticeOverlay).")]
+        [SerializeField] private UIPresentationSpec _notice;
+
         public UIPresentationSpec Title => _title;
         public UIPresentationSpec Upgrade => _upgrade;
         public UIPresentationSpec Battle => _battle;
@@ -33,6 +37,7 @@ namespace BlackHole.Unity
         public UIPresentationSpec Settings => _settings;
         public UIPresentationSpec Pause => _pause;
         public UIPresentationSpec Confirm => _confirm;
+        public UIPresentationSpec Notice => _notice;
 
         // 연결하지 않은 칸. 비어 있어야 화면 흐름을 조립한다(GameBootstrap).
         internal IReadOnlyList<string> MissingReferences()
@@ -48,6 +53,7 @@ namespace BlackHole.Unity
             if (_settings == null) missing.Add("Settings");
             if (_pause == null) missing.Add("Pause");
             if (_confirm == null) missing.Add("Confirm");
+            if (_notice == null) missing.Add("Notice");
 
             return missing;
         }
