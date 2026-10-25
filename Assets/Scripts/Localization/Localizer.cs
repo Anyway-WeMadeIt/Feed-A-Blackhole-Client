@@ -9,7 +9,7 @@ namespace BlackHole.Unity
     // UI 글자 번역. UI 글자 표(Assets/Data/Localization/UIText.csv)에서 지금 언어의 글자를 찾는다.
     //
     // 표(CSV)
-    // - 첫 줄은 열 이름: key, en-US, ko-KR … (언어 열 이름은 UILocale.ToId()). 그 아래 한 줄에 키 하나.
+    // - 첫 줄은 열 이름: key, en-US, ko-KR … key가 아닌 열은 모두 언어 열이다(BCP 47). 그 아래 한 줄에 키 하나.
     // - 키가 #으로 시작하는 줄은 구분용 메모라 읽지 않는다.
     // - 글자 안의 {0}, {1} …은 Format이 채운다. 숫자를 이어 붙이지 말고 문장 전체를 번역한다("Gold {0}").
     //
@@ -18,28 +18,30 @@ namespace BlackHole.Unity
     // - 코드가 쓰는 글자: 소문자로 시작하고 점으로 나눈다(예: setting.DarkMode — 설정은 설정 ID를 그대로 쓴다).
     //
     // 지금 언어 칸이 비었으면 영어 칸을 쓴다. 둘 다 없으면 찾지 못한 것이다(TryGet은 false, Get은 키를 돌려준다).
-    // 언어는 GameSettings의 Language가 정한다. 바뀌면 Changed로 알린다 — 글자를 다시 넣는 일은 받는 쪽이 한다.
+    // 언어는 열 이름과 같은 글자(ko-KR)로 고른다. 이 게임에서는 GameSettings의 Language가 정한다(Create). 바뀌면 Changed로 알린다 — 글자를 다시 넣는 일은 받는 쪽이 한다.
     // 번역(글자 내용)만 맡는다. 언어별 글꼴·배치·그림은 UIPresentationFlow의 언어 변형이 맡는다.
+    // 게임을 모른다(Create 빼고). 표 읽기는 Csv다.
     public sealed class Localizer
     {
         private const string KeyColumn = "key";
         private const string CommentPrefix = "#";
-        private const UILocale FallbackLocale = UILocale.English;
+        private const string FallbackLocale = "en-US";
 
-        // 키 → 그 줄의 칸들. 언어별 칸 위치는 _columns.
+        // 키 → 그 줄의 칸들. 언어별 칸 위치는 _columns(열 이름 → 칸 번호).
         private readonly Dictionary<string, string[]> _rows = new(StringComparer.Ordinal);
-        private readonly Dictionary<UILocale, int> _columns = new();
+        private readonly Dictionary<string, int> _columns = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _warned = new(StringComparer.Ordinal);
 
-        public UILocale Locale { get; private set; }
+        // 지금 언어(열 이름).
+        public string Locale { get; private set; }
 
         public IReadOnlyCollection<string> Keys => _rows.Keys;
 
         public event Action Changed;
 
-        public Localizer(string table, UILocale locale)
+        public Localizer(string table, string locale)
         {
-            Locale = locale;
+            Locale = locale ?? FallbackLocale;
             Read(table ?? string.Empty);
         }
 
@@ -52,20 +54,20 @@ namespace BlackHole.Unity
             if (table == null)
                 Debug.LogError("[UI] GameBootstrap에 UI 글자 표(UIText.csv)를 연결해야 한다. 지금은 프리팹 글자와 영어 원문으로 보인다.");
 
-            var localizer = new Localizer(table != null ? table.text : null, settings.LanguageLocale);
+            var localizer = new Localizer(table != null ? table.text : null, settings.LanguageLocale.ToId());
 
             settings.Changed += id =>
             {
                 if (id == GameSettings.Language)
-                    localizer.SetLocale(settings.LanguageLocale);
+                    localizer.SetLocale(settings.LanguageLocale.ToId());
             };
 
             return localizer;
         }
 
-        public void SetLocale(UILocale locale)
+        public void SetLocale(string locale)
         {
-            if (Locale == locale)
+            if (string.Equals(Locale, locale, StringComparison.OrdinalIgnoreCase))
                 return;
 
             Locale = locale;
@@ -82,10 +84,10 @@ namespace BlackHole.Unity
             if (TryCell(cells, Locale, out text))
                 return true;
 
-            if (Locale == FallbackLocale || !TryCell(cells, FallbackLocale, out text))
+            if (string.Equals(Locale, FallbackLocale, StringComparison.OrdinalIgnoreCase) || !TryCell(cells, FallbackLocale, out text))
                 return false;
 
-            WarnOnce(key, $"[글자] '{key}'의 {Locale.ToId()} 번역이 비어 있어 {FallbackLocale.ToId()} 글자를 쓴다.");
+            WarnOnce(key, $"[글자] '{key}'의 {Locale} 번역이 비어 있어 {FallbackLocale} 글자를 쓴다.");
             return true;
         }
 
@@ -109,12 +111,12 @@ namespace BlackHole.Unity
             }
             catch (FormatException)
             {
-                WarnOnce(key, $"[글자] '{key}'의 {Locale.ToId()} 글자 \"{template}\"의 {{n}} 자리가 넘긴 값과 맞지 않는다.");
+                WarnOnce(key, $"[글자] '{key}'의 {Locale} 글자 \"{template}\"의 {{n}} 자리가 넘긴 값과 맞지 않는다.");
                 return template;
             }
         }
 
-        private bool TryCell(string[] cells, UILocale locale, out string text)
+        private bool TryCell(string[] cells, string locale, out string text)
         {
             text = null;
 
@@ -143,16 +145,17 @@ namespace BlackHole.Unity
                 return;
             }
 
-            foreach (UILocale locale in (UILocale[])Enum.GetValues(typeof(UILocale)))
+            // key가 아닌 열은 모두 언어 열이다.
+            for (int c = 0; c < header.Length; c++)
             {
-                string id = locale.ToId();
-                int column = Array.FindIndex(header, name => string.Equals(name.Trim(), id, StringComparison.OrdinalIgnoreCase));
+                string name = header[c].Trim();
 
-                if (column >= 0)
-                    _columns[locale] = column;
-                else
-                    Debug.LogWarning($"[글자] UI 글자 표에 '{id}' 열이 없다. 그 언어는 영어로 보인다.");
+                if (c != keyColumn && name.Length > 0 && !_columns.TryAdd(name, c))
+                    Debug.LogWarning($"[글자] UI 글자 표에 '{name}' 열이 두 번 있다. 앞의 것을 쓴다.");
             }
+
+            if (!_columns.ContainsKey(Locale))
+                Debug.LogWarning($"[글자] UI 글자 표에 '{Locale}' 열이 없다. 그 언어는 {FallbackLocale}로 보인다.");
 
             for (int i = 1; i < rows.Count; i++)
             {
@@ -174,7 +177,7 @@ namespace BlackHole.Unity
         // 같은 키·언어의 경고는 한 번만 남긴다(글자를 매 프레임 쓰는 화면이 있어도 로그가 쌓이지 않게).
         private void WarnOnce(string key, string message)
         {
-            if (_warned.Add(Locale.ToId() + "|" + key))
+            if (_warned.Add(Locale + "|" + key))
                 Debug.LogWarning(message);
         }
     }

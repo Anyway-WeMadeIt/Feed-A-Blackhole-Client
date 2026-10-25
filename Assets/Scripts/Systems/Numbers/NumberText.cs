@@ -80,12 +80,13 @@ namespace BlackHole.Systems.Numbers
         public static string Compact(long value) => Compact((double)value);
 
         // 소수 합계(결산의 스킬별 피해)도 같은 단위로 줄인다: 233,650,000.4 → 233.65M.
+        // 반올림한 값으로 단위를 정한다 — 999,996은 999.996K가 아니라(두 자리로 쓰면 1000K) 1M.
         public static string Compact(double value)
         {
             double scaled = value;
             int unit = 0;
 
-            while (Math.Abs(scaled) >= 1000 && unit < Units.Length - 1)
+            while (unit < Units.Length - 1 && Math.Abs(Math.Round(scaled, 2, MidpointRounding.AwayFromZero)) >= 1000)
             {
                 scaled /= 1000;
                 unit++;

@@ -3,8 +3,17 @@ using BlackHole.Core;
 
 namespace BlackHole.Unity
 {
+    // 판이 끝났을 때 어디로 가는지는 여기서 정한다. GameHost는 끝난 이유를 넘기고(HandleBattleEnded) 매 프레임 한 번 부른다(TickBattle).
+    // - 시간 만료·종료 버튼·테스트 도구: 곧바로 결산 전환(RequestEnd). 튜토리얼 판은 결산하지 않고 첫 판으로(EndTutorialAsync).
+    // - 이정표 도달: 전투 화면의 달성 연출을 먼저 보이고, 연출이 끝난 뒤 결산 전환.
+    //   마지막 이정표(보라 은하를 부순 판)면 결산 대신 엔딩(ScreenFlow.Ending). 달성 연출은 붕괴와 함께 보인다.
+    //   튜토리얼 판은 자기 성장 표를 쓰므로 엔딩이 아니다.
+    // - 포기(일시 정지의 메인 메뉴, 테스트 도구): 결산 없이 타이틀 또는 새 판(ScreenFlow.Pause·Playtest).
     internal sealed partial class ScreenFlow
     {
+        // 이정표에 닿아 판이 끝났고, 달성 연출이 끝나기를 기다리는 중. 끝나면 결산 전환을 한 번만 요청한다.
+        private bool _endAwaitsMilestoneEffect;
+
         private void ShowBattle()
         {
             _ui.SwitchRoot<BattleScreen>(
@@ -37,17 +46,67 @@ namespace BlackHole.Unity
             _transition.Play(StartBattle);
         }
 
+        // 판이 이번 프레임에 규칙 안에서 끝났다. 종료는 이미 적용됐다(판이 더 흐르지 않는다).
+        internal void HandleBattleEnded(BattleEndReason reason)
+        {
+            if (reason != BattleEndReason.MilestoneReached)
+            {
+                RequestEnd();
+                return;
+            }
+
+            if (!_battle.IsTutorial && IsFinalMilestone && TryBeginEnding())
+            {
+                PlayMilestoneReached();
+                return;
+            }
+
+            if (PlayMilestoneReached())
+                _endAwaitsMilestoneEffect = true;
+            else
+                RequestEnd();
+        }
+
+        // 매 프레임: 달성 연출이 끝났거나 전투 화면이 다른 이유로 닫혔으면 결산 전환을 한 번 요청한다.
+        internal void TickBattle()
+        {
+            if (!_endAwaitsMilestoneEffect || IsCelebratingMilestone)
+                return;
+
+            _endAwaitsMilestoneEffect = false;
+
+            // 판이 이미 없으면(다른 경로로 끝남) 요청하지 않는다.
+            if (_battle.Session != null)
+                RequestEnd();
+        }
+
         // 끝: 덮인 뒤 판을 정리·결산하고 결산 화면으로 바꾼다. 적이 치워지는 모습이 보이지 않는다.
         // 튜토리얼 판은 결산하지 않고 첫 판으로 넘어간다(EndTutorialAsync).
         // 엔딩 중(마지막 이정표 뒤 붕괴·엔딩 화면)에는 받지 않는다 — 엔딩이 판을 결산하고 타이틀로 간다(ScreenFlow.Ending).
-        // GameHost(시간 만료, 이정표 연출 뒤)와 테스트 도구도 이 길로 온다.
-        internal void RequestEnd()
+        // 종료 버튼, 판 끝 분기(시간 만료·이정표 연출 뒤), 테스트 도구가 이 길로 온다.
+        private void RequestEnd()
         {
             if (IsEndingPlaying)
                 return;
 
             _transition.Play(_battle.IsTutorial ? EndTutorialAsync : EndBattleAsync);
         }
+
+        // 이 이정표를 넘으면 더 이상 이정표가 없다(엔딩).
+        private bool IsFinalMilestone
+        {
+            get
+            {
+                Hq hq = _battle.Session.World.Hq;
+                return hq.NextStage >= hq.Growth.MaxStage;
+            }
+        }
+
+        private bool PlayMilestoneReached() =>
+            _ui.CurrentRoot is BattleScreen screen && screen.TryPlayMilestoneReached();
+
+        private bool IsCelebratingMilestone =>
+            _ui.CurrentRoot is BattleScreen screen && screen.IsCelebratingMilestone;
 
         private void StartBattle()
         {

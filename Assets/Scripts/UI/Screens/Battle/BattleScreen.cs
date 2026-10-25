@@ -9,7 +9,7 @@ namespace BlackHole.Unity
 {
     // 전투 화면(전투 장면 위의 겹 화면). 전투 중에 필요한 정보만 보여 준다: 남은 시간, 다음 Level까지의 진행 막대, 일시정지·종료 버튼.
     // Level 숫자·목표·% 글자는 두지 않는다(막대와 겹친다). 번 Gold 칩은 프리팹에서 꺼 두었다(결산에서 본다) — 켜면 다시 보인다.
-    // 막대 아래의 마름모 칸(MilestoneRow)은 이번 구간에서 오른 Level 수다. 칸 수는 구간의 Level 수(목표 − 시작, 최대 10). 이정표에 닿으면 달성 연출을 하고, 그동안 GameHost가 결산 전환을 미룬다.
+    // 막대 아래의 마름모 칸(MilestoneRow)은 이번 구간에서 오른 Level 수다. 칸 수는 구간의 Level 수(목표 − 시작, 최대 10). 이정표에 닿으면 달성 연출을 하고, 그동안 ScreenFlow가 결산 전환을 미룬다.
     // 전투 Session을 모른다 — GameHost가 전투 Step 뒤 표시 값을 넘긴다. 진행 중인 판이 없으면 비어 있는 표시(ShowIdle)다.
     // 번 Gold는 이 판의 합계일 뿐이다. 진행 상태의 Gold는 판이 끝난 뒤 결산이 바꾼다.
     // 은하가 나오는 판(블랙홀 구역)에서는 화면 아래 가운데에 은하 체력바(GalaxyHealthBar)를 보인다. GameHost가 ShowGalaxy로 상태를 넘긴다.
@@ -153,7 +153,7 @@ namespace BlackHole.Unity
         private string GalaxyName(int tier) =>
             _localizer != null && _localizer.TryGet(UIText.Battle.Galaxy(tier), out string name) ? name : Localized(UIText.Battle.GalaxyFallback);
 
-        // 이정표 달성 연출 중인가. 끝날 때까지 GameHost가 결산 전환을 미루고, 이 화면은 버튼을 받지 않는다.
+        // 이정표 달성 연출 중인가. 끝날 때까지 ScreenFlow가 결산 전환을 미루고, 이 화면은 버튼을 받지 않는다.
         public bool IsCelebratingMilestone => _milestones != null && _milestones.IsCelebrating;
 
         // 이정표에 닿아 판이 끝났다. 10칸을 채운 모습과 달성 연출을 시작한다. 시작했으면 true(한 판에 한 번).
