@@ -4,7 +4,6 @@ using BlackHole.Core;
 using BlackHole.Systems.Numbers;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace BlackHole.Unity
 {
@@ -94,8 +93,8 @@ namespace BlackHole.Unity
             if (safeArea != null)
                 _galaxyBar = new GalaxyHealthBar(safeArea, _pauseLabel != null ? _pauseLabel.font : null, Styled);
 
-            BindEvent(View.Button(Refs.PauseBtn_Button), HandlePauseClicked);
-            BindEvent(View.Button(Refs.EndBtn_Button), HandleEndClicked);
+            ButtonFeedback.Bind(View.Button(Refs.PauseBtn_Button), HandlePauseClicked);
+            ButtonFeedback.Bind(View.Button(Refs.EndBtn_Button), HandleEndClicked);
         }
 
         // 화면이 닫힐 때 알림·튕김·이정표 칸을 지운다. 다시 열 때 남아 있지 않게 한다.
@@ -138,13 +137,13 @@ namespace BlackHole.Unity
         // 이정표에 닿아 판이 끝났다. 10칸을 채운 모습과 달성 연출을 시작한다. 시작했으면 true(한 판에 한 번).
         public bool TryPlayMilestoneReached() => _milestones != null && _milestones.TryCelebrate();
 
-        private void HandlePauseClicked(PointerEventData _)
+        private void HandlePauseClicked()
         {
             if (!IsCelebratingMilestone)
                 PauseClicked?.Invoke();
         }
 
-        private void HandleEndClicked(PointerEventData _)
+        private void HandleEndClicked()
         {
             if (!IsCelebratingMilestone)
                 EndClicked?.Invoke();

@@ -69,10 +69,10 @@ namespace BlackHole.Unity
             _prev = View.Button(Refs.PrevBtn_Button);
             _next = View.Button(Refs.NextBtn_Button);
 
-            BindEvent(View.Button(Refs.Toggle_Button), HandleToggleClicked);
-            BindEvent(View.Button(Refs.Choice_Button), HandleChoiceClicked);
-            BindEvent(_prev, HandlePrevClicked);
-            BindEvent(_next, HandleNextClicked);
+            ButtonFeedback.Bind(View.Button(Refs.Toggle_Button), HandleToggleClicked);
+            ButtonFeedback.Bind(View.Button(Refs.Choice_Button), HandleChoiceClicked);
+            ButtonFeedback.Bind(_prev, HandlePrevClicked);
+            ButtonFeedback.Bind(_next, HandleNextClicked);
 
             // 막대는 버튼이 아니라 누름·끌기를 받는다. 끌기를 여기서 받으므로 막대 위에서는 목록이 스크롤되지 않는다.
             UI_EventHandler track = View.Component<UI_EventHandler>(Refs.SliderTrack);
@@ -102,11 +102,11 @@ namespace BlackHole.Unity
         // 펼침 목록에서 고른 번호. 설정 창이 부른다.
         public void Choose(int index) => Change(index);
 
-        private void HandleToggleClicked(PointerEventData _) => Change(Value >= 0.5f ? 0 : 1);
-        private void HandleChoiceClicked(PointerEventData _) => ChoiceClicked?.Invoke(this);
+        private void HandleToggleClicked() => Change(Value >= 0.5f ? 0 : 1);
+        private void HandleChoiceClicked() => ChoiceClicked?.Invoke(this);
         // 끝에서는 버튼이 막혀 있지만 클릭은 온다(UI_EventHandler). Change가 범위 밖 번호를 거른다.
-        private void HandlePrevClicked(PointerEventData _) => Change(Index - 1);
-        private void HandleNextClicked(PointerEventData _) => Change(Index + 1);
+        private void HandlePrevClicked() => Change(Index - 1);
+        private void HandleNextClicked() => Change(Index + 1);
 
         private void HandleSliderPointer(PointerEventData eventData)
         {

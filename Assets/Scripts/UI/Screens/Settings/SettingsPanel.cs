@@ -96,8 +96,9 @@ namespace BlackHole.Unity
             SetVisible(_blocker, false);
             SetVisible(_popup, false);
 
+            // 선택지 뒤의 가림막은 화면 전체의 투명 버튼이라 연출·소리 없이 닫기만 한다.
             BindEvent(View.Button(Refs.ChoiceBlocker_Button), HandleBlockerClicked);
-            BindEvent(View.Button(Refs.BackBtn_Button), HandleBackClicked);
+            ButtonFeedback.Bind(View.Button(Refs.BackBtn_Button), HandleBackClicked);
         }
 
         // 설정 행을 새로 만든다. 창을 열 때마다 불러 지금 값을 보여 준다. 목록은 맨 위부터 보인다.
@@ -146,7 +147,7 @@ namespace BlackHole.Unity
         // 패널이 닫힐 때(비활성) 펼침 목록도 닫는다.
         private void OnDisable() => CloseChoice();
 
-        private void HandleBackClicked(PointerEventData _) => BackClicked?.Invoke();
+        private void HandleBackClicked() => BackClicked?.Invoke();
         private void HandleBlockerClicked(PointerEventData _) => CloseChoice();
 
         // 행이 알린 새 값을 종류에 맞는 사건으로 바꿔 알린다.
@@ -264,7 +265,7 @@ namespace BlackHole.Unity
                     Styled.AddImageColor(back, UIColorRole.Surface);
             }
 
-            BindEvent(option, _ => ChooseOption(index));
+            ButtonFeedback.Bind(option, () => ChooseOption(index));
             option.gameObject.SetActive(true);
             return option;
         }

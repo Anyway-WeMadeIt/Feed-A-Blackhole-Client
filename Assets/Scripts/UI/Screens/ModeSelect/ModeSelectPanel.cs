@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace BlackHole.Unity
@@ -103,11 +102,11 @@ namespace BlackHole.Unity
             if (_template != null)
                 _template.gameObject.SetActive(false);
 
-            BindEvent(_prev, HandlePrevClicked);
-            BindEvent(_next, HandleNextClicked);
-            BindEvent(_continue, HandleContinueClicked);
-            BindEvent(_newGame, HandleNewGameClicked);
-            BindEvent(View.Button(Refs.BackBtn_Button), HandleBackClicked);
+            ButtonFeedback.Bind(_prev, HandlePrevClicked);
+            ButtonFeedback.Bind(_next, HandleNextClicked);
+            ButtonFeedback.Bind(_continue, HandleContinueClicked);
+            ButtonFeedback.Bind(_newGame, HandleNewGameClicked);
+            ButtonFeedback.Bind(View.Button(Refs.BackBtn_Button), HandleBackClicked);
         }
 
         // 모드 카드를 새로 만든다. 창을 열 때마다 불러도 된다. selectedId가 목록에 없으면 첫 모드를 고른다.
@@ -131,17 +130,17 @@ namespace BlackHole.Unity
         private void Update() => Slide(UIMotion.Follow(SlideSharpness, Time.unscaledDeltaTime));
 
         // 막힌 버튼(interactable=false)의 클릭은 UI_EventHandler가 보내지 않는다.
-        private void HandlePrevClicked(PointerEventData _) => Select(_selected - 1);
-        private void HandleNextClicked(PointerEventData _) => Select(_selected + 1);
-        private void HandleBackClicked(PointerEventData _) => BackClicked?.Invoke();
+        private void HandlePrevClicked() => Select(_selected - 1);
+        private void HandleNextClicked() => Select(_selected + 1);
+        private void HandleBackClicked() => BackClicked?.Invoke();
 
-        private void HandleContinueClicked(PointerEventData _)
+        private void HandleContinueClicked()
         {
             if (_modes.Count > 0)
                 ContinueClicked?.Invoke(SelectedId);
         }
 
-        private void HandleNewGameClicked(PointerEventData _)
+        private void HandleNewGameClicked()
         {
             if (_modes.Count > 0)
                 NewGameClicked?.Invoke(SelectedId);

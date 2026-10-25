@@ -5,7 +5,7 @@ namespace BlackHole.Unity
 {
     // UI 소리. 화면 흐름(ScreenFlow)은 생성자로 받고, 프리팹 화면과 버튼 배선은 캔버스의 UISoundSource에서 찾는다.
     // SoundPlayer가 없으면(소리 없이 실행) 모든 호출이 아무것도 하지 않는다.
-    public sealed class UISounds
+    public sealed class UISounds : IButtonSounds
     {
         private readonly SoundPlayer _player;
         private readonly UISoundSetup _clips;

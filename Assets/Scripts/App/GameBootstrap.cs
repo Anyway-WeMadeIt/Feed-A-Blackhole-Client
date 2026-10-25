@@ -172,7 +172,8 @@ namespace BlackHole.Unity
             AimInput aim = new(battle);
 
             UIManager ui = CreateUI();
-            // UI 소리의 출처를 캔버스 루트에 둔다. 그 아래의 버튼 배선(ButtonFeedback)과 화면이 찾아 쓴다.
+            // UI 소리의 출처: 버튼 배선(ButtonFeedback)은 정적으로, 화면(결산의 슬라이더 소리)은 캔버스 루트의 UISoundSource에서 찾아 쓴다.
+            ButtonFeedback.Sounds = uiSounds;
             GetOrAdd<UISoundSource>(CanvasRoot().gameObject).Sounds = uiSounds;
             // 화면을 등록한 뒤에 프리팹 글자를 지금 언어로 바꾼다. 언어가 바뀌면 다시 바꾼다.
             _viewTexts = new ViewTexts(_views, localizer);
