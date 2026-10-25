@@ -91,9 +91,10 @@ namespace BlackHole.Unity
 
             UIAppliedTheme theme = _ui.Theme;
 
+            // 프리팹 없이 코드로 만드는 뷰: UIManager의 Overlay 층 맨 위에 둔다. 글꼴·글자 배율은 _ui.Theme에서 받는다.
             _notice = FloatingNotice.Create(
-                CodeScreenParent(),
-                CodeScreenSiblingIndex(),
+                _ui.OverlayLayer,
+                int.MaxValue,
                 theme.FontFor(UITextRole.Body),
                 theme.TextScale);
 

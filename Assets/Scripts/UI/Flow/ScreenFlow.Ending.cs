@@ -53,9 +53,10 @@ namespace BlackHole.Unity
         {
             UIAppliedTheme theme = _ui.Theme;
 
+            // 프리팹 없이 코드로 만드는 뷰: UIManager의 Overlay 층 맨 위에 둔다(알림보다 위, 화면 전환 덮개 아래).
             _endingScreen = EndingScreen.Create(
-                CodeScreenParent(),
-                CodeScreenSiblingIndex(),
+                _ui.OverlayLayer,
+                int.MaxValue,
                 EndingTextsOf(),
                 theme.FontFor(UITextRole.Title),
                 theme.FontFor(UITextRole.Body),

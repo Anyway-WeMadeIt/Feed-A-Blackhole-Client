@@ -41,6 +41,8 @@ namespace BlackHole.Unity
         [Header("UI Layers")]
         [SerializeField] private RectTransform _rootLayer;
         [SerializeField] private RectTransform _panelLayer;
+        [Tooltip("Overlay 층(알림·엔딩). 비우면 UIManager가 Panel 층 다음에 만든다.")]
+        [SerializeField] private RectTransform _overlayLayer;
 
         [Header("Screen Transition")]
         [SerializeField] private ScreenTransitionLook _screenTransitionLook;
@@ -338,7 +340,8 @@ namespace BlackHole.Unity
                 _rootLayer,
                 _panelLayer,
                 uiResolver,
-                presentationApplier);
+                presentationApplier,
+                overlayLayer: _overlayLayer);
 
             foreach (UIBase view in _views)
             {

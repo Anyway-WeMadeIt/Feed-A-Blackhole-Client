@@ -72,11 +72,6 @@ namespace BlackHole.Unity
                 _auth.StateChanged += HandleConnectionStateChanged;
         }
 
-        // 프리팹 없이 코드로 만드는 화면(엔딩, 알림)의 자리: 화면 전환 덮개 바로 아래, 같은 캔버스. 글꼴·글자 배율은 _ui.Theme에서 받는다.
-        private Transform CodeScreenParent() => _transition.transform.parent;
-
-        private int CodeScreenSiblingIndex() => _transition.transform.GetSiblingIndex();
-
         private void BindView<T>(T screen, Action<T> apply) where T : UIBase
         {
             Unbind(screen);

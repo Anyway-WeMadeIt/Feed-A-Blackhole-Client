@@ -13,6 +13,7 @@ public sealed partial class UIManager
 
     private readonly Transform _rootLayer;
     private readonly Transform _panelLayer;
+    // _overlayLayer: UIManager.Overlay.cs
     private readonly UIResolver _resolver;
     private readonly UIPresentationApplier _presentationApplier;
 
@@ -27,16 +28,19 @@ public sealed partial class UIManager
     public DisplayContext LastDisplay { get; private set; }
     public UIResolveResult LastResult { get; private set; }
 
+    // overlayLayer: Overlay 층(Root·Panel 위). 비우면 Panel 층 다음 형제로 만든다.
     public UIManager(
         Transform rootLayer,
         Transform panelLayer,
         UIResolver resolver,
         UIPresentationApplier presentationApplier,
         int panelKeepAliveDepth = 2,
-        float coveredPanelAlpha = 0.95f)
+        float coveredPanelAlpha = 0.95f,
+        Transform overlayLayer = null)
     {
         _rootLayer = rootLayer;
         _panelLayer = panelLayer;
+        _overlayLayer = overlayLayer != null ? overlayLayer : CreateOverlayLayer(panelLayer);
         _resolver = resolver;
         _presentationApplier = presentationApplier;
 
