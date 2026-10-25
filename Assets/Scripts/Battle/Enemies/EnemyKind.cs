@@ -8,7 +8,8 @@ namespace BlackHole.Unity
     // 적 종류 하나의 저작 에셋: 규칙 수치, 외형. 종류(EnemyType)마다 에셋이 하나이고 적 종류 목록(EnemyCatalog)에 넣는다.
     // 움직임은 모든 종류가 HQ 공전이다(EnemyBehaviors).
     // 규칙 칸은 Core의 저작 형식(EnemyData)으로 옮겨져 EnemyContentLoader가 검증한다.
-    // 외형 칸(스프라이트, 색 등급의 색)은 Core로 가지 않고 화면(EnemyView)만 읽는다. 규칙과 외형이 한 에셋에 있어 외형 연결이 빠지지 않는다.
+    // 외형 칸(EnemyLook, 색 등급의 색, 성질 표식 색)은 Core로 가지 않고 화면(EnemyView)만 읽는다. 규칙과 외형이 한 에셋에 있어 외형 연결이 빠지지 않는다.
+    // 종류마다의 화면 결정(도형·자전·사망 연출·파편 속도·체력바)이 모두 외형 칸에 있어, 종류를 추가할 때 화면 코드를 고치지 않는다.
     // 모든 칸은 이 에셋을 Inspector에서 직접 고친다.
     //
     // 종류는 계열(소행성·행성·별·은하, 픽업인 혜성)이고 색은 종류 안에 둔다.
@@ -124,11 +125,10 @@ namespace BlackHole.Unity
         [SerializeField] private List<Trait> traits = new List<Trait>();
 
         [Header("외형 (Core는 모른다)")]
-        [Tooltip("모든 색 등급이 같은 윤곽을 쓴다. 비우면 임시 원으로 그린다.")]
-        [SerializeField] private Sprite sprite;
+        [SerializeField] private EnemyLook look;
 
         public EnemyType Type => type;
-        public Sprite Sprite => sprite;
+        public EnemyLook Look => look;
 
         // 색 등급의 색. 없는 번호는 흰색이다.
         public Color ColorOf(int tier) => tier >= 0 && tier < tiers.Count ? tiers[tier].color : Color.white;

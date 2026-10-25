@@ -4,7 +4,7 @@ using BlackHole.Core;
 namespace BlackHole.Unity
 {
     // 판의 상태를 전투 화면(BattleScreen)의 값으로 바꿔 넣는다. 매 프레임 GameHost가 부른다.
-    // 판이 없으면 대기 상태를 보이고, 은하가 있는 판이면 은하 체력바의 상태도 넘긴다.
+    // 판이 없으면 대기 상태를 보이고, 체력바를 보이는 종류(EnemyLook.healthBar, 은하)가 있는 판이면 그 체력바의 상태도 넘긴다.
     internal sealed class BattleHud
     {
         private readonly UIManager _ui;
@@ -77,16 +77,17 @@ namespace BlackHole.Unity
                 _galaxy.Size,
                 _galaxy.Health,
                 _galaxy.Stats.MaxHealth,
-                _enemyLooks.ColorOf(EnemyType.Galaxy, _galaxy.Tier));
+                _enemyLooks.ColorOf(_galaxy.Definition.Type, _galaxy.Tier));
         }
 
-        private static Enemy FindGalaxy(World world)
+        // 체력바를 보이는 종류(외형 칸)의 첫 마리. 판에 은하는 하나뿐이다.
+        private Enemy FindGalaxy(World world)
         {
             IReadOnlyList<Enemy> enemies = world.Enemies;
 
             for (int i = 0; i < enemies.Count; i++)
             {
-                if (enemies[i].Definition.Type == EnemyType.Galaxy)
+                if (_enemyLooks.LookOf(enemies[i].Definition.Type).healthBar)
                     return enemies[i];
             }
 

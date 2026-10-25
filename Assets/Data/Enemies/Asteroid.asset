@@ -81,4 +81,15 @@ MonoBehaviour:
     maxActive: 0
     force: 0
     duration: 0
-  sprite: {fileID: 0}
+  look:
+    sprites: []
+    shape: 1
+    markerSprite: {fileID: 0}
+    markerShape: 0
+    spinSpeedMin: 10
+    spinSpeedMax: 25
+    spinDirection: 0
+    randomStartAngle: 0
+    deathMotion: 0
+    debrisSuction: 1
+    healthBar: 0

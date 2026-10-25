@@ -37,4 +37,15 @@ MonoBehaviour:
     critChance: 0
     critMultiplier: 0
     width: 0
-  sprite: {fileID: 0}
+  look:
+    sprites: []
+    shape: 0
+    markerSprite: {fileID: 0}
+    markerShape: 0
+    spinSpeedMin: 0
+    spinSpeedMax: 0
+    spinDirection: 0
+    randomStartAngle: 0
+    deathMotion: 0
+    debrisSuction: 0.7
+    healthBar: 0

@@ -11,7 +11,8 @@ namespace BlackHole.Unity
     // 특수 성질이 붙었으면 그 색의 윤곽 안에 성질의 표식 색으로 속을 한 겹 더 그린다(황금이면 노란 속, 임시 표식). 스프라이트가 없는 종류는 적 ID에 맞는 다각형으로 그린다.
     // 달 성질이 붙은 적은 Breaker 달과 같은 모양의 달 하나가 주위를 공전한다. 크기·위상·속도는 출현 때 정해진다(일시정지 중에는 멈춘다).
     // 모든 종류가 같은 구조다: Container(위치·크기·자전) > 몸체 스프라이트(색·음영·피격 펀치) > [성질 표식]. 달은 형제.
-    // 은하는 중심과 세 팔이 하나의 실루엣(몸체)으로 자전하고(공전과 별개, 화면에서만), 죽으면 중심으로 말려 들어가며 사라진다(EnemyVanishes).
+    // 종류마다의 외형 결정(도형·자전·사망 연출·파편 속도)은 적 종류 에셋의 외형 칸(EnemyLook)이 가진다. 이 코드는 종류를 가르지 않는다.
+    // 은하는 실루엣(몸체)이 자전하고(공전과 별개, 화면에서만), 죽으면 중심으로 말려 들어가며 사라진다(EnemyVanishes, DeathMotion.Spiral).
     // 혜성을 뺀 적은 출현할 때 점에서 시작해 제 크기보다 살짝 커졌다가 제 크기로 돌아온다(AdvanceSpawn). 일시정지 중에는 멈춘다.
     // 붙잡힌 적(World.IsHeld: 조준점이 있고 Breaker 링 안이라 거의 멈춘 적)은 색이 BreakerLook.HoldTint 쪽으로 밝아지고 제자리에서 잘게 떤다.
     //   켜지고 꺼지는 것은 HoldFadeSeconds 동안 부드럽게. 떨림은 Container의 위치에만 더하므로 피격 흔들림·자전과 부딪히지 않는다. 일시정지 중에는 멈춘다.
@@ -31,16 +32,6 @@ namespace BlackHole.Unity
         private const float SpawnSeconds = 0.35f;
         // OutBack 곡선의 넘침 정도. 1.70158이면 가장 클 때 제 크기의 약 1.1배다. 키우면 더 크게 튀었다가 돌아온다.
         private const float SpawnOvershoot = 1.70158f;
-
-        // 은하의 자전 속도(도/초)와 적마다의 배율 범위 [임시]. 시계방향 고정. 팔이 반시계로 감겨 있어 시계방향으로 돌면 팔이 뒤로 끌린다(EnemyLooks).
-        private const float GalaxySpin = 40f;
-        private const float GalaxySpinMin = 0.8f;
-        private const float GalaxySpinMax = 1.2f;
-
-        // 소행성/행성/별의 자전 속도 범위(도/초) [임시]. 공전(이동)과 별개로 제자리에서 천천히 도는 연출 —
-        // 방향(시계/반시계)은 적마다 무작위.
-        private const float SpinSpeedMin = 10f;
-        private const float SpinSpeedMax = 25f;
 
         // 이 판의 전장 배율(Hq.FieldScale). 화면 크기가 고정인 달과 떠오르는 숫자에 곱한다. Synchronize가 매번 읽는다.
         private float _fieldScale = HqGrowthDefinition.StartFieldScale;
@@ -63,7 +54,7 @@ namespace BlackHole.Unity
         private float _holdTime;
         private readonly HashSet<EnemyId> _seen = new HashSet<EnemyId>();
         private readonly List<EnemyId> _gone = new List<EnemyId>();
-        // 이번 프레임에 사망 기록으로 죽음을 안 은하. 화면을 지우는 대신 소멸 연출로 넘긴다.
+        // 이번 프레임에 사망 기록으로 죽음을 안, 소멸 연출(DeathMotion.Spiral)이 있는 적. 화면을 지우는 대신 소멸 연출로 넘긴다.
         private readonly HashSet<EnemyId> _collapsing = new HashSet<EnemyId>();
         private readonly EnemyVanishes _vanishes = new EnemyVanishes();
 
@@ -265,16 +256,18 @@ namespace BlackHole.Unity
                 if (death.IsPickup)
                     continue;
 
+                EnemyLook look = _looks.LookOf(death.EnemyType);
+
                 if (particles)
                 {
                     _hitParticles.EmitDeath(new Vector3(death.Position.X, death.Position.Y, 0),
-                        _looks.ColorOf(death.EnemyType, death.Tier, death.Tone), death.EnemyType, death.Tier, death.Size, death.Radius);
+                        _looks.ColorOf(death.EnemyType, death.Tier, death.Tone), look.debrisSuction, death.Tier, death.Size, death.Radius);
                 }
 
                 if (goldText)
                     _goldText.Show(death, _settings.NumberFormatValue);
 
-                if (death.EnemyType == EnemyType.Galaxy)
+                if (look.deathMotion == DeathMotion.Spiral)
                     _collapsing.Add(death.EnemyId);
             }
 
@@ -379,7 +372,7 @@ namespace BlackHole.Unity
             EnemyType kind = enemy.Definition.Type;
             EnemyTraitType? trait = enemy.Trait?.Type;
             string name = trait != null ? $"{kind} #{enemy.Id.Value} ({trait})" : $"{kind} #{enemy.Id.Value}";
-            bool spins = kind == EnemyType.Asteroid || kind == EnemyType.Planet || kind == EnemyType.Star;
+            EnemyLook look = _looks.LookOf(kind);
 
             // 바깥에 Container를 두고 그 안에 "Sprite"(몸체)를 자식으로 둔다 — Container(위치·크기·자전)와 Sprite(Hit 펀치 회전)가
             // 서로 다른 트랜스폼이라 부딪히지 않는다. 모든 종류가 같다.
@@ -408,9 +401,9 @@ namespace BlackHole.Unity
                 fill.transform.SetParent(view.transform, false);
                 fill.transform.localScale = Vector3.one * EnemyLooks.TraitFillScale;
 
-                // 표식 모양: 몸체와 같은 스프라이트. 은하는 실루엣이 아니라 중심 원이다(몸체 위에 겹치는 작은 표식).
+                // 표식 모양: 외형 칸이 정한다(기본은 몸체와 같은 스프라이트. 은하는 실루엣이 아니라 중심 원).
                 var fillRenderer = fill.AddComponent<SpriteRenderer>();
-                fillRenderer.sprite = kind == EnemyType.Galaxy ? _looks.GalaxyCore : renderer.sprite;
+                fillRenderer.sprite = _looks.MarkerSpriteOf(kind, renderer.sprite, enemy.Id.Value);
                 fillRenderer.color = marker;
                 fillRenderer.sortingOrder = renderer.sortingOrder + 1;
                 traitFill = fillRenderer;
@@ -426,18 +419,25 @@ namespace BlackHole.Unity
                 Fill = traitFill,
             };
 
-            if (spins)
-                visual.SpinSpeed = UnityEngine.Random.Range(SpinSpeedMin, SpinSpeedMax) * (UnityEngine.Random.value < 0.5f ? -1f : 1f);
+            // 자전: 외형 칸의 범위에서 속도를 고르고, 방향은 Random이면 반반(소행성·행성·별), 아니면 고정(은하 시계방향).
+            if (look.spinSpeedMax > 0)
+            {
+                float speed = UnityEngine.Random.Range(look.spinSpeedMin, look.spinSpeedMax);
+                float sign = look.spinDirection switch
+                {
+                    SpinDirection.Clockwise => -1f,
+                    SpinDirection.CounterClockwise => 1f,
+                    _ => UnityEngine.Random.value < 0.5f ? -1f : 1f,
+                };
+                visual.SpinSpeed = speed * sign;
+            }
 
             if (trait == EnemyTraitType.Moon)
                 _moons.Create(visual, enemy, _fieldScale);
 
-            // 은하: 시작 각도는 무작위, 자전은 시계방향 고정.
-            if (kind == EnemyType.Galaxy)
-            {
+            // 방향이 있는 모양(은하)은 시작 각도를 무작위로.
+            if (look.randomStartAngle)
                 container.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(0f, 360f));
-                visual.SpinSpeed = -GalaxySpin * UnityEngine.Random.Range(GalaxySpinMin, GalaxySpinMax);
-            }
 
             // 체력 음영: 몸체와 성질 속 채움에 음영 셰이더를 쓴다. 이후엔 체력이 바뀔 때 문턱값만 고친다(EnemyShade.Update).
             _shade.Attach(visual);
