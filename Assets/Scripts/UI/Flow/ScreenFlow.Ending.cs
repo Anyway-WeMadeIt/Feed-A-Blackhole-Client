@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BlackHole.Core;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace BlackHole.Unity
 {
     // 엔딩: 마지막 이정표(보라 은하를 부순 판)에 닿으면 결산 화면 대신 이 흐름을 탄다.
     // 1. 붕괴(전투 화면): 판은 이미 끝났다. 남은 적이 블랙홀로 빨려 들어가고 블랙홀이 커진다(BattleSystem.TryBeginCollapse). 버튼·키는 받지 않는다.
-    // 2. 엔딩 화면(EndingScreen)이 검게 덮는다. 다 덮이면 판을 정리·결산하고 결산 로그와 함께 저장한다 — 일반 판 끝과 같은 길이라 서버 진행도가 맞는다.
+    // 2. 엔딩 화면(EndingOverlay)이 검게 덮는다. 다 덮이면 판을 정리·결산하고 결산 로그와 함께 저장한다 — 일반 판 끝과 같은 길이라 서버 진행도가 맞는다.
     //    결산 화면은 보이지 않는다(보상은 다음에 업그레이드 화면에서 쓴다).
     // 3. 엔딩 문구 → 크레딧 → 감사 문구. 문구·크레딧은 누르고 있으면(클릭·터치, Space) 빨리 흐른다. 감사 문구에서 누르면 화면 전환과 함께 타이틀로.
     // 엔딩 뒤 이어하기는 마지막 이정표 뒤의 판(성장도 = MaxStage, 은하는 보라로 고정, 더 이상 이정표 없음)이다.
@@ -21,7 +20,7 @@ namespace BlackHole.Unity
         private const int EndingMaxRows = 64;
 
         private bool _endingPlaying;
-        private EndingScreen _endingScreen;
+        private EndingOverlay _endingScreen;
         private Task _endingSettlement;
 
         // 엔딩 흐름 중인가(붕괴부터 타이틀로 갈 때까지). 이 동안 판 종료 버튼·시간 만료·키는 엔딩만 다룬다.
@@ -49,21 +48,18 @@ namespace BlackHole.Unity
                 OpenEndingScreen();
         }
 
+        // Overlay로 연다(알림보다 위, 화면 전환 덮개 아래). 글꼴·글자 배율은 UIManager가 넣는다. 글자를 놓고(Present) 덮기부터 시작한다(Play).
         private void OpenEndingScreen()
         {
-            UIAppliedTheme theme = _ui.Theme;
+            EndingTexts texts = EndingTextsOf();
 
-            // 프리팹 없이 코드로 만드는 뷰: UIManager의 Overlay 층 맨 위에 둔다(알림보다 위, 화면 전환 덮개 아래).
-            _endingScreen = EndingScreen.Create(
-                _ui.OverlayLayer,
-                int.MaxValue,
-                EndingTextsOf(),
-                theme.FontFor(UITextRole.Title),
-                theme.FontFor(UITextRole.Body),
-                theme.TextScale);
-
-            _endingScreen.Covered += HandleEndingCovered;
-            _endingScreen.Finished += HandleEndingFinished;
+            _endingScreen = _ui.ShowOverlay<EndingOverlay>(_presentations.Ending, ending =>
+            {
+                ending.Covered += HandleEndingCovered;
+                ending.Finished += HandleEndingFinished;
+                ending.Present(texts);
+                ending.Play();
+            });
         }
 
         // 다 덮였다: 아래에서 판을 정리·결산한다.
@@ -120,7 +116,7 @@ namespace BlackHole.Unity
             {
                 _endingScreen.Covered -= HandleEndingCovered;
                 _endingScreen.Finished -= HandleEndingFinished;
-                Object.Destroy(_endingScreen.gameObject);
+                _ui.HideOverlay<EndingOverlay>();
             }
 
             _endingScreen = null;
