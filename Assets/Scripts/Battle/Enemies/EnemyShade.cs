@@ -30,15 +30,15 @@ namespace BlackHole.Unity
                 Debug.LogWarning($"[적 화면] '{ShaderName}' 셰이더를 찾지 못해 체력 음영 없이 그린다. 빌드라면 Project Settings > Graphics > Always Included Shaders에 추가할 것.");
         }
 
-        // 출현 때 한 번: 색을 내는 몸체(은하는 실루엣 팔)와 성질 속 채움에 음영 셰이더를 쓴다.
+        // 출현 때 한 번: 몸체와 성질 속 채움에 음영 셰이더를 쓴다.
         // 중심·반지름은 스프라이트의 텍스처 좌표(UV)라 여기서 한 번만 넣고, 이후엔 체력이 바뀔 때 문턱값만 고친다(Update).
         public void Attach(EnemyVisual visual)
         {
             if (_material == null)
                 return;
 
-            visual.Body.sharedMaterial = _material;
-            Init(visual.Body, 1);
+            visual.Renderer.sharedMaterial = _material;
+            Init(visual.Renderer, 1);
 
             // 성질 속 채움은 같은 스프라이트를 TraitFillScale로 줄인 자식이다. 반지름을 그만큼 키워 잡아야 경계선이 몸체와 같은 높이에 온다.
             if (visual.Fill != null)
@@ -62,7 +62,7 @@ namespace BlackHole.Unity
 
             visual.ShadeRatio = ratio;
             float threshold = ThresholdOf(1 - ratio);
-            SetThreshold(visual.Body, threshold);
+            SetThreshold(visual.Renderer, threshold);
 
             if (visual.Fill != null)
                 SetThreshold(visual.Fill, threshold);

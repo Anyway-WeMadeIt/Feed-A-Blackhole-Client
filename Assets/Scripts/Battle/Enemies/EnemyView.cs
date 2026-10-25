@@ -10,7 +10,8 @@ namespace BlackHole.Unity
     // 게임 상태를 바꾸지 않는다. 외형은 적 종류 에셋이 가진다(EnemyLooks). 색은 적의 색 등급으로, 크기는 적의 수치로 정한다.
     // 특수 성질이 붙었으면 그 색의 윤곽 안에 성질의 표식 색으로 속을 한 겹 더 그린다(황금이면 노란 속, 임시 표식). 스프라이트가 없는 종류는 적 ID에 맞는 다각형으로 그린다.
     // 달 성질이 붙은 적은 Breaker 달과 같은 모양의 달 하나가 주위를 공전한다. 크기·위상·속도는 출현 때 정해진다(일시정지 중에는 멈춘다).
-    // 은하는 중심과 세 팔이 하나의 실루엣으로 자전하고(공전과 별개, 화면에서만), 죽으면 나선이 중심으로 말려 들어가며 사라진다(GalaxyCollapses).
+    // 모든 종류가 같은 구조다: Container(위치·크기·자전) > 몸체 스프라이트(색·음영·피격 펀치) > [성질 표식]. 달은 형제.
+    // 은하는 중심과 세 팔이 하나의 실루엣(몸체)으로 자전하고(공전과 별개, 화면에서만), 죽으면 중심으로 말려 들어가며 사라진다(EnemyVanishes).
     // 혜성을 뺀 적은 출현할 때 점에서 시작해 제 크기보다 살짝 커졌다가 제 크기로 돌아온다(AdvanceSpawn). 일시정지 중에는 멈춘다.
     // 붙잡힌 적(World.IsHeld: 조준점이 있고 Breaker 링 안이라 거의 멈춘 적)은 색이 BreakerLook.HoldTint 쪽으로 밝아지고 제자리에서 잘게 떤다.
     //   켜지고 꺼지는 것은 HoldFadeSeconds 동안 부드럽게. 떨림은 Container의 위치에만 더하므로 피격 흔들림·자전과 부딪히지 않는다. 일시정지 중에는 멈춘다.
@@ -31,7 +32,7 @@ namespace BlackHole.Unity
         // OutBack 곡선의 넘침 정도. 1.70158이면 가장 클 때 제 크기의 약 1.1배다. 키우면 더 크게 튀었다가 돌아온다.
         private const float SpawnOvershoot = 1.70158f;
 
-        // 은하 나선팔의 자전 속도(도/초)와 적마다의 배율 범위 [임시]. 팔이 반시계로 감겨 있어 시계방향으로 돌면 팔이 뒤로 끌린다(EnemyLooks).
+        // 은하의 자전 속도(도/초)와 적마다의 배율 범위 [임시]. 시계방향 고정. 팔이 반시계로 감겨 있어 시계방향으로 돌면 팔이 뒤로 끌린다(EnemyLooks).
         private const float GalaxySpin = 40f;
         private const float GalaxySpinMin = 0.8f;
         private const float GalaxySpinMax = 1.2f;
@@ -62,9 +63,9 @@ namespace BlackHole.Unity
         private float _holdTime;
         private readonly HashSet<EnemyId> _seen = new HashSet<EnemyId>();
         private readonly List<EnemyId> _gone = new List<EnemyId>();
-        // 이번 프레임에 사망 기록으로 죽음을 안 은하. 화면을 지우는 대신 붕괴 연출로 넘긴다.
+        // 이번 프레임에 사망 기록으로 죽음을 안 은하. 화면을 지우는 대신 소멸 연출로 넘긴다.
         private readonly HashSet<EnemyId> _collapsing = new HashSet<EnemyId>();
-        private readonly GalaxyCollapses _collapses = new GalaxyCollapses();
+        private readonly EnemyVanishes _vanishes = new EnemyVanishes();
 
         // 붕괴 연출 [임시]: 가장 먼 적이 출발하는 시점(전체 0 ~ 1 중), 끝까지 감기는 각도(라디안, 먼 적일수록 더 감긴다).
         private const float CollapseStagger = 0.45f;
@@ -171,11 +172,7 @@ namespace BlackHole.Unity
                 if (visual.Moon != null)
                     _moons.Follow(visual, enemy.Position, paused, delta);
 
-                if (visual.Arms != null && !paused)
-                    visual.Arms.Rotate(0, 0, visual.ArmSpin * delta);
-
-                // 공전(이동)과 별개의 자전(소행성/행성/별만 SpinSpeed != 0). Container를 돌리므로 Hit의 펀치
-                // 회전(Renderer.transform)과 서로 다른 트랜스폼이라 부딪히지 않는다.
+                // 공전(이동)과 별개의 자전. Container를 돌리므로 Hit의 펀치 회전(Renderer.transform)과 서로 다른 트랜스폼이라 부딪히지 않는다.
                 if (visual.SpinSpeed != 0 && !paused)
                     visual.Container.Rotate(0, 0, visual.SpinSpeed * delta);
 
@@ -191,7 +188,7 @@ namespace BlackHole.Unity
             _hitParticles.Advance(delta);
             _goldText.Age(delta);
             _damageText.Age(delta);
-            _collapses.Advance(paused, delta);
+            _vanishes.Advance(paused, delta);
             _gone.Clear();
 
             foreach (EnemyId id in _visuals.Keys)
@@ -204,8 +201,8 @@ namespace BlackHole.Unity
             {
                 EnemyVisual visual = _visuals[id];
 
-                if (visual.Arms != null && _collapsing.Contains(id))
-                    _collapses.Play(visual.Renderer.transform, visual.Arms, visual.ArmSpin);
+                if (_collapsing.Contains(id))
+                    _vanishes.Play(visual.Container, visual.SpinSpeed);
                 else
                     Release(visual);
 
@@ -293,7 +290,7 @@ namespace BlackHole.Unity
 
             _visuals.Clear();
             _collapsing.Clear();
-            _collapses.Reset();
+            _vanishes.Reset();
             _comets.Reset();
             _hitParticles.Clear();
             _goldText.Reset();
@@ -309,7 +306,7 @@ namespace BlackHole.Unity
 
         public void Dispose()
         {
-            _collapses.Reset();
+            _vanishes.Reset();
             _comets.Dispose();
             Object.Destroy(_root.gameObject);
             _moons.Dispose();
@@ -384,34 +381,18 @@ namespace BlackHole.Unity
             string name = trait != null ? $"{kind} #{enemy.Id.Value} ({trait})" : $"{kind} #{enemy.Id.Value}";
             bool spins = kind == EnemyType.Asteroid || kind == EnemyType.Planet || kind == EnemyType.Star;
 
-            // 자전하는 종류(소행성/행성/별)만 바깥에 별도 Container를 두고 그 안에 "Sprite"를 자식으로 둔다 —
-            // Container(위치·크기·자전)와 Sprite(Hit 펀치 회전)가 서로 다른 트랜스폼이라 부딪히지 않는다.
-            // 그 외 종류는 기존과 같은 평평한 구조를 유지한다(Container == Sprite 자신) — 은하의 붕괴 연출
-            // (GalaxyCollapses)이 Renderer.transform의 게임오브젝트 하나만 파괴하므로, 감싸면 빈 부모가 남는다.
-            GameObject view;
-            Transform container;
+            // 바깥에 Container를 두고 그 안에 "Sprite"(몸체)를 자식으로 둔다 — Container(위치·크기·자전)와 Sprite(Hit 펀치 회전)가
+            // 서로 다른 트랜스폼이라 부딪히지 않는다. 모든 종류가 같다.
+            var containerObject = new GameObject(name);
+            containerObject.transform.SetParent(_root, false);
+            Transform container = containerObject.transform;
 
-            if (spins)
-            {
-                var containerObject = new GameObject(name);
-                containerObject.transform.SetParent(_root, false);
-                container = containerObject.transform;
-
-                view = new GameObject("Sprite");
-                view.transform.SetParent(container, false);
-            }
-            else
-            {
-                view = new GameObject(name);
-                view.transform.SetParent(_root, false);
-                container = view.transform;
-            }
+            var view = new GameObject("Sprite");
+            view.transform.SetParent(container, false);
 
             var renderer = view.AddComponent<SpriteRenderer>();
-            // 은하의 부모 스프라이트는 크기와 성질 표식의 기준이다. 실제 몸체는 자식의 완성 실루엣으로 그린다.
-            renderer.sprite = kind == EnemyType.Galaxy ? _looks.GalaxyCore : _looks.SpriteOf(kind, enemy.Id.Value);
+            renderer.sprite = _looks.SpriteOf(kind, enemy.Id.Value);
             renderer.color = _looks.ColorOf(kind, enemy.Tier, enemy.Tone);
-            renderer.enabled = kind != EnemyType.Galaxy;
 
             // 크기는 규칙 수치(반지름)를 그대로 쓴다: 스프라이트의 긴 변이 지름이 되게 맞춘다.
             Vector3 bounds = renderer.sprite.bounds.size;
@@ -427,8 +408,9 @@ namespace BlackHole.Unity
                 fill.transform.SetParent(view.transform, false);
                 fill.transform.localScale = Vector3.one * EnemyLooks.TraitFillScale;
 
+                // 표식 모양: 몸체와 같은 스프라이트. 은하는 실루엣이 아니라 중심 원이다(몸체 위에 겹치는 작은 표식).
                 var fillRenderer = fill.AddComponent<SpriteRenderer>();
-                fillRenderer.sprite = renderer.sprite;
+                fillRenderer.sprite = kind == EnemyType.Galaxy ? _looks.GalaxyCore : renderer.sprite;
                 fillRenderer.color = marker;
                 fillRenderer.sortingOrder = renderer.sortingOrder + 1;
                 traitFill = fillRenderer;
@@ -439,7 +421,6 @@ namespace BlackHole.Unity
                 Container = container,
                 Renderer = renderer,
                 Hit = new EnemyHitAnimation(renderer.transform),
-                Body = renderer,
                 BaseColor = renderer.color,
                 HoldPhase = UnityEngine.Random.Range(0f, Mathf.PI * 2),
                 Fill = traitFill,
@@ -451,13 +432,14 @@ namespace BlackHole.Unity
             if (trait == EnemyTraitType.Moon)
                 _moons.Create(visual, enemy, _fieldScale);
 
+            // 은하: 시작 각도는 무작위, 자전은 시계방향 고정.
             if (kind == EnemyType.Galaxy)
             {
-                CreateGalaxyArms(visual, enemy);
-                visual.Body = visual.Arms.GetComponent<SpriteRenderer>();
+                container.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(0f, 360f));
+                visual.SpinSpeed = -GalaxySpin * UnityEngine.Random.Range(GalaxySpinMin, GalaxySpinMax);
             }
 
-            // 체력 음영: 색을 내는 몸체(은하는 실루엣 팔)와 성질 속 채움에 음영 셰이더를 쓴다. 이후엔 체력이 바뀔 때 문턱값만 고친다(EnemyShade.Update).
+            // 체력 음영: 몸체와 성질 속 채움에 음영 셰이더를 쓴다. 이후엔 체력이 바뀔 때 문턱값만 고친다(EnemyShade.Update).
             _shade.Attach(visual);
 
             // 출현 연출은 점에서 시작한다(AdvanceSpawn). 자식(성질 표식·은하 실루엣)은 부모 크기를 따라 함께 커진다.
@@ -483,7 +465,7 @@ namespace BlackHole.Unity
 
             Color color = Color.Lerp(visual.BaseColor, _breakerLook.HoldTint, visual.Hold * _breakerLook.HoldTintStrength);
             color.a = visual.BaseColor.a;
-            visual.Body.color = color;
+            visual.Renderer.color = color;
         }
 
         // 붙잡힌 적의 제자리 떨림(월드 단위). Hold가 0이면 없다. 두 축의 주기를 조금 다르게 해 원을 그리지 않게 한다.
@@ -498,7 +480,7 @@ namespace BlackHole.Unity
         }
 
         // 출현 연출을 delta만큼 진행한다. 끝나면 정확히 제 크기가 된다(OutBack(1) = 1).
-        // 피격 흔들림은 회전만 바꾸므로 겹쳐도 된다. 연출 중에 죽은 은하는 그때 크기에서 붕괴를 시작한다(GalaxyCollapses).
+        // 피격 흔들림은 회전만 바꾸므로 겹쳐도 된다. 연출 중에 죽은 은하는 그때 크기에서 소멸을 시작한다(EnemyVanishes).
         private static void AdvanceSpawn(EnemyVisual visual, float delta)
         {
             visual.SpawnElapsed = Mathf.Min(SpawnSeconds, visual.SpawnElapsed + delta);
@@ -514,29 +496,6 @@ namespace BlackHole.Unity
         {
             float u = t - 1;
             return 1 + (SpawnOvershoot + 1) * u * u * u + SpawnOvershoot * u * u;
-        }
-
-        // 은하의 완성 실루엣: 중심과 팔을 함께 돌린다. 별도 중심 원이 윤곽을 덮지 않으며 성질 표식만 위에 겹친다.
-        // 피격 흔들림은 부모를 돌리고, 자전과 붕괴 회전은 이 자식을 돌린다.
-        private void CreateGalaxyArms(EnemyVisual visual, Enemy enemy)
-        {
-            var arms = new GameObject("Arms");
-            arms.transform.SetParent(visual.Renderer.transform, false);
-            arms.transform.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(0f, 360f));
-
-            var armsRenderer = arms.AddComponent<SpriteRenderer>();
-            armsRenderer.sprite = _looks.SpriteOf(EnemyType.Galaxy, enemy.Id.Value);
-            armsRenderer.color = visual.Renderer.color;
-            armsRenderer.sortingOrder = visual.Renderer.sortingOrder - 1;
-
-            // 에셋 스프라이트로 바꿔도 중심과 같은 지름이 되게 맞춘다(중심 도형은 1 단위).
-            Vector3 bounds = armsRenderer.sprite.bounds.size;
-            float longest = Mathf.Max(bounds.x, bounds.y);
-            Vector3 core = visual.Renderer.sprite.bounds.size;
-            arms.transform.localScale = Vector3.one * (Mathf.Max(core.x, core.y) / longest);
-
-            visual.Arms = arms.transform;
-            visual.ArmSpin = -GalaxySpin * UnityEngine.Random.Range(GalaxySpinMin, GalaxySpinMax);
         }
     }
 }
