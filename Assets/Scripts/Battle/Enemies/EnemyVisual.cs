@@ -13,6 +13,8 @@ namespace BlackHole.Unity
         public EnemyHitAnimation Hit;
         // 공전(이동)과 별개로 제자리에서 도는 자전 속도(도/초, 부호가 방향). 출현 때 정한다. 0이면 돌지 않는다.
         public float SpinSpeed;
+        // 성질의 부속물 처리기. 부속물이 있는 성질(달)이 붙은 적만 가진다(없으면 null). 아래 Moon* 칸이 그 상태다.
+        public IEnemyAttachment Attachment;
         // 달 성질이 붙은 적만 가진다(없으면 null). 적 스프라이트의 형제라 피격 흔들림·배율의 영향을 받지 않는다(EnemyMoons).
         public MeshRenderer Moon;
         // 달 공전의 위상(바퀴)과 속도(바퀴/초, 시계방향). 적마다 출현 때 한 번 정해진다.

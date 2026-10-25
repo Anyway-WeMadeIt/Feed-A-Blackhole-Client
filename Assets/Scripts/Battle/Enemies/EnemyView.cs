@@ -9,7 +9,7 @@ namespace BlackHole.Unity
     // 적 시스템의 화면. 매 프레임 World의 살아 있는 적을 읽어 스프라이트를 맞추고, 짧은 피격 흔들림 연출도 같이 진행시킨다.
     // 게임 상태를 바꾸지 않는다. 외형은 적 종류 에셋이 가진다(EnemyLooks). 색은 적의 색 등급으로, 크기는 적의 수치로 정한다.
     // 특수 성질이 붙었으면 그 색의 윤곽 안에 성질의 표식 색으로 속을 한 겹 더 그린다(황금이면 노란 속, 임시 표식). 스프라이트가 없는 종류는 적 ID에 맞는 다각형으로 그린다.
-    // 달 성질이 붙은 적은 Breaker 달과 같은 모양의 달 하나가 주위를 공전한다. 크기·위상·속도는 출현 때 정해진다(일시정지 중에는 멈춘다).
+    // 달 성질이 붙은 적은 Breaker 달과 같은 모양의 달 하나가 주위를 공전한다(EnemyMoons). 성질의 부속물은 IEnemyAttachment 처리기 목록으로 등록한다.
     // 모든 종류가 같은 구조다: Container(위치·크기·자전) > 몸체 스프라이트(색·음영·피격 펀치) > [성질 표식]. 달은 형제.
     // 종류마다의 외형 결정(도형·자전·사망 연출·파편 속도)은 적 종류 에셋의 외형 칸(EnemyLook)이 가진다. 이 코드는 종류를 가르지 않는다.
     // 은하는 실루엣(몸체)이 자전하고(공전과 별개, 화면에서만), 죽으면 중심으로 말려 들어가며 사라진다(EnemyVanishes, DeathMotion.Spiral).
@@ -42,9 +42,9 @@ namespace BlackHole.Unity
         private readonly GameSettings _settings;
         private readonly BreakerLook _breakerLook;
         private readonly CometView _comets;
-        // 공용 처리기: 달 성질의 달, 체력 음영. 상태는 EnemyVisual에 있다.
-        private readonly EnemyMoons _moons;
+        // 공용 처리기: 체력 음영과, 성질에 붙는 부속물(달). 상태는 EnemyVisual에 있다. 부속물이 있는 성질을 추가하면 이 목록에 처리기를 넣는다.
         private readonly EnemyShade _shade;
+        private readonly IEnemyAttachment[] _attachments;
         private readonly EnemyHitParticles _hitParticles;
         private readonly EnemyGoldText _goldText;
         private readonly BattleSounds _sounds;
@@ -85,7 +85,7 @@ namespace BlackHole.Unity
             _looks = looks;
             _breakerLook = breakerLook;
             _comets = new CometView(parent, cometLook);
-            _moons = new EnemyMoons(_root, breakerLook);
+            _attachments = new IEnemyAttachment[] { new EnemyMoons(_root, breakerLook) };
             _hitParticles = _root.gameObject.AddComponent<EnemyHitParticles>();
             _goldText = new EnemyGoldText(_root);
             _sounds = sounds;
@@ -160,8 +160,7 @@ namespace BlackHole.Unity
                 if (visual.SpawnElapsed < SpawnSeconds)
                     AdvanceSpawn(visual, paused ? (visual.SpawnElapsed == 0 ? SpawnSeconds : 0) : delta);
 
-                if (visual.Moon != null)
-                    _moons.Follow(visual, enemy.Position, paused, delta);
+                visual.Attachment?.Follow(visual, enemy.Position, paused, delta);
 
                 // 공전(이동)과 별개의 자전. Container를 돌리므로 Hit의 펀치 회전(Renderer.transform)과 서로 다른 트랜스폼이라 부딪히지 않는다.
                 if (visual.SpinSpeed != 0 && !paused)
@@ -302,8 +301,10 @@ namespace BlackHole.Unity
             _vanishes.Reset();
             _comets.Dispose();
             Object.Destroy(_root.gameObject);
-            _moons.Dispose();
             _shade.Dispose();
+
+            foreach (IEnemyAttachment attachment in _attachments)
+                (attachment as IDisposable)?.Dispose();
         }
 
         private bool IsRevealed(Enemy enemy)
@@ -336,8 +337,7 @@ namespace BlackHole.Unity
             if (visual.Container.gameObject.activeSelf != visible)
                 visual.Container.gameObject.SetActive(visible);
 
-            if (visual.Moon != null)
-                _moons.Place(visual, position, scale, visible);
+            visual.Attachment?.Place(visual, position, scale, visible);
         }
 
         // 원점에서 가장 먼 일반 적(픽업 제외) 중심까지의 거리. 없으면 0.
@@ -363,8 +363,7 @@ namespace BlackHole.Unity
         {
             Object.Destroy(visual.Container.gameObject);
 
-            if (visual.Moon != null)
-                _moons.Destroy(visual);
+            visual.Attachment?.Destroy(visual);
         }
 
         private EnemyVisual Create(Enemy enemy)
@@ -432,8 +431,16 @@ namespace BlackHole.Unity
                 visual.SpinSpeed = speed * sign;
             }
 
-            if (trait == EnemyTraitType.Moon)
-                _moons.Create(visual, enemy, _fieldScale);
+            // 성질의 부속물(달): 등록된 처리기 가운데 이 성질의 것이 만든다.
+            foreach (IEnemyAttachment attachment in _attachments)
+            {
+                if (trait == attachment.Trait)
+                {
+                    attachment.Create(visual, enemy, _fieldScale);
+                    visual.Attachment = attachment;
+                    break;
+                }
+            }
 
             // 방향이 있는 모양(은하)은 시작 각도를 무작위로.
             if (look.randomStartAngle)
@@ -446,8 +453,7 @@ namespace BlackHole.Unity
             visual.BaseScale = container.localScale;
             container.localScale = Vector3.zero;
 
-            if (visual.Moon != null)
-                _moons.BeginSpawn(visual);
+            visual.Attachment?.BeginSpawn(visual);
 
             return visual;
         }
@@ -487,8 +493,7 @@ namespace BlackHole.Unity
             float scale = OutBack(visual.SpawnElapsed / SpawnSeconds);
             visual.Container.localScale = visual.BaseScale * scale;
 
-            if (visual.Moon != null)
-                _moons.SetScale(visual, scale);
+            visual.Attachment?.SetScale(visual, scale);
         }
 
         // 0 → 1로 가며 끝 무렵 1을 살짝 넘었다가 1에서 멈추는 곡선.

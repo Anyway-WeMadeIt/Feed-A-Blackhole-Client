@@ -7,8 +7,8 @@ namespace BlackHole.Unity
 {
     // 달 성질이 붙은 적의 달. 외형은 Breaker 달과 같은 셰이더·머티리얼(BreakerLook.OrbMaterial)이다.
     // 모든 행성이 같은 크기의 달을 가지고, 궤도는 적의 반지름 바로 바깥이다(Breaker는 링 바깥 가장자리).
-    // 달의 상태(렌더러·위상·속도·제 크기)는 EnemyVisual이 갖고, 이 처리기 하나가 모든 달을 같은 식으로 다룬다. EnemyView가 매 프레임 부른다.
-    internal sealed class EnemyMoons : IDisposable
+    // 달의 상태(렌더러·위상·속도·제 크기)는 EnemyVisual이 갖고, 이 처리기 하나가 모든 달을 같은 식으로 다룬다. 달 성질의 부속물로 EnemyView에 등록된다(IEnemyAttachment).
+    internal sealed class EnemyMoons : IEnemyAttachment, IDisposable
     {
         // 달 구체의 반지름(전장 배율 1에서의 월드 단위). 모든 행성이 같은 크기의 달을 가진다. Breaker 달(BreakerLook.OrbRadius)보다 작다.
         // 원작 달은 카메라와 무관하게 화면에서 약 25px이라(C0 지름 25px ÷ 54px/unit ÷ 2) 판의 전장 배율을 곱한다.
@@ -44,6 +44,8 @@ namespace BlackHole.Unity
             _look = look;
             _quad = QuadRenderers.CreateMesh();
         }
+
+        public EnemyTraitType Trait => EnemyTraitType.Moon;
 
         // 달은 출현 때 한 번 만든다. 적의 크기는 변하지 않으므로 궤도와 사각형 크기도 여기서 한 번만 정한다.
         // fieldScale: 이 판의 전장 배율. 적(월드)에 붙어 돌지만 달 자체와 간격은 화면 크기가 고정이라 곱한다.
