@@ -124,8 +124,6 @@ namespace BlackHole.Unity
         // 툴팁과 행 사이의 틈.
         private const float TooltipGap = 6;
 
-        private readonly Vector3[] _corners = new Vector3[4];
-
         private TMP_Text _result;
         private RectTransform _stageFillRect;
         private TMP_Text _stageText;
@@ -143,9 +141,8 @@ namespace BlackHole.Unity
         private Button _upgradeButton;
         private Button _continueButton;
 
-        private RectTransform _tooltip;
-        private TMP_Text _tooltipText;
-        private RectTransform _tooltipOwner;
+        // 물질 행·통계 칸 위의 이름 툴팁.
+        private RowTooltip _tooltip;
 
         private GameObject _skillStats;
         private GameObject _countStats;
@@ -217,10 +214,7 @@ namespace BlackHole.Unity
         private long _totalBegin;
         private long _totalTarget;
         // 값이 바뀐 글자를 잠깐 키우는 강조 효과. 한 번에 하나.
-        private const float ScaleDuration = 0.15f;
-        private const float HighlightScale = 1.2f;
-        private TMP_Text _scaleTarget;
-        private float _scaleTimer;
+        private readonly TextPop _pop = new();
 
         protected override void OnInitialize()
         {
@@ -232,7 +226,7 @@ namespace BlackHole.Unity
 
             _stageFill.Completed += HandleStageFillCompleted;
             _countUp.Completed += HandleCountUpCompleted;
-            _countUp.ValueChanged += PlayScaleEffect;
+            _countUp.ValueChanged += _pop.Play;
             _stageText = View.Text(Refs.Stage_Text);
             _totalLabel = View.Text(Refs.TotalLabel_Text);
             _earned = View.Text(Refs.EarnedGold_Text);
@@ -241,13 +235,13 @@ namespace BlackHole.Unity
             _asteroidText = View.Text(Refs.AsteroidRow_Text);
             _planetText = View.Text(Refs.PlanetRow_Text);
             _starText = View.Text(Refs.StarRow_Text);
-            _tooltip = View.Rect(Refs.Tooltip_Image);
-            _tooltipText = View.Text(Refs.Tooltip_Text);
-            HideTooltip();
+            TMP_Text tooltipText = View.Text(Refs.Tooltip_Text);
+            _tooltip = new RowTooltip(View.Rect(Refs.Tooltip_Image), tooltipText, TooltipGap);
+            _tooltip.Hide();
 
             // TextBindings에 없는 글자(합계·툴팁·캡션·통계 값)와 바탕색·구분선은 Styled가 테마에 맞춘다. 글자 크기는 프리팹 크기 × 배율.
             Styled.AddText(_totalGold, UITextRole.Body, UITextSizePolicy.Prefab);
-            Styled.AddText(_tooltipText, UITextRole.Body, UITextSizePolicy.Prefab);
+            Styled.AddText(tooltipText, UITextRole.Body, UITextSizePolicy.Prefab);
             Styled.AddText(View.Text(Refs.DestroyedCaption_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
             Styled.AddText(View.Text(Refs.AsteroidName_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
             Styled.AddText(View.Text(Refs.PlanetName_Text), UITextRole.Caption, UITextSizePolicy.Prefab);
@@ -270,14 +264,14 @@ namespace BlackHole.Unity
 
             // 물질 행 셋: 올리면 툴팁. 통계 칸(BindStat)과 같은 방식이다.
             ButtonFeedback.Bind(_asteroidRow,
-                onHover: () => ShowTooltip(_asteroidRow, Localized(UIText.Settlement.RowAsteroid)),
-                onLeave: () => HideTooltip(_asteroidRow));
+                onHover: () => _tooltip.Show(_asteroidRow, Localized(UIText.Settlement.RowAsteroid)),
+                onLeave: () => _tooltip.Hide(_asteroidRow));
             ButtonFeedback.Bind(_planetRow,
-                onHover: () => ShowTooltip(_planetRow, Localized(UIText.Settlement.RowPlanet)),
-                onLeave: () => HideTooltip(_planetRow));
+                onHover: () => _tooltip.Show(_planetRow, Localized(UIText.Settlement.RowPlanet)),
+                onLeave: () => _tooltip.Hide(_planetRow));
             ButtonFeedback.Bind(_starRow,
-                onHover: () => ShowTooltip(_starRow, Localized(UIText.Settlement.RowStar)),
-                onLeave: () => HideTooltip(_starRow));
+                onHover: () => _tooltip.Show(_starRow, Localized(UIText.Settlement.RowStar)),
+                onLeave: () => _tooltip.Hide(_starRow));
 
             ButtonFeedback.Bind(_upgradeButton, () => UpgradeClicked?.Invoke());
             ButtonFeedback.Bind(_continueButton, () => ContinueClicked?.Invoke());
@@ -302,7 +296,7 @@ namespace BlackHole.Unity
         }
 
         // 화면이 닫힐 때 툴팁도 닫는다. 다시 열 때 남아 있지 않게 한다.
-        private void OnDisable() => HideTooltip();
+        private void OnDisable() => _tooltip?.Hide();
 
         private StatCell BindStat(Refs button, Refs value, string labelKey)
         {
@@ -310,8 +304,8 @@ namespace BlackHole.Unity
             Styled.AddText(cell.Value, UITextRole.Body, UITextSizePolicy.Prefab);
 
             ButtonFeedback.Bind(cell.Button,
-                onHover: () => ShowTooltip(cell.Button, Localized(cell.LabelKey)),
-                onLeave: () => HideTooltip(cell.Button));
+                onHover: () => _tooltip.Show(cell.Button, Localized(cell.LabelKey)),
+                onLeave: () => _tooltip.Hide(cell.Button));
 
             return cell;
         }
@@ -473,7 +467,7 @@ namespace BlackHole.Unity
         public void Relocalize(Localizer localizer)
         {
             _localizer = localizer;
-            HideTooltip();
+            _tooltip?.Hide();
 
             if (_shownMilestone is bool milestone)
                 ShowResult(milestone);
@@ -506,46 +500,6 @@ namespace BlackHole.Unity
         private string Localized(string key, params object[] args) =>
             _localizer != null ? _localizer.Format(key, args) : key;
 
-        #region 툴팁
-
-        // 행 위 가운데에 붙인다. 툴팁은 레이캐스트를 받지 않아 행의 올림을 가로채지 않는다.
-        private void ShowTooltip(Button row, string displayName)
-        {
-            if (_tooltip == null || row == null)
-                return;
-
-            _tooltipOwner = (RectTransform)row.transform;
-
-            if (_tooltipText != null)
-                _tooltipText.text = displayName;
-
-            _tooltip.gameObject.SetActive(true);
-            _tooltip.SetAsLastSibling();
-            LayoutRebuilder.ForceRebuildLayoutImmediate(_tooltip);
-
-            _tooltipOwner.GetWorldCorners(_corners);
-            _tooltip.pivot = new Vector2(0.5f, 0);
-            _tooltip.position = (_corners[1] + _corners[2]) * 0.5f;
-            _tooltip.anchoredPosition += new Vector2(0, TooltipGap);
-        }
-
-        // 다른 행으로 막 옮겨 간 툴팁은 닫지 않는다.
-        private void HideTooltip(Button row)
-        {
-            if (row != null && row.transform == _tooltipOwner)
-                HideTooltip();
-        }
-
-        private void HideTooltip()
-        {
-            _tooltipOwner = null;
-
-            if (_tooltip != null)
-                _tooltip.gameObject.SetActive(false);
-        }
-
-        #endregion
-
         private static string Count(int count) =>
             "x" + count.ToString("N0", CultureInfo.InvariantCulture);
 
@@ -570,7 +524,7 @@ namespace BlackHole.Unity
 
             _stageFill.Tick(Time.deltaTime);
             _countUp.Tick(Time.deltaTime);
-            TickScaleEffect();
+            _pop.Tick(Time.deltaTime);
         }
 
         // 연출을 끝까지 돌린 것과 같은 상태로 만든다: 막대·숫자 다 최종값, 강조 효과 끔, 슬라이더 소리 멈추고 종료음. 연출 중이 아니면 아무것도 하지 않는다.
@@ -585,7 +539,7 @@ namespace BlackHole.Unity
             if (_earned != null)
                 _earned.text = Money(_earnedTarget);
 
-            StopScaleEffect();
+            _pop.Stop();
             Sounds?.StopSlider();
             Sounds?.PlayClosing();
         }
@@ -599,38 +553,5 @@ namespace BlackHole.Unity
 
         // 숫자가 다 올랐다: 종료음.
         private void HandleCountUpCompleted() => Sounds?.PlayClosing();
-
-        // 값이 바뀐 글자를 잠깐 키운다. 다른 글자가 커지는 중이었으면 그것은 원래 크기로.
-        private void PlayScaleEffect(TMP_Text text)
-        {
-            StopScaleEffect();
-            _scaleTarget = text;
-            _scaleTimer = 0f;
-        }
-
-        private void StopScaleEffect()
-        {
-            if (_scaleTarget != null)
-                _scaleTarget.transform.localScale = Vector3.one;
-
-            _scaleTarget = null;
-        }
-
-        // 앞 절반은 HighlightScale까지 커지고 뒤 절반은 1로 돌아온다.
-        private void TickScaleEffect()
-        {
-            if (_scaleTarget == null)
-                return;
-
-            _scaleTimer += Time.deltaTime;
-            float t = _scaleTimer / ScaleDuration;
-            float scale = t <= 0.5f
-                ? Mathf.Lerp(1f, HighlightScale, t * 2f)
-                : Mathf.Lerp(HighlightScale, 1f, (t - 0.5f) * 2f);
-            _scaleTarget.transform.localScale = Vector3.one * scale;
-
-            if (t >= 1f)
-                StopScaleEffect();
-        }
     }
 }
