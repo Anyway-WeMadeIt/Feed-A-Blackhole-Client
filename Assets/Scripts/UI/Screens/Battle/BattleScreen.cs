@@ -51,7 +51,8 @@ namespace BlackHole.Unity
         public event Action EndClicked;
 
         private TMP_Text _remaining;
-        private TMP_Text _gain;
+        // 시간 증가 알림("+0.3")과 남은 시간 숫자 튕김.
+        private TimeGainNotice _gain;
         private TMP_Text _earned;
         private RectTransform _levelFill;
         private TMP_Text _pauseLabel;
@@ -73,26 +74,10 @@ namespace BlackHole.Unity
         private const string FractionSize = "70%";
         private float _fillValue = float.NaN;
 
-        // 시간 증가 알림. 짧게 연달아 늘면 하나로 합쳐 "+0.9"처럼 보이고, 마지막 증가 뒤 잠시 있다가 흐려진다.
-        // 그 순간 남은 시간 숫자를 살짝 튕긴다. 화면에서 보고 맞출 값이다.
-        private const float GainMergeWindow = 0.5f; // 이 안에 다시 늘면 합친다(초)
-        private const float GainHold = 0.5f;        // 마지막 증가 뒤 그대로 보이는 시간(초)
-        private const float GainFade = 0.3f;        // 그 뒤 흐려지는 시간(초)
-        private const float GainGap = 12f;          // 숫자 오른쪽 끝과의 틈(px)
-        private const float MinGain = 0.05f;        // 이보다 작은 증가는 모아 두었다가 알린다(초)
-        private const float PopDuration = 0.15f;
-        private const float PopScale = 0.1f;        // 1.0 → 1.1 → 1.0
-
-        private float _shownAdded = float.NaN;      // 마지막으로 알린 "더해진 시간" 합. NaN이면 기준이 없다(새 판).
-        private float _gainSum;
-        private float _sinceGain = float.PositiveInfinity;
-        private float _popTime = PopDuration;
-
         protected override void OnInitialize()
         {
             _remaining = View.Text(Refs.Remaining_Text);
-            _gain = View.Text(Refs.TimeGain_Text);
-            ResetGain();
+            _gain = new TimeGainNotice(_remaining, View.Text(Refs.TimeGain_Text));
             _earned = View.Text(Refs.EarnedGold_Text);
             _levelFill = View.Rect(Refs.LevelFill_Image);
             _pauseLabel = View.Text(Refs.PauseBtn_Text);
@@ -116,7 +101,7 @@ namespace BlackHole.Unity
         // 화면이 닫힐 때 알림·튕김·이정표 칸을 지운다. 다시 열 때 남아 있지 않게 한다.
         private void OnDisable()
         {
-            ResetGain();
+            _gain?.Reset();
             _milestones?.Reset();
             _galaxyBar?.Hide();
         }
@@ -185,7 +170,7 @@ namespace BlackHole.Unity
                 _idle = true;
                 _fillValue = float.NaN;
                 SetLevelFill(0);
-                ResetGain();
+                _gain.Reset();
                 _milestones?.Reset();
                 _milestones?.SetVisible(false);
                 _galaxyBar?.Hide();
@@ -239,10 +224,10 @@ namespace BlackHole.Unity
                 remainingChanged = true;
             }
 
-            if (TrackGain(addedSeconds) || (remainingChanged && GainVisible))
-                PlaceGain();
+            if (_gain.Track(addedSeconds) || (remainingChanged && _gain.IsVisible))
+                _gain.Place();
 
-            AnimateGain(Time.unscaledDeltaTime);
+            _gain.Animate(Time.unscaledDeltaTime);
 
             if (earnedGold != _shownEarned && _earned != null)
             {
@@ -297,91 +282,6 @@ namespace BlackHole.Unity
             string fraction = (tenths % 10).ToString(CultureInfo.InvariantCulture);
 
             return $"<mspace={DigitWidth}>{whole}</mspace><size={FractionSize}>.<mspace={DigitWidth}>{fraction}</mspace></size>";
-        }
-
-        private bool GainVisible => _gain != null && _gain.gameObject.activeSelf;
-
-        // 더해진 시간 합이 늘었으면 알림 글자를 고치고 true. 새 판(합이 줄었거나 기준이 없음)이면 기준만 잡는다.
-        private bool TrackGain(float addedSeconds)
-        {
-            if (float.IsNaN(_shownAdded) || addedSeconds < _shownAdded)
-            {
-                _shownAdded = addedSeconds;
-                return false;
-            }
-
-            float gained = addedSeconds - _shownAdded;
-            if (gained < MinGain)
-                return false;
-
-            _shownAdded = addedSeconds;
-            _gainSum = _sinceGain <= GainMergeWindow ? _gainSum + gained : gained;
-            _sinceGain = 0;
-            _popTime = 0;
-
-            if (_gain == null)
-                return false;
-
-            _gain.text = "+" + _gainSum.ToString("0.0", CultureInfo.InvariantCulture);
-            _gain.alpha = 1;
-            _gain.gameObject.SetActive(true);
-            return true;
-        }
-
-        // 알림을 숫자 오른쪽 끝 바로 옆에 둔다. 숫자 폭은 자릿수·글자 크기 설정에 따라 바뀐다.
-        // 숫자 글자는 Timer 전체에 펼쳐져 있고 기준점이 가운데라, 그 지역 좌표의 x가 곧 Timer 가운데 기준 x다.
-        private void PlaceGain()
-        {
-            if (_gain == null || _remaining == null)
-                return;
-
-            _remaining.ForceMeshUpdate();
-            RectTransform gain = _gain.rectTransform;
-            gain.anchoredPosition = new Vector2(_remaining.textBounds.max.x + GainGap, gain.anchoredPosition.y);
-        }
-
-        private void AnimateGain(float deltaTime)
-        {
-            if (_popTime < PopDuration && _remaining != null)
-            {
-                _popTime += deltaTime;
-                float t = Mathf.Clamp01(_popTime / PopDuration);
-                float scale = t < 1 ? 1 + PopScale * Mathf.Sin(t * Mathf.PI) : 1;
-                _remaining.rectTransform.localScale = new Vector3(scale, scale, 1);
-            }
-
-            if (float.IsPositiveInfinity(_sinceGain))
-                return;
-
-            _sinceGain += deltaTime;
-            float alpha = 1 - Mathf.Clamp01((_sinceGain - GainHold) / GainFade);
-
-            if (alpha > 0)
-            {
-                if (_gain != null)
-                    _gain.alpha = alpha;
-
-                return;
-            }
-
-            _sinceGain = float.PositiveInfinity;
-
-            if (_gain != null)
-                _gain.gameObject.SetActive(false);
-        }
-
-        private void ResetGain()
-        {
-            _shownAdded = float.NaN;
-            _gainSum = 0;
-            _sinceGain = float.PositiveInfinity;
-            _popTime = PopDuration;
-
-            if (_gain != null)
-                _gain.gameObject.SetActive(false);
-
-            if (_remaining != null)
-                _remaining.rectTransform.localScale = Vector3.one;
         }
 
         private string PauseLabel(bool paused) => Localized(paused ? UIText.Battle.Resume : UIText.Battle.Pause);
