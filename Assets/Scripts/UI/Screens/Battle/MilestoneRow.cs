@@ -233,7 +233,7 @@ namespace BlackHole.Unity
                     continue;
                 }
 
-                float scale = 1 + (PopScale - 1) * Mathf.Sin(t * Mathf.PI);
+                float scale = UIMotion.Pop(t, PopScale - 1);
                 token.Rect.localScale = new Vector3(scale, scale, 1);
             }
         }
@@ -278,7 +278,7 @@ namespace BlackHole.Unity
         {
             float since = _time - _phaseStart;
             float t = Mathf.Clamp01(since / GoldPopDuration);
-            float scale = t < 1 ? 1 + (GoldPopScale - 1) * Mathf.Sin(t * Mathf.PI) : 1;
+            float scale = UIMotion.Pop(t, GoldPopScale - 1);
 
             for (int i = 0; i < _tokens.Length; i++)
                 _tokens[i].Rect.localScale = new Vector3(scale, scale, 1);

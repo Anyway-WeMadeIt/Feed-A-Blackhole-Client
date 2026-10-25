@@ -128,7 +128,7 @@ namespace BlackHole.Unity
         }
 
         // 매 프레임: 카드를 제자리로 조금씩 옮긴다. 일시정지(timeScale 0)와 관계없이 움직인다.
-        private void Update() => Slide(1 - Mathf.Exp(-SlideSharpness * Time.unscaledDeltaTime));
+        private void Update() => Slide(UIMotion.Follow(SlideSharpness, Time.unscaledDeltaTime));
 
         // 막힌 버튼(interactable=false)의 클릭은 UI_EventHandler가 보내지 않는다.
         private void HandlePrevClicked(PointerEventData _) => Select(_selected - 1);

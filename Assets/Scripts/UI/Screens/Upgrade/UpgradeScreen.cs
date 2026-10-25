@@ -218,7 +218,7 @@ namespace BlackHole.Unity
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / ShortBumpSeconds);
-                float scale = 1 + (ShortBumpScale - 1) * Mathf.Sin(t * Mathf.PI);
+                float scale = UIMotion.Pop(t, ShortBumpScale - 1);
                 scaled.localScale = new Vector3(scale, scale, 1);
                 yield return null;
             }
@@ -253,7 +253,7 @@ namespace BlackHole.Unity
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / GoldCountSeconds);
-                t = 1 - (1 - t) * (1 - t);
+                t = UIMotion.EaseOut(t);
                 WriteGold(from + (long)((to - from) * (double)t), preview: true);
                 yield return null;
             }

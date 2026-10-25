@@ -80,7 +80,7 @@ namespace BlackHole.Unity
             {
                 _popTime += deltaTime;
                 float t = Mathf.Clamp01(_popTime / PopDuration);
-                float scale = t < 1 ? 1 + PopScale * Mathf.Sin(t * Mathf.PI) : 1;
+                float scale = UIMotion.Pop(t, PopScale);
                 _remaining.rectTransform.localScale = new Vector3(scale, scale, 1);
             }
 

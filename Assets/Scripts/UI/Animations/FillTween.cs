@@ -32,7 +32,7 @@ namespace BlackHole.Unity
                 return;
 
             _elapsed += deltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_elapsed / _seconds));
+            float t = UIMotion.Smooth(_elapsed / _seconds);
             Set(_target * t);
 
             if (t >= 1f)

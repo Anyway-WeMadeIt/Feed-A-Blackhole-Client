@@ -314,7 +314,7 @@ namespace BlackHole.Unity
             }
             else
             {
-                float t = 1f - Mathf.Exp(-FillSharpness * Time.unscaledDeltaTime);
+                float t = UIMotion.Follow(FillSharpness, Time.unscaledDeltaTime);
                 _fillValue = Mathf.Lerp(_fillValue, target, t);
 
                 if (target - _fillValue < 0.001f)

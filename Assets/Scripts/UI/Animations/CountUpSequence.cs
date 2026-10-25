@@ -58,7 +58,7 @@ namespace BlackHole.Unity
 
             _elapsed += deltaTime;
             Step step = _steps[_index];
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_elapsed / Mathf.Max(StepSeconds, 0.0001f)));
+            float t = UIMotion.Smooth(_elapsed / Mathf.Max(StepSeconds, 0.0001f));
             Write(step, step.From + (long)Math.Round((step.To - step.From) * (double)t));
 
             if (t < 1f)

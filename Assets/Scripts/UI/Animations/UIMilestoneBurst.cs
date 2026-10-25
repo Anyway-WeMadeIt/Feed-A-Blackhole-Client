@@ -119,7 +119,7 @@ namespace BlackHole.Unity
 
         private void Draw(float t)
         {
-            float distanceT = 1f - (1f - t) * (1f - t);
+            float distanceT = UIMotion.EaseOut(t);
             float alpha = 1f - Mathf.SmoothStep(0.2f, 1f, t);
 
             for (int i = 0; i < _pieces.Length; i++)

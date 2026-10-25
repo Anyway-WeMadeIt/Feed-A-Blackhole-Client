@@ -245,14 +245,14 @@ namespace BlackHole.Unity
                 return;
 
             _appear = Mathf.Min(1, _appear + delta / AppearSeconds);
-            float ease = 1 - (1 - _appear) * (1 - _appear);
+            float ease = UIMotion.EaseOut(_appear);
             _root.anchoredPosition = new Vector2(0, BottomMargin - AppearRise * (1 - ease));
 
             // 꼬리: 맞은 뒤 잠깐 머물렀다가 막대를 따라 줄어든다. 막대보다 짧아지지 않는다.
             _sinceHit += delta;
 
             if (_sinceHit >= TrailHoldSeconds)
-                _trailFraction = Mathf.Lerp(_trailFraction, _fraction, 1 - Mathf.Exp(-TrailSharpness * delta));
+                _trailFraction = Mathf.Lerp(_trailFraction, _fraction, UIMotion.Follow(TrailSharpness, delta));
 
             _trailFraction = Mathf.Max(_trailFraction, _fraction);
             SetWidth(_fill, _fraction);
@@ -262,8 +262,7 @@ namespace BlackHole.Unity
             _fillImage.color = Color.Lerp(_lines.ColorOf(_line), Color.white, flash);
 
             _sincePop += delta;
-            float pop = _sincePop < CountPopSeconds ? Mathf.Sin(_sincePop / CountPopSeconds * Mathf.PI) * CountPopScale : 0;
-            _count.transform.localScale = Vector3.one * (1 + pop);
+            _count.transform.localScale = Vector3.one * UIMotion.Pop(_sincePop / CountPopSeconds, CountPopScale);
 
             float alpha = ease;
 

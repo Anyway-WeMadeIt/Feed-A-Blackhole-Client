@@ -190,7 +190,7 @@ namespace BlackHole.Unity
             switch (_phase)
             {
                 case Phase.Covering:
-                    _background.color = WithAlpha(Background, Smooth(_elapsed / CoverSeconds));
+                    _background.color = WithAlpha(Background, UIMotion.Smooth(_elapsed / CoverSeconds));
 
                     if (_elapsed >= CoverSeconds)
                     {
@@ -208,7 +208,7 @@ namespace BlackHole.Unity
                     break;
 
                 case Phase.Thanks:
-                    _thanksGroup.alpha = Smooth(_elapsed / ThanksFadeSeconds);
+                    _thanksGroup.alpha = UIMotion.Smooth(_elapsed / ThanksFadeSeconds);
                     float prompt = _elapsed - PromptDelay;
                     _prompt.alpha = prompt <= 0 ? 0 : Mathf.Min(1, prompt) * (0.55f + 0.45f * Mathf.Cos(prompt * PromptPulseHz * Mathf.PI * 2));
                     break;
@@ -229,7 +229,7 @@ namespace BlackHole.Unity
             for (int i = 0; i < _lines.Count; i++)
             {
                 float t = Mathf.Clamp01((_elapsed - LineDelay - i * LineInterval) / LineFadeSeconds);
-                float eased = Smooth(t);
+                float eased = UIMotion.Smooth(t);
                 _lines[i].alpha = eased;
                 RectTransform rect = (RectTransform)_lines[i].transform;
                 Vector2 position = rect.anchoredPosition;
@@ -240,7 +240,7 @@ namespace BlackHole.Unity
             float fade = Mathf.Clamp01((_elapsed - shown) / LinesOutSeconds);
 
             if (_skipFade < 0)
-                _linesGroup.alpha = 1 - Smooth(fade);
+                _linesGroup.alpha = 1 - UIMotion.Smooth(fade);
 
             if (fade >= 1)
                 Enter(Phase.Credits);
@@ -316,12 +316,6 @@ namespace BlackHole.Unity
             float lineHeight = ((RectTransform)_lines[index].transform).sizeDelta.y;
             float top = (_lines.Count - 1) * lineHeight * 0.5f;
             return top - index * lineHeight;
-        }
-
-        private static float Smooth(float t)
-        {
-            t = Mathf.Clamp01(t);
-            return t * t * (3 - 2 * t);
         }
 
         private static Color WithAlpha(Color color, float alpha)

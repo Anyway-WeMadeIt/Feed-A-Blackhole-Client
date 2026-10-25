@@ -169,7 +169,7 @@ namespace BlackHole.Unity
                 Relayout();
 
             // 목표 자리로 부드럽게 움직인다.
-            float follow = 1f - Mathf.Exp(-SlideSharpness * delta);
+            float follow = UIMotion.Follow(SlideSharpness, delta);
 
             foreach (Entry entry in _active)
             {
