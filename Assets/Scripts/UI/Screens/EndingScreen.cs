@@ -30,7 +30,7 @@ namespace BlackHole.Unity
         }
     }
 
-    // 엔딩 화면 [임시: 프리팹 없이 코드로 만든다. 나중에 프리팹으로].
+    // 엔딩 화면 [임시: 프리팹 없이 코드로 만든다(EndingLayout). 나중에 프리팹으로].
     // 순서: 검은 화면이 천천히 덮는다 → 다 덮이면 Covered(이때 판을 결산한다) → 엔딩 문구가 한 줄씩 떠오른다 → 크레딧이 아래에서 위로 흐른다 →
     //       감사 문구와 안내("눌러서 타이틀로") → 누르면 Finished(타이틀로 간다).
     // - 빨리 감기: 화면을 누르고 있는 동안(클릭·터치, Space) 문구·크레딧이 FastForwardRate배로 흐른다. 떼면 원래 빠르기로 돌아온다. 건너뛰지는 않는다.
@@ -59,28 +59,11 @@ namespace BlackHole.Unity
         private const float FastForwardRate = 5f;           // 누르고 있을 때 문구·크레딧 빠르기 배율
         private const float FastForwardRampSeconds = 0.2f;  // 1배 ↔ 빨리 감기 배율로 바뀌는 데 걸리는 시간
 
-        // 배치(기준 해상도 1920×1080) [임시].
-        private const float LineSize = 46f;
-        private const float LineGap = 34f;
-        private const float LineWidth = 1500f;
-        private const float CreditsTitleSize = 84f;
-        private const float RoleSize = 30f;
-        private const float NameSize = 44f;
-        private const float RoleGap = 14f;
-        private const float NameGap = 8f;
-        private const float SectionGap = 96f;
-        private const float TitleGap = 140f;
-        private const float ThanksSize = 60f;
-        private const float PromptSize = 28f;
-
         private static readonly Color Background = new(0.015f, 0.01f, 0.03f, 1f);
-        private static readonly Color TextColor = new(0.96f, 0.94f, 1f, 1f);
-        private static readonly Color RoleColor = new(0.68f, 0.62f, 0.86f, 1f);
-        private static readonly Color PromptColor = new(0.8f, 0.78f, 0.9f, 1f);
 
         private RectTransform _rect;
         private Image _background;
-        private readonly List<TMP_Text> _lines = new();
+        private IReadOnlyList<TMP_Text> _lines;
         private CanvasGroup _linesGroup;
         private RectTransform _credits;
         private CanvasGroup _creditsGroup;
@@ -121,7 +104,7 @@ namespace BlackHole.Unity
             view.layer = canvas.gameObject.layer;
             var rect = (RectTransform)view.transform;
             rect.SetParent(canvas, false);
-            Stretch(rect);
+            UIParts.Stretch(rect);
             rect.SetSiblingIndex(Mathf.Clamp(siblingIndex, 0, canvas.childCount - 1));
 
             var screen = view.AddComponent<EndingScreen>();
@@ -177,79 +160,20 @@ namespace BlackHole.Unity
                 _pointersDown = 0;
         }
 
+        // 부품은 EndingLayout이 만든다. 이 화면은 참조만 들고 연출한다.
         private void Build(RectTransform rect, EndingTexts texts, TMP_FontAsset titleFont, TMP_FontAsset bodyFont, float scale)
         {
             _rect = rect;
-            _background = rect.gameObject.AddComponent<Image>();
+            var layout = new EndingLayout(rect, texts, titleFont, bodyFont, scale);
+            _background = layout.Background;
             _background.color = WithAlpha(Background, 0);
-            _background.raycastTarget = true;
-
-            // 엔딩 문구: 화면 가운데에 줄을 쌓는다.
-            RectTransform lines = NewRect("Lines", rect);
-            Stretch(lines);
-            _linesGroup = lines.gameObject.AddComponent<CanvasGroup>();
-            Quiet(_linesGroup);
-
-            float lineHeight = (LineSize + LineGap) * scale;
-            float top = (texts.Lines.Count - 1) * lineHeight * 0.5f;
-
-            for (int i = 0; i < texts.Lines.Count; i++)
-            {
-                TMP_Text line = NewText("Line " + (i + 1), lines, bodyFont, LineSize * scale, TextColor, TextAlignmentOptions.Center);
-                RectTransform lineRect = (RectTransform)line.transform;
-                lineRect.anchorMin = lineRect.anchorMax = new Vector2(0.5f, 0.5f);
-                lineRect.sizeDelta = new Vector2(LineWidth, lineHeight);
-                lineRect.anchoredPosition = new Vector2(0, top - i * lineHeight);
-                line.text = texts.Lines[i];
-                line.alpha = 0;
-                _lines.Add(line);
-            }
-
-            // 크레딧: 위에서부터 쌓은 뒤 화면 아래에서 위로 올린다.
-            _credits = NewRect("Credits", rect);
-            _credits.anchorMin = _credits.anchorMax = new Vector2(0.5f, 0f);
-            _credits.pivot = new Vector2(0.5f, 1f);
-            _creditsGroup = _credits.gameObject.AddComponent<CanvasGroup>();
-            Quiet(_creditsGroup);
-
-            float y = 0;
-            y = AddBlock(_credits, "Title", texts.CreditsTitle, titleFont, CreditsTitleSize * scale, TextColor, y) - TitleGap * scale;
-
-            for (int i = 0; i < texts.Credits.Count; i++)
-            {
-                EndingCredit credit = texts.Credits[i];
-                y = AddBlock(_credits, "Role " + (i + 1), credit.Role, bodyFont, RoleSize * scale, RoleColor, y) - RoleGap * scale;
-
-                foreach (string name in credit.Names)
-                    y = AddBlock(_credits, "Name", name, bodyFont, NameSize * scale, TextColor, y) - NameGap * scale;
-
-                y -= SectionGap * scale;
-            }
-
-            _creditsHeight = -y;
-            _credits.sizeDelta = new Vector2(LineWidth, _creditsHeight);
-            _credits.anchoredPosition = new Vector2(0, 0);
-
-            // 감사 문구와 안내.
-            RectTransform thanks = NewRect("Thanks", rect);
-            Stretch(thanks);
-            _thanksGroup = thanks.gameObject.AddComponent<CanvasGroup>();
-            Quiet(_thanksGroup);
-
-            TMP_Text thanksText = NewText("Thanks Text", thanks, titleFont, ThanksSize * scale, TextColor, TextAlignmentOptions.Center);
-            RectTransform thanksRect = (RectTransform)thanksText.transform;
-            thanksRect.anchorMin = thanksRect.anchorMax = new Vector2(0.5f, 0.5f);
-            thanksRect.sizeDelta = new Vector2(LineWidth, ThanksSize * scale * 2);
-            thanksRect.anchoredPosition = new Vector2(0, 30 * scale);
-            thanksText.text = texts.Thanks;
-
-            _prompt = NewText("Prompt", thanks, bodyFont, PromptSize * scale, PromptColor, TextAlignmentOptions.Center);
-            RectTransform promptRect = (RectTransform)_prompt.transform;
-            promptRect.anchorMin = promptRect.anchorMax = new Vector2(0.5f, 0f);
-            promptRect.sizeDelta = new Vector2(LineWidth, PromptSize * scale * 2);
-            promptRect.anchoredPosition = new Vector2(0, 120 * scale);
-            _prompt.text = texts.Prompt;
-            _prompt.alpha = 0;
+            _lines = layout.Lines;
+            _linesGroup = layout.LinesGroup;
+            _credits = layout.Credits;
+            _creditsGroup = layout.CreditsGroup;
+            _creditsHeight = layout.CreditsHeight;
+            _thanksGroup = layout.ThanksGroup;
+            _prompt = layout.Prompt;
         }
 
         private void Update()
@@ -394,23 +318,6 @@ namespace BlackHole.Unity
             return top - index * lineHeight;
         }
 
-        // 글자 한 덩이를 위(y)에서 아래로 놓고, 다음 덩이를 놓을 y를 돌려준다. 빈 글자는 놓지 않는다.
-        private static float AddBlock(RectTransform parent, string name, string text, TMP_FontAsset font, float size, Color color, float y)
-        {
-            if (string.IsNullOrEmpty(text))
-                return y;
-
-            TMP_Text block = NewText(name, parent, font, size, color, TextAlignmentOptions.Top);
-            RectTransform rect = (RectTransform)block.transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            block.text = text;
-            float height = Mathf.Max(size * 1.25f, block.GetPreferredValues(text, LineWidth, 0).y);
-            rect.sizeDelta = new Vector2(LineWidth, height);
-            rect.anchoredPosition = new Vector2(0, y);
-            return y - height;
-        }
-
         private static float Smooth(float t)
         {
             t = Mathf.Clamp01(t);
@@ -421,47 +328,6 @@ namespace BlackHole.Unity
         {
             color.a = alpha;
             return color;
-        }
-
-        private static void Quiet(CanvasGroup group)
-        {
-            group.alpha = 0;
-            group.blocksRaycasts = false;
-            group.interactable = false;
-        }
-
-        private static RectTransform NewRect(string name, Transform parent)
-        {
-            var go = new GameObject(name, typeof(RectTransform));
-            go.layer = parent.gameObject.layer;
-            var rect = (RectTransform)go.transform;
-            rect.SetParent(parent, false);
-            return rect;
-        }
-
-        private static void Stretch(RectTransform rect)
-        {
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-        }
-
-        private static TMP_Text NewText(string name, Transform parent, TMP_FontAsset font, float size, Color color, TextAlignmentOptions alignment)
-        {
-            TextMeshProUGUI text = NewRect(name, parent).gameObject.AddComponent<TextMeshProUGUI>();
-            text.raycastTarget = false;
-            text.textWrappingMode = TextWrappingModes.Normal;
-            text.overflowMode = TextOverflowModes.Overflow;
-            text.alignment = alignment;
-            text.fontSize = size;
-            text.color = color;
-
-            if (font != null)
-                text.font = font;
-
-            return text;
         }
     }
 }
