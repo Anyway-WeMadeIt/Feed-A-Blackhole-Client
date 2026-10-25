@@ -67,7 +67,7 @@ namespace BlackHole.Unity
             _back.color = BlockedColor;
             _back.raycastTarget = true;
 
-            RectTransform label = Child(_root, "Label");
+            RectTransform label = UIParts.NewRect("Label", _root);
             label.anchorMin = Vector2.zero;
             label.anchorMax = Vector2.one;
             label.sizeDelta = Vector2.zero;
@@ -192,13 +192,5 @@ namespace BlackHole.Unity
 
         private static Color Darkened(Color color) =>
             new(color.r * PressedDarken, color.g * PressedDarken, color.b * PressedDarken, color.a);
-
-        private static RectTransform Child(RectTransform parent, string name)
-        {
-            var child = new GameObject(name, typeof(RectTransform));
-            var rect = (RectTransform)child.transform;
-            rect.SetParent(parent, false);
-            return rect;
-        }
     }
 }

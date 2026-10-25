@@ -319,7 +319,7 @@ namespace BlackHole.Unity
         public static NodeVisual Create(NodeItem item, RectTransform parent, in NodeTreeStyle style)
         {
             NodeTreeLook look = style.Look;
-            RectTransform rect = Child(parent, "Node " + item.Id);
+            RectTransform rect = UIParts.NewRect("Node " + item.Id, parent);
             rect.sizeDelta = new Vector2(NodeSize, NodeSize);
             var position = new Vector2(item.X * CellSize, item.Y * CellSize);
             rect.anchoredPosition = position;
@@ -348,7 +348,7 @@ namespace BlackHole.Unity
             if (look != null)
             {
                 // 가격 딱지: 노드 바로 아래 가운데. 폭은 칠할 때 글자에 맞춘다.
-                badge = Child(rect, "Price");
+                badge = UIParts.NewRect("Price", rect);
                 badge.anchorMin = new Vector2(0.5f, 0);
                 badge.anchorMax = new Vector2(0.5f, 0);
                 badge.pivot = new Vector2(0.5f, 1);
@@ -356,11 +356,11 @@ namespace BlackHole.Unity
                 var back = badge.gameObject.AddComponent<Image>();
                 back.color = style.BadgeBackColor;
                 back.raycastTarget = false;
-                labelRect = Stretch(Child(badge, "Label"));
+                labelRect = UIParts.Stretch(UIParts.NewRect("Label", badge));
             }
             else
             {
-                labelRect = Child(rect, "Label");
+                labelRect = UIParts.NewRect("Label", rect);
             }
 
             var label = labelRect.gameObject.AddComponent<TextMeshProUGUI>();
@@ -399,7 +399,7 @@ namespace BlackHole.Unity
         // 노드 위에 그리는 얇은 고리(가운데는 비어 노드가 보인다). 처음엔 꺼 둔다.
         private static Image CreateRing(RectTransform node, string name, Sprite sprite, Color color)
         {
-            RectTransform rect = Child(node, name);
+            RectTransform rect = UIParts.NewRect(name, node);
             rect.sizeDelta = new Vector2(NodeSize + SelectRingExtra, NodeSize + SelectRingExtra);
             var image = rect.gameObject.AddComponent<Image>();
             image.sprite = sprite;
@@ -412,7 +412,7 @@ namespace BlackHole.Unity
         // Rank 딱지: 노드 오른쪽 위 모서리에 걸친다. 글자는 칠할 때 쓴다("3/10").
         private static RectTransform CreateRankBadge(RectTransform node, in NodeTreeStyle style, out TMP_Text label)
         {
-            RectTransform badge = Child(node, "Rank");
+            RectTransform badge = UIParts.NewRect("Rank", node);
             badge.anchorMin = new Vector2(1, 1);
             badge.anchorMax = new Vector2(1, 1);
             badge.pivot = new Vector2(1, 1);
@@ -423,7 +423,7 @@ namespace BlackHole.Unity
             back.color = style.BadgeBackColor;
             back.raycastTarget = false;
 
-            label = Stretch(Child(badge, "Label")).gameObject.AddComponent<TextMeshProUGUI>();
+            label = UIParts.Stretch(UIParts.NewRect("Label", badge)).gameObject.AddComponent<TextMeshProUGUI>();
             label.fontSize = RankSize;
             label.alignment = TextAlignmentOptions.Center;
             label.color = style.PriceColorOf(NodeState.Purchasable);
@@ -432,25 +432,6 @@ namespace BlackHole.Unity
             return badge;
         }
 
-        // 부모 가운데에 붙는 자식.
-        public static RectTransform Child(RectTransform parent, string name)
-        {
-            var child = new GameObject(name, typeof(RectTransform));
-            var rect = (RectTransform)child.transform;
-            rect.SetParent(parent, false);
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            return rect;
-        }
-
-        private static RectTransform Stretch(RectTransform rect)
-        {
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.sizeDelta = Vector2.zero;
-            return rect;
-        }
     }
 
     // 두 노드를 잇는 선. 양 끝이 보일 때만 보이고, 양 끝 상태에 따른 색. 한쪽이라도 안개 속이면 안개 선 색.
@@ -491,7 +472,7 @@ namespace BlackHole.Unity
         // 두 노드 중심을 잇는 얇은 막대: 가운데에 놓고, 길이만큼 늘리고, 방향만큼 돌린다.
         public static LinkVisual Create(NodeVisual from, NodeVisual to, RectTransform parent)
         {
-            RectTransform rect = NodeVisual.Child(parent, $"Link {from.Id}-{to.Id}");
+            RectTransform rect = UIParts.NewRect($"Link {from.Id}-{to.Id}", parent);
             Vector2 delta = to.Position - from.Position;
             rect.anchoredPosition = (from.Position + to.Position) * 0.5f;
             rect.sizeDelta = new Vector2(delta.magnitude, LinkWidth);

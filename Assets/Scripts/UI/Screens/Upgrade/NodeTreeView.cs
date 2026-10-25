@@ -756,7 +756,7 @@ namespace BlackHole.Unity
 
         private static RectTransform Layer(RectTransform parent, string name)
         {
-            RectTransform rect = NodeVisual.Child(parent, name);
+            RectTransform rect = UIParts.NewRect(name, parent);
             rect.sizeDelta = Vector2.zero;
             return rect;
         }

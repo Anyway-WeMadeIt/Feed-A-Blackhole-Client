@@ -4,7 +4,6 @@ using BlackHole.Core;
 using BlackHole.Systems.Numbers;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace BlackHole.Unity
 {
@@ -34,6 +33,17 @@ namespace BlackHole.Unity
             EndBtn_Text,
             // 노치·둥근 모서리를 피하는 영역. 화면을 열 때와 해상도가 바뀔 때 UIManager가 Safe Area에 맞춘다(SafeAreaUtility).
             SafeAreaRoot,
+            // 은하 체력바(GalaxyHealthBar). 막대 전체(CanvasGroup, 꺼 둔다)와 그 부품. 바탕·홈·이름·줄 수의 테마는 코드(Styled)가 맞춘다.
+            GalaxyHealth,
+            GalaxyPanel_Image,
+            GalaxyTrack_Image,
+            GalaxyNextLine_Image,
+            GalaxyTrail_Image,
+            GalaxyFill_Image,
+            GalaxyHealth_Text,
+            GalaxyHealthShadow_Text,
+            GalaxyName_Text,
+            GalaxyLines_Text,
 
             // Presentation이 바꾸는 그림. 코드는 건드리지 않는다.
             // 배경이 어두워지면 Image Theme로 칩·아이콘을 바꾼다(예: 아이콘 ink → ivory).
@@ -51,12 +61,13 @@ namespace BlackHole.Unity
         public event Action EndClicked;
 
         private TMP_Text _remaining;
-        private TMP_Text _gain;
+        // 시간 증가 알림("+0.3")과 남은 시간 숫자 튕김.
+        private TimeGainNotice _gain;
         private TMP_Text _earned;
         private RectTransform _levelFill;
         private TMP_Text _pauseLabel;
         private MilestoneRow _milestones;
-        // 은하 체력바(코드로 만든다). 이름·줄 수 글자와 바탕은 Styled에 넣어 테마를 받고, 막대 안 수치는 OnPresented가 넘긴다.
+        // 은하 체력바(프리팹의 Galaxy* 부품). 이름·줄 수 글자와 바탕은 Styled에 넣어 테마를 받고, 막대 안 수치는 OnPresented가 넘긴다. 프리팹에 없으면 null.
         private GalaxyHealthBar _galaxyBar;
         private int _galaxyTier = -1;
         private int _shownTenths = -1;
@@ -73,26 +84,10 @@ namespace BlackHole.Unity
         private const string FractionSize = "70%";
         private float _fillValue = float.NaN;
 
-        // 시간 증가 알림. 짧게 연달아 늘면 하나로 합쳐 "+0.9"처럼 보이고, 마지막 증가 뒤 잠시 있다가 흐려진다.
-        // 그 순간 남은 시간 숫자를 살짝 튕긴다. 화면에서 보고 맞출 값이다.
-        private const float GainMergeWindow = 0.5f; // 이 안에 다시 늘면 합친다(초)
-        private const float GainHold = 0.5f;        // 마지막 증가 뒤 그대로 보이는 시간(초)
-        private const float GainFade = 0.3f;        // 그 뒤 흐려지는 시간(초)
-        private const float GainGap = 12f;          // 숫자 오른쪽 끝과의 틈(px)
-        private const float MinGain = 0.05f;        // 이보다 작은 증가는 모아 두었다가 알린다(초)
-        private const float PopDuration = 0.15f;
-        private const float PopScale = 0.1f;        // 1.0 → 1.1 → 1.0
-
-        private float _shownAdded = float.NaN;      // 마지막으로 알린 "더해진 시간" 합. NaN이면 기준이 없다(새 판).
-        private float _gainSum;
-        private float _sinceGain = float.PositiveInfinity;
-        private float _popTime = PopDuration;
-
         protected override void OnInitialize()
         {
             _remaining = View.Text(Refs.Remaining_Text);
-            _gain = View.Text(Refs.TimeGain_Text);
-            ResetGain();
+            _gain = new TimeGainNotice(_remaining, View.Text(Refs.TimeGain_Text));
             _earned = View.Text(Refs.EarnedGold_Text);
             _levelFill = View.Rect(Refs.LevelFill_Image);
             _pauseLabel = View.Text(Refs.PauseBtn_Text);
@@ -103,20 +98,31 @@ namespace BlackHole.Unity
                 burstRect != null ? burstRect.GetComponent<UIMilestoneBurst>() : null);
             _milestones.Reset();
 
-            // 은하 체력바의 기준 글꼴은 일시정지 글자의 것(한글이 있는 글꼴). 테마가 들어오면 언어·역할에 맞는 글꼴로 바뀐다.
-            RectTransform safeArea = View.Rect(Refs.SafeAreaRoot);
+            RectTransform galaxyRoot = View.Rect(Refs.GalaxyHealth);
 
-            if (safeArea != null)
-                _galaxyBar = new GalaxyHealthBar(safeArea, _pauseLabel != null ? _pauseLabel.font : null, Styled);
+            if (galaxyRoot != null)
+            {
+                _galaxyBar = new GalaxyHealthBar(new GalaxyHealthBar.Parts(
+                    galaxyRoot,
+                    View.Image(Refs.GalaxyPanel_Image),
+                    View.Image(Refs.GalaxyTrack_Image),
+                    View.Image(Refs.GalaxyNextLine_Image),
+                    View.Image(Refs.GalaxyTrail_Image),
+                    View.Image(Refs.GalaxyFill_Image),
+                    View.Text(Refs.GalaxyHealth_Text),
+                    View.Text(Refs.GalaxyHealthShadow_Text),
+                    View.Text(Refs.GalaxyName_Text),
+                    View.Text(Refs.GalaxyLines_Text)), Styled);
+            }
 
-            BindEvent(View.Button(Refs.PauseBtn_Button), HandlePauseClicked);
-            BindEvent(View.Button(Refs.EndBtn_Button), HandleEndClicked);
+            ButtonFeedback.Bind(View.Button(Refs.PauseBtn_Button), HandlePauseClicked);
+            ButtonFeedback.Bind(View.Button(Refs.EndBtn_Button), HandleEndClicked);
         }
 
         // 화면이 닫힐 때 알림·튕김·이정표 칸을 지운다. 다시 열 때 남아 있지 않게 한다.
         private void OnDisable()
         {
-            ResetGain();
+            _gain?.Reset();
             _milestones?.Reset();
             _galaxyBar?.Hide();
         }
@@ -153,13 +159,13 @@ namespace BlackHole.Unity
         // 이정표에 닿아 판이 끝났다. 10칸을 채운 모습과 달성 연출을 시작한다. 시작했으면 true(한 판에 한 번).
         public bool TryPlayMilestoneReached() => _milestones != null && _milestones.TryCelebrate();
 
-        private void HandlePauseClicked(PointerEventData _)
+        private void HandlePauseClicked()
         {
             if (!IsCelebratingMilestone)
                 PauseClicked?.Invoke();
         }
 
-        private void HandleEndClicked(PointerEventData _)
+        private void HandleEndClicked()
         {
             if (!IsCelebratingMilestone)
                 EndClicked?.Invoke();
@@ -185,7 +191,7 @@ namespace BlackHole.Unity
                 _idle = true;
                 _fillValue = float.NaN;
                 SetLevelFill(0);
-                ResetGain();
+                _gain.Reset();
                 _milestones?.Reset();
                 _milestones?.SetVisible(false);
                 _galaxyBar?.Hide();
@@ -239,10 +245,10 @@ namespace BlackHole.Unity
                 remainingChanged = true;
             }
 
-            if (TrackGain(addedSeconds) || (remainingChanged && GainVisible))
-                PlaceGain();
+            if (_gain.Track(addedSeconds) || (remainingChanged && _gain.IsVisible))
+                _gain.Place();
 
-            AnimateGain(Time.unscaledDeltaTime);
+            _gain.Animate(Time.unscaledDeltaTime);
 
             if (earnedGold != _shownEarned && _earned != null)
             {
@@ -299,91 +305,6 @@ namespace BlackHole.Unity
             return $"<mspace={DigitWidth}>{whole}</mspace><size={FractionSize}>.<mspace={DigitWidth}>{fraction}</mspace></size>";
         }
 
-        private bool GainVisible => _gain != null && _gain.gameObject.activeSelf;
-
-        // 더해진 시간 합이 늘었으면 알림 글자를 고치고 true. 새 판(합이 줄었거나 기준이 없음)이면 기준만 잡는다.
-        private bool TrackGain(float addedSeconds)
-        {
-            if (float.IsNaN(_shownAdded) || addedSeconds < _shownAdded)
-            {
-                _shownAdded = addedSeconds;
-                return false;
-            }
-
-            float gained = addedSeconds - _shownAdded;
-            if (gained < MinGain)
-                return false;
-
-            _shownAdded = addedSeconds;
-            _gainSum = _sinceGain <= GainMergeWindow ? _gainSum + gained : gained;
-            _sinceGain = 0;
-            _popTime = 0;
-
-            if (_gain == null)
-                return false;
-
-            _gain.text = "+" + _gainSum.ToString("0.0", CultureInfo.InvariantCulture);
-            _gain.alpha = 1;
-            _gain.gameObject.SetActive(true);
-            return true;
-        }
-
-        // 알림을 숫자 오른쪽 끝 바로 옆에 둔다. 숫자 폭은 자릿수·글자 크기 설정에 따라 바뀐다.
-        // 숫자 글자는 Timer 전체에 펼쳐져 있고 기준점이 가운데라, 그 지역 좌표의 x가 곧 Timer 가운데 기준 x다.
-        private void PlaceGain()
-        {
-            if (_gain == null || _remaining == null)
-                return;
-
-            _remaining.ForceMeshUpdate();
-            RectTransform gain = _gain.rectTransform;
-            gain.anchoredPosition = new Vector2(_remaining.textBounds.max.x + GainGap, gain.anchoredPosition.y);
-        }
-
-        private void AnimateGain(float deltaTime)
-        {
-            if (_popTime < PopDuration && _remaining != null)
-            {
-                _popTime += deltaTime;
-                float t = Mathf.Clamp01(_popTime / PopDuration);
-                float scale = t < 1 ? 1 + PopScale * Mathf.Sin(t * Mathf.PI) : 1;
-                _remaining.rectTransform.localScale = new Vector3(scale, scale, 1);
-            }
-
-            if (float.IsPositiveInfinity(_sinceGain))
-                return;
-
-            _sinceGain += deltaTime;
-            float alpha = 1 - Mathf.Clamp01((_sinceGain - GainHold) / GainFade);
-
-            if (alpha > 0)
-            {
-                if (_gain != null)
-                    _gain.alpha = alpha;
-
-                return;
-            }
-
-            _sinceGain = float.PositiveInfinity;
-
-            if (_gain != null)
-                _gain.gameObject.SetActive(false);
-        }
-
-        private void ResetGain()
-        {
-            _shownAdded = float.NaN;
-            _gainSum = 0;
-            _sinceGain = float.PositiveInfinity;
-            _popTime = PopDuration;
-
-            if (_gain != null)
-                _gain.gameObject.SetActive(false);
-
-            if (_remaining != null)
-                _remaining.rectTransform.localScale = Vector3.one;
-        }
-
         private string PauseLabel(bool paused) => Localized(paused ? UIText.Battle.Resume : UIText.Battle.Pause);
 
         private string Localized(string key, params object[] args) =>
@@ -414,7 +335,7 @@ namespace BlackHole.Unity
             }
             else
             {
-                float t = 1f - Mathf.Exp(-FillSharpness * Time.unscaledDeltaTime);
+                float t = UIMotion.Follow(FillSharpness, Time.unscaledDeltaTime);
                 _fillValue = Mathf.Lerp(_fillValue, target, t);
 
                 if (target - _fillValue < 0.001f)

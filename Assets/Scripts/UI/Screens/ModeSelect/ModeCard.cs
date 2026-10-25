@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace BlackHole.Unity
@@ -38,10 +37,11 @@ namespace BlackHole.Unity
 
         protected override void OnInitialize()
         {
-            BindEvent(GetComponent<Button>(), HandleClicked);
+            // 카드의 크기는 패널(ModeSelectPanel)이 움직이므로 크기 연출은 붙이지 않고 소리만 받는다.
+            ButtonFeedback.Bind(GetComponent<Button>(), HandleClicked, animate: false);
         }
 
-        private void HandleClicked(PointerEventData _) => Clicked?.Invoke();
+        private void HandleClicked() => Clicked?.Invoke();
 
         public void Show(ModeSelectPanel.ModeItem mode)
         {

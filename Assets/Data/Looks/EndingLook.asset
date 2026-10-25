@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c988171b191f4341915bef657e41aa7b, type: 3}
+  m_Name: EndingLook
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHole.Unity.EndingLook
+  _coverSeconds: 1.6
+  _lineDelay: 0.8
+  _lineInterval: 2.6
+  _lineFadeSeconds: 1
+  _lineRise: 18
+  _linesHoldSeconds: 3
+  _linesOutSeconds: 1.2
+  _creditsSpeed: 110
+  _titleGap: 140
+  _roleGap: 14
+  _nameGap: 8
+  _sectionGap: 96
+  _thanksFadeSeconds: 1.4
+  _promptDelay: 1
+  _promptPulseHz: 0.6
+  _fastForwardRate: 5
+  _fastForwardRampSeconds: 0.2
+  _skipFadeSeconds: 0.5

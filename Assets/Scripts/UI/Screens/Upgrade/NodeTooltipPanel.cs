@@ -70,7 +70,7 @@ namespace BlackHole.Unity
             {
                 _titleMarginLeft = _title.margin.x;
 
-                RectTransform iconRect = Child((RectTransform)_title.transform, "Icon");
+                RectTransform iconRect = UIParts.NewRect("Icon", _title.transform);
                 iconRect.anchorMin = new Vector2(0, 0.5f);
                 iconRect.anchorMax = new Vector2(0, 0.5f);
                 iconRect.pivot = new Vector2(0, 0.5f);
@@ -306,14 +306,6 @@ namespace BlackHole.Unity
 
             color.a = PanelColor.a;
             return color;
-        }
-
-        private static RectTransform Child(RectTransform parent, string name)
-        {
-            var child = new GameObject(name, typeof(RectTransform));
-            var rect = (RectTransform)child.transform;
-            rect.SetParent(parent, false);
-            return rect;
         }
     }
 }

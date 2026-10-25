@@ -104,7 +104,8 @@ public sealed partial class UIManager
     private bool IsLivePageOwner(UIBase owner)
     {
         return CurrentRoot == owner ||
-               _panelStack.Contains(owner);
+               _panelStack.Contains(owner) ||
+               _shownOverlays.Contains(owner);
     }
 
     private static void ValidatePageOwner(

@@ -4,7 +4,6 @@ using BlackHole.Core;
 using BlackHole.Systems.Numbers;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace BlackHole.Unity
@@ -97,10 +96,8 @@ namespace BlackHole.Unity
                 _panel = new NodeTooltipPanel(tooltip, View.Image(Refs.NodeTooltip_Image), View.Text(Refs.NodeTooltipTitle_Text), tooltipBody, hint,
                     (RectTransform)transform, View.Rect(Refs.GoldChip_Image));
                 _buyTab = new NodeBuyTab(tooltip, tooltipBody, Styled, this);
-                BindEvent(_buyTab.Button, HandleBuyClicked);
-                BindEvent(_buyTab.Button, HandleBuyPressed, ETouchEvent.PointerDown);
-                BindEvent(_buyTab.Button, HandleBuyReleased, ETouchEvent.PointerUp);
-                BindEvent(_buyTab.Button, HandleBuyLeft, ETouchEvent.PointerExit);
+                // 구매 탭의 크기 연출·소리는 다른 버튼과 같은 길(ButtonFeedback). 눌림 상태(골드 미리보기·모자람)는 on*에서 이 화면이 맡는다.
+                ButtonFeedback.Bind(_buyTab.Button, HandleBuyClicked, onLeave: HandleBuyLeft, onPress: HandleBuyPressed, onRelease: HandleBuyReleased);
                 _buyTab.Hide();
             }
 
@@ -109,10 +106,10 @@ namespace BlackHole.Unity
             Styled.AddImageColor(GetComponent<Image>(), UIColorRole.Backdrop);
             HideNodeTooltip();
 
-            BindEvent(View.Button(Refs.StartBattleBtn_Button), HandleStartBattleClicked);
+            ButtonFeedback.Bind(View.Button(Refs.StartBattleBtn_Button), HandleStartBattleClicked);
         }
 
-        private void HandleStartBattleClicked(PointerEventData _) => StartBattleClicked?.Invoke();
+        private void HandleStartBattleClicked() => StartBattleClicked?.Invoke();
 
         // 화면이 닫힐 때 툴팁도 닫는다. 다시 열 때 남아 있지 않게 한다.
         private void OnDisable()
@@ -218,7 +215,7 @@ namespace BlackHole.Unity
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / ShortBumpSeconds);
-                float scale = 1 + (ShortBumpScale - 1) * Mathf.Sin(t * Mathf.PI);
+                float scale = UIMotion.Pop(t, ShortBumpScale - 1);
                 scaled.localScale = new Vector3(scale, scale, 1);
                 yield return null;
             }
@@ -253,7 +250,7 @@ namespace BlackHole.Unity
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / GoldCountSeconds);
-                t = 1 - (1 - t) * (1 - t);
+                t = UIMotion.EaseOut(t);
                 WriteGold(from + (long)((to - from) * (double)t), preview: true);
                 yield return null;
             }
@@ -390,39 +387,39 @@ namespace BlackHole.Unity
             _panel?.Hide();
         }
 
-        private void HandleBuyClicked(PointerEventData _) => BuyConfirmed?.Invoke();
-        private void HandleBuyPressed(PointerEventData _)
+        private void HandleBuyClicked() => BuyConfirmed?.Invoke();
+
+        // 손가락으로 탭을 눌렀다(크기 연출·소리는 ButtonFeedback이 냈다). Gold가 모자란 노드의 탭을 누르면 누르는 동안 이유를 보인다. 최대·잠김은 탭 글자가 이미 말한다.
+        private void HandleBuyPressed()
         {
-            // Gold가 모자란 노드의 탭을 누르면 누르는 동안 이유를 보인다. 최대·잠김은 탭 글자가 이미 말한다.
             if (_pinnedState == NodeState.Revealed)
                 SetGoldShort(true);
 
-            SetBuyPressed(true);
+            MarkBuyPressed(true);
         }
 
-        private void HandleBuyReleased(PointerEventData _)
+        private void HandleBuyReleased()
         {
-            SetBuyPressed(false);
+            MarkBuyPressed(false);
             SetGoldShort(false);
         }
 
-        private void HandleBuyLeft(PointerEventData _)
+        private void HandleBuyLeft()
         {
-            SetBuyPressed(false);
+            MarkBuyPressed(false);
             SetGoldShort(false);
         }
 
-        // 구매 버튼의 눌림 모양: 작아지고(스프링) 어두워진다. 손가락으로 직접 누를 때와, 노드를 꾹 눌러 살 수 있게 된 순간(호스트가 부른다) 둘 다.
+        // 노드를 꾹 눌러 살 수 있게 된 순간(호스트가 부른다): 구매 탭도 눌린 모양(작아지고 어두워짐)과 소리. 손가락으로 직접 누를 때는
+        // ButtonFeedback이 연출·소리를 내므로 상태만 바꾼다(MarkBuyPressed).
         public void SetBuyPressed(bool pressed)
         {
             if (_buyTab == null || _buyPressed == pressed)
                 return;
 
-            _buyPressed = pressed;
-
             if (pressed)
             {
-                UISoundSource.For(this)?.PlayClick();
+                ButtonFeedback.Sounds?.PlayClick();
                 _buyTab.Press();
             }
             else
@@ -430,6 +427,16 @@ namespace BlackHole.Unity
                 _buyTab.Release();
             }
 
+            MarkBuyPressed(pressed);
+        }
+
+        // 눌림 상태: 구매 탭 바탕을 어둡게, 골드 칩에 산 뒤 값을 미리 보인다.
+        private void MarkBuyPressed(bool pressed)
+        {
+            if (_buyTab == null || _buyPressed == pressed)
+                return;
+
+            _buyPressed = pressed;
             PaintBuyBack();
             PaintGold();
         }

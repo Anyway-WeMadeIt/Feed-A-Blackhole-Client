@@ -82,11 +82,13 @@ public sealed partial class UIManager
     {
         ReapplyCurrentRoot(display);
 
-        if (_panelStack.Count == 0)
-            return;
+        if (_panelStack.Count > 0)
+        {
+            ReapplyPanelStack(display);
+            ApplyPanelStackState();
+        }
 
-        ReapplyPanelStack(display);
-        ApplyPanelStackState();
+        ReapplyOverlays(display);
     }
 
     private void PopUntil(
