@@ -29,7 +29,7 @@ namespace BlackHole.Unity
         private const float IntroStartZoom = 0.3f;
 
         // 붕괴 연출(엔딩) [임시].
-        // 기다림: 마지막 은하가 나선으로 말려 사라지는 동안(GalaxyCollapses 0.7초) 나머지는 멈춰 있다.
+        // 기다림: 마지막 은하가 나선으로 말려 사라지는 동안(EnemyVanishes 0.7초) 나머지는 멈춰 있다.
         private const float CollapseDelaySeconds = 0.9f;
         // 빨려 들어감: 가까운 적부터 먼 적까지 이 시간 안에 모두 블랙홀에 닿는다(EnemyView.Collapse).
         private const float CollapseSeconds = 3.4f;

@@ -53,4 +53,15 @@ MonoBehaviour:
     gold: 22000000000000
     exp: 4700000000000000
   traits: []
-  sprite: {fileID: 0}
+  look:
+    sprites: []
+    shape: 4
+    markerSprite: {fileID: 0}
+    markerShape: 5
+    spinSpeedMin: 32
+    spinSpeedMax: 48
+    spinDirection: 1
+    randomStartAngle: 1
+    deathMotion: 1
+    debrisSuction: 0.35
+    healthBar: 1

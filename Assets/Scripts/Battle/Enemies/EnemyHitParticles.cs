@@ -222,23 +222,6 @@ namespace BlackHole.Unity
             }
         }
 
-        // 적 종류별 흡입 속도 배율(소행성 > 행성 > 별 > 은하 순으로 빠름). 대기 공전·당김 속도 전부에 곱한다.
-        private static float SuctionSpeedMultiplierOf(EnemyType type)
-        {
-            switch (type)
-            {
-                case EnemyType.Asteroid:
-                    return 1f;
-                case EnemyType.Star:
-                    return 0.5f;
-                case EnemyType.Galaxy:
-                    return 0.35f;
-                case EnemyType.Planet:
-                default:
-                    return 0.7f;
-            }
-        }
-
         private static uint EncodePullStart(float age)
         {
             return (uint)Mathf.Clamp(Mathf.RoundToInt(age * 100f), 0, (int)PullStartMask);
@@ -285,9 +268,9 @@ namespace BlackHole.Unity
         }
 
         // 사망 파편: 폭발 없이 죽은 자리 둘레에 배치만 하고, DeathSuctionDelay 후 그 자리에서 천천히 돌기
-        // 시작하며, 자기 차례가 되면 Advance가 나선을 그리며 HQ로 빨아들인다. type은 종류별 흡입 속도 차등에 쓰인다.
+        // 시작하며, 자기 차례가 되면 Advance가 나선을 그리며 HQ로 빨아들인다. suction은 종류별 흡입 속도 배율(EnemyLook.debrisSuction, 소행성 1 > 행성 0.7 > 별 0.5 > 은하 0.35) — 대기 공전·당김 속도 전부에 곱한다.
         // radius(죽은 적의 반지름)가 파편 크기와 배치 반경을 정한다(FragmentScaleOf). size는 파편 수에만 쓴다.
-        public void EmitDeath(Vector3 position, Color color, EnemyType type, int tier, int size, float radius)
+        public void EmitDeath(Vector3 position, Color color, float suction, int tier, int size, float radius)
         {
             if (!_deathParticles.isPlaying)
                 _deathParticles.Play(false);
@@ -297,7 +280,7 @@ namespace BlackHole.Unity
             float baseAngle = (_burstIndex++ % 16) * Mathf.PI / 8f;
             float fragmentSizeMultiplier = FragmentScaleOf(radius);
             float spreadRadius = FragmentSpreadRadius * fragmentSizeMultiplier;
-            float typeSpeed = SuctionSpeedMultiplierOf(type);
+            float typeSpeed = suction;
 
             // 이 적(사망 1회) 전체에 공통인 값. 가까이서 함께 죽은 다른 적과 감김·속도·당김 타이밍이 서로 달라져
             // 한 덩어리로 같이 움직이지 않는다.
