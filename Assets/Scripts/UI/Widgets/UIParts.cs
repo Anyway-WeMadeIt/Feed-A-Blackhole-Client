@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace BlackHole.Unity
 {
-    // 프리팹 없이 코드로 UI 부품을 만들 때 쓰는 도우미(은하 체력바, 엔딩 화면). 새 오브젝트는 부모의 레이어를 따르고 레이캐스트를 받지 않는다.
+    // 프리팹 없이 코드로 UI 부품을 만들 때 쓰는 도우미(은하 체력바, 엔딩 화면, 업그레이드 트리의 노드·선·툴팁 부품). 새 오브젝트는 부모의 레이어를 따르고 레이캐스트를 받지 않는다.
     internal static class UIParts
     {
         public static RectTransform NewRect(string name, Transform parent)
@@ -24,13 +24,14 @@ namespace BlackHole.Unity
             return image;
         }
 
-        // 부모에 꽉 채운다(앵커 0 ~ 1, 여백 0).
-        public static void Stretch(RectTransform rect)
+        // 부모에 꽉 채운다(앵커 0 ~ 1, 여백 0). 이어 쓰기 좋게 같은 rect를 돌려준다.
+        public static RectTransform Stretch(RectTransform rect)
         {
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+            return rect;
         }
 
         // 글자. 넘침은 자르지 않는다(Overflow). font가 없으면 TMP 기본 글꼴.
