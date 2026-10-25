@@ -214,7 +214,7 @@ namespace BlackHole.Unity
         private long _totalBegin;
         private long _totalTarget;
         // 값이 바뀐 글자를 잠깐 키우는 강조 효과. 한 번에 하나.
-        private readonly TextPop _pop = new();
+        private readonly ScalePop _pop = new(0.15f, 0.2f, ScalePop.Curve.Triangle);
 
         protected override void OnInitialize()
         {
@@ -226,7 +226,7 @@ namespace BlackHole.Unity
 
             _stageFill.Completed += HandleStageFillCompleted;
             _countUp.Completed += HandleCountUpCompleted;
-            _countUp.ValueChanged += _pop.Play;
+            _countUp.ValueChanged += text => _pop.Play(text.transform);
             _stageText = View.Text(Refs.Stage_Text);
             _totalLabel = View.Text(Refs.TotalLabel_Text);
             _earned = View.Text(Refs.EarnedGold_Text);

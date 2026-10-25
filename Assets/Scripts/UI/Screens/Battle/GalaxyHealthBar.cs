@@ -87,7 +87,8 @@ namespace BlackHole.Unity
         private float _fraction;      // 지금 줄 안의 남은 몫(0 ~ 1)
         private float _trailFraction;
         private float _sinceHit = float.PositiveInfinity;
-        private float _sincePop = float.PositiveInfinity;
+        // 줄 수가 줄 때 글자 튕김.
+        private readonly ScalePop _countPop = new ScalePop(CountPopSeconds, CountPopScale);
         private float _appear;
         private float _sinceDeath = float.NaN;
         private bool _active;
@@ -203,7 +204,7 @@ namespace BlackHole.Unity
                 if (!float.IsNaN(_shownHealth))
                 {
                     _trailFraction = 1;
-                    _sincePop = 0;
+                    _countPop.Play(_count.transform);
                 }
 
                 _line = line;
@@ -261,8 +262,7 @@ namespace BlackHole.Unity
             float flash = _sinceHit < FlashSeconds ? FlashAmount * (1 - _sinceHit / FlashSeconds) : 0;
             _fillImage.color = Color.Lerp(_lines.ColorOf(_line), Color.white, flash);
 
-            _sincePop += delta;
-            _count.transform.localScale = Vector3.one * UIMotion.Pop(_sincePop / CountPopSeconds, CountPopScale);
+            _countPop.Tick(delta);
 
             float alpha = ease;
 
@@ -283,7 +283,7 @@ namespace BlackHole.Unity
             _line = -1;
             _trailFraction = 1;
             _sinceHit = float.PositiveInfinity;
-            _sincePop = float.PositiveInfinity;
+            _countPop.Stop();
             _sinceDeath = float.NaN;
             _appear = 0;
             _name.text = name;

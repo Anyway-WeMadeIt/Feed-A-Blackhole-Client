@@ -24,7 +24,8 @@ namespace BlackHole.Unity
         private float _shownAdded = float.NaN;      // 마지막으로 알린 "더해진 시간" 합. NaN이면 기준이 없다(새 판).
         private float _gainSum;
         private float _sinceGain = float.PositiveInfinity;
-        private float _popTime = PopDuration;
+        // 남은 시간 숫자 튕김.
+        private readonly ScalePop _pop = new ScalePop(PopDuration, PopScale);
 
         public TimeGainNotice(TMP_Text remaining, TMP_Text gain)
         {
@@ -51,7 +52,9 @@ namespace BlackHole.Unity
             _shownAdded = addedSeconds;
             _gainSum = _sinceGain <= GainMergeWindow ? _gainSum + gained : gained;
             _sinceGain = 0;
-            _popTime = 0;
+
+            if (_remaining != null)
+                _pop.Play(_remaining.rectTransform);
 
             if (_gain == null)
                 return false;
@@ -76,13 +79,7 @@ namespace BlackHole.Unity
 
         public void Animate(float deltaTime)
         {
-            if (_popTime < PopDuration && _remaining != null)
-            {
-                _popTime += deltaTime;
-                float t = Mathf.Clamp01(_popTime / PopDuration);
-                float scale = UIMotion.Pop(t, PopScale);
-                _remaining.rectTransform.localScale = new Vector3(scale, scale, 1);
-            }
+            _pop.Tick(deltaTime);
 
             if (float.IsPositiveInfinity(_sinceGain))
                 return;
@@ -110,13 +107,10 @@ namespace BlackHole.Unity
             _shownAdded = float.NaN;
             _gainSum = 0;
             _sinceGain = float.PositiveInfinity;
-            _popTime = PopDuration;
+            _pop.Stop();
 
             if (_gain != null)
                 _gain.gameObject.SetActive(false);
-
-            if (_remaining != null)
-                _remaining.rectTransform.localScale = Vector3.one;
         }
     }
 }
